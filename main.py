@@ -5,6 +5,8 @@ import os
 from dotenv import load_dotenv
 from random import choice
 from random import randint
+from shlex import split
+from subprocess import run
 
 import check_folder_size
 from youtube_to_mp3 import main_dl
@@ -170,6 +172,38 @@ async def dps(ctx,
     embed = discord.Embed(title="伺服器電腦資訊", color=default_color)
     embed.add_field(name="CPU使用率", value=f"{detect_pc_status.get_cpu_usage()}%")
     embed.add_field(name="記憶體使用率", value=f"{detect_pc_status.get_ram_usage_detail()}%")
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
+@bot.slash_command(name="ping", description="查詢機器人PING值(ms)。")
+async def ping(ctx,
+               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    embed = discord.Embed(title="PONG!✨", color=default_color)
+    embed.add_field(name="PING值", value=f"`{round(bot.latency * 1000)}` ms")
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
+@bot.slash_command(name="cmd", description="在伺服器端執行指令並傳回結果。")
+async def cmd(ctx,
+              指令: Option(str, "要執行的指令", required=True),
+              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    if ctx.author == bot.get_user(657519721138094080):
+        try:
+            command = split(指令)
+            result = str(run(command, capture_output=True, text=True).stdout)
+            if result != "":
+                embed = discord.Embed(title="執行結果", description=f"```{result}```", color=default_color)
+            else:
+                embed = discord.Embed(title="執行結果", description="終端未傳回回應。", color=default_color)
+        except WindowsError as e:
+            if e.winerror == 2:
+                embed = discord.Embed(title="錯誤", description="找不到指令。", color=error_color)
+            else:
+                embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
+        except Exception as e:
+            embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
+    else:
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
