@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord.ext import tasks
 from discord import Option
 import os
 from dotenv import load_dotenv
@@ -13,12 +14,26 @@ import check_folder_size
 from youtube_to_mp3 import main_dl
 import detect_pc_status
 import update
+import user_exp
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents)
 base_dir = os.path.abspath(os.path.dirname(__file__))
 default_color = 0x5FE1EA
 error_color = 0xF1411C
+
+
+@tasks.loop(seconds=10)
+async def give_voice_exp():  # 給予語音經驗
+    voice_channel_lists = []
+    for server in bot.guilds:
+        for channel in server.channels:
+            if channel.type == discord.ChannelType.voice:
+                voice_channel_lists.append(channel)
+                members = channel.members
+                for member in members:
+                    if not member.bot:
+                        user_exp.add_exp(member.id, "voice", 1)
 
 
 async def check_voice_channel():
@@ -243,6 +258,10 @@ async def update(ctx,
 @bot.event
 async def on_message(message):
     msg_in = message.content
+    if not message.author.bot and isinstance(msg_in, str):
+        user_exp.add_exp(message.author.id, "text", len(msg_in))
+    elif not message.author.bot and isinstance(msg_in, discord.File):
+        user_exp.add_exp(message.author.id, "text", 1)
     if message.channel == bot.get_channel(891665312028713001):
         if "https://www.youtube.com" == msg_in[:23] or "https://youtu.be" == msg_in[:16] or "https://open.spotify.com" \
                 == msg_in[:24]:
