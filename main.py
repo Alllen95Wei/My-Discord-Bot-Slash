@@ -7,10 +7,12 @@ from random import choice
 from random import randint
 from shlex import split
 from subprocess import run
+from platform import system
 
 import check_folder_size
 from youtube_to_mp3 import main_dl
 import detect_pc_status
+import update
 
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents)
@@ -113,13 +115,9 @@ async def qrcode(ctx,
 @bot.slash_command(name="sizecheck", description="檢查\"C:\\MusicBot\\audio_cache\"的大小。")
 async def sizecheck(ctx,
                     私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
-    if ctx.author != bot.get_user(657519721138094080):
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用這個指令", color=error_color)
-        私人訊息 = True
-    else:
-        size = check_folder_size.check_size()
-        embed = discord.Embed(title="資料夾大小", description=f"\"C:\\MusicBot\\audio_cache\"的大小：{size}",
-                              color=default_color)
+    size = check_folder_size.check_size()
+    embed = discord.Embed(title="資料夾大小", description=f"\"C:\\MusicBot\\audio_cache\"的大小：{size}",
+                          color=default_color)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
@@ -140,9 +138,13 @@ async def ytdl(ctx,
                 embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
                 embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
             await ctx.respond(embed=embed, ephemeral=私人訊息)
+    else:
+        embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
-@bot.slash_command(name="rc", description="重新連接至語音頻道。可指定頻道，否則將自動檢測音樂機器人及Allen Why在哪個頻道並加入。")
+@bot.slash_command(name="rc",
+                   description="重新連接至語音頻道。可指定頻道，否則將自動檢測音樂機器人及Allen Why在哪個頻道並加入。")
 async def rc(ctx,
              頻道: Option(discord.VoiceChannel, "指定要加入的頻道", required=False),
              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
@@ -153,7 +155,8 @@ async def rc(ctx,
         elif isinstance(msg, str):
             embed = discord.Embed(title="錯誤", description="發生錯誤：`" + msg + "`", color=error_color)
         elif msg is None:
-            embed = discord.Embed(title="錯誤", description="找不到<@885723595626676264>及<@657519721138094080>在哪個頻道。",
+            embed = discord.Embed(title="錯誤",
+                                  description="找不到<@885723595626676264>及<@657519721138094080>在哪個頻道。",
                                   color=error_color)
         else:
             embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
@@ -162,6 +165,20 @@ async def rc(ctx,
             await 頻道.guild.change_voice_state(channel=頻道, self_mute=True, self_deaf=True)
             embed = discord.Embed(title="已加入頻道", description=f"已經加入了 <#{頻道.id}>！", color=default_color)
         except Exception as e:
+            embed = discord.Embed(title="錯誤", description="發生錯誤：`" + str(e) + "`", color=error_color)
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
+@bot.slash_command(name="dc", description="從目前的語音頻道中斷連接。")
+async def dc(ctx,
+             私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    try:
+        await ctx.guild.change_voice_state(channel=None)
+        embed = discord.Embed(title="已斷開連接", description="已經從語音頻道中斷連接。", color=default_color)
+    except Exception as e:
+        if str(e) == "'NoneType' object has no attribute 'disconnect'":
+            embed = discord.Embed(title="錯誤", description="目前沒有連接到任何語音頻道。", color=error_color)
+        else:
             embed = discord.Embed(title="錯誤", description="發生錯誤：`" + str(e) + "`", color=error_color)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
@@ -204,7 +221,23 @@ async def cmd(ctx,
             embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+        私人訊息 = True
     await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
+@bot.slash_command(name="update", description="更新機器人。")
+async def update(ctx,
+                 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    if ctx.author == bot.get_user(657519721138094080):
+        embed = discord.Embed(title="更新中", description="更新流程啟動。", color=default_color)
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
+        event = discord.Activity(type=discord.ActivityType.playing, name="更新中...")
+        await bot.change_presence(status=discord.Status.do_not_disturb, activity=event)
+        update.update(os.getpid(), system())
+    else:
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+        私人訊息 = True
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
