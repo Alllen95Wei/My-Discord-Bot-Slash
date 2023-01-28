@@ -240,6 +240,19 @@ async def update(ctx,
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
+@bot.event
+async def on_message(message):
+    msg_in = message.content
+    if message.channel == bot.get_channel(891665312028713001):
+        if "https://www.youtube.com" == msg_in[:23] or "https://youtu.be" == msg_in[:16] or "https://open.spotify.com" \
+                == msg_in[:24]:
+            if "&list=" in msg_in:
+                msg_in = msg_in[:msg_in.find("&list=")]
+                await message.channel.send(f"<@{message.author.id}> 偵測到此連結來自播放清單！已轉換為單一影片連結。")
+            ap_cmd = "ap!p " + msg_in
+            await message.channel.send(ap_cmd)
+
+
 load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
 TOKEN = str(os.getenv("TOKEN"))
 bot.run(TOKEN)
