@@ -70,6 +70,15 @@ async def check_voice_channel():
 @bot.event
 async def on_ready():
     await bot.sync_commands(commands=None)
+    status = discord.Activity(name="斜線指令 參戰！", type=discord.ActivityType.playing)
+    await bot.change_presence(activity=status, status=discord.Status.online)
+    await check_voice_channel()
+    for guild in bot.guilds:
+        for member in guild.members:
+            date = member.joined_at.strftime("%Y-%m-%d %H:%M:%S")
+            user_exp.set_join_date(member.id, date)
+            print(f"{member.name} 加入於 {date}")
+    await give_voice_exp.start()
     print("機器人準備完成！")
     print(f"PING值：{round(bot.latency * 1000)}ms")
     print(f"登入身分：{bot.user.name}#{bot.user.discriminator}")
