@@ -69,7 +69,9 @@ async def check_voice_channel():
 
 @bot.event
 async def on_ready():
-    await bot.sync_commands(commands=None)
+    print("機器人準備完成！")
+    print(f"PING值：{round(bot.latency * 1000)}ms")
+    print(f"登入身分：{bot.user.name}#{bot.user.discriminator}")
     status = discord.Activity(name="斜線指令 參戰！", type=discord.ActivityType.playing)
     await bot.change_presence(activity=status, status=discord.Status.online)
     await check_voice_channel()
@@ -79,9 +81,6 @@ async def on_ready():
             user_exp.set_join_date(member.id, date)
             print(f"{member.name} 加入於 {date}")
     await give_voice_exp.start()
-    print("機器人準備完成！")
-    print(f"PING值：{round(bot.latency * 1000)}ms")
-    print(f"登入身分：{bot.user.name}#{bot.user.discriminator}")
 
 
 @bot.slash_command(name="ama", description="就是8號球，給你這個問題的隨機回答。")
@@ -104,12 +103,15 @@ async def ama(ctx,
     ball_result1 = choice(ans1)
     if ball_result1 == "g":
         ball_result2 = choice(ans_g)
+        ball_result1 = "🟢"
     elif ball_result1 == "s":
         ball_result2 = choice(ans_s)
+        ball_result1 = "🟡"
     else:
         ball_result2 = choice(ans_b)
+        ball_result1 = "🔴"
     embed = discord.Embed(title="8號球", description=f"你的問題：{問題}", color=default_color)
-    embed.add_field(name="回答", value=f"\"{ball_result2}\"", inline=False)
+    embed.add_field(name="回答", value=f"{ball_result1}\"{ball_result2}\"", inline=False)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
