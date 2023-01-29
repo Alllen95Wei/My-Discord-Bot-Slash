@@ -17,7 +17,7 @@ import update
 import user_exp
 
 intents = discord.Intents.all()
-bot = commands.Bot(intents=intents)
+bot = commands.Bot(intents=intents, help_command=None)
 base_dir = os.path.abspath(os.path.dirname(__file__))
 default_color = 0x5FE1EA
 error_color = 0xF1411C
@@ -81,6 +81,27 @@ async def on_ready():
             user_exp.set_join_date(member.id, date)
             print(f"{member.name} 加入於 {date}")
     await give_voice_exp.start()
+
+
+@bot.slash_command(name="help", description="提供指令協助。")
+async def help(ctx,
+               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    embed = discord.Embed(title="指令協助", color=default_color)
+    embed.add_field(name="</help:1069227660816957491>", value="提供指令協助。", inline=False)
+    embed.add_field(name="</ping:1069046879473647637>", value="查詢機器人PING值(ms)。", inline=False)
+    embed.add_field(name="</ama:1059105845629165568>", value="就是8號球，給你這個問題的隨機回答。", inline=False)
+    embed.add_field(name="</random:1059754228882616360>", value="在指定數字範圍隨機取得一數，不指定範圍則設為1~100。", inline=False)
+    embed.add_field(name="</qrcode:1063349408223207516>", value="將輸入的文字轉為QR Code。", inline=False)
+    embed.add_field(name="</sizecheck:1068693011858456656>", value="檢查`C:\\MusicBot\\audio_cache`的大小。", inline=False)
+    embed.add_field(name="</ytdl:1068693011858456657>", value="將YouTube影片下載為mp3。由於Discord有檔案大小限制，因此有時可能會失敗。",
+                    inline=False)
+    embed.add_field(name="</rc:1068693011858456658>", value="重新連接至語音頻道。可指定頻道，否則將自動檢測<@885723595626676264>"
+                                                            "及<@657519721138094080>在哪個頻道並加入。", inline=False)
+    embed.add_field(name="</dc:1069046879473647636>", value="從目前的語音頻道中斷連接。", inline=False)
+    embed.add_field(name="</dps:1068693011858456659>", value="查詢伺服器電腦的CPU及記憶體使用率。", inline=False)
+    embed.add_field(name="</cmd:1069046879473647638>", value="在伺服器端執行指令並傳回結果。", inline=False)
+    embed.add_field(name="</update:1069046879473647639>", value="更新機器人。", inline=False)
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="ama", description="就是8號球，給你這個問題的隨機回答。")
