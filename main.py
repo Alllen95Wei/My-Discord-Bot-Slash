@@ -13,7 +13,7 @@ from platform import system
 import check_folder_size
 from youtube_to_mp3 import main_dl
 import detect_pc_status
-import update
+import update as upd
 import user_exp
 
 intents = discord.Intents.all()
@@ -280,7 +280,7 @@ async def update(ctx,
         await ctx.respond(embed=embed, ephemeral=私人訊息)
         event = discord.Activity(type=discord.ActivityType.playing, name="更新中...")
         await bot.change_presence(status=discord.Status.do_not_disturb, activity=event)
-        update.update(os.getpid(), system())
+        upd.update(os.getpid(), system())
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
         私人訊息 = True
