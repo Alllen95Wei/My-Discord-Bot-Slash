@@ -159,6 +159,22 @@ async def qrcode(ctx,
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
+@bot.slash_command(name="exp", description="取得使用者的經驗值資訊。")
+async def exp(ctx,
+              使用者: Option(discord.Member, "要查詢的使用者", required=False) = None,
+              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    if 使用者 is None:
+        使用者 = ctx.author
+    text_exp = user_exp.get_exp(使用者.id, "text")
+    voice_exp = user_exp.get_exp(使用者.id, "voice")
+    avatar = 使用者.avatar_url
+    embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}的經驗值", color=default_color)
+    embed.add_field(name="文字經驗值", value=f"{text_exp}", inline=False)
+    embed.add_field(name="語音經驗值", value=f"{voice_exp}", inline=False)
+    embed.set_image(url=avatar)
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
 @bot.slash_command(name="sizecheck", description="檢查\"C:\\MusicBot\\audio_cache\"的大小。")
 async def sizecheck(ctx,
                     私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):

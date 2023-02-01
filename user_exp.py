@@ -10,14 +10,12 @@ def get_raw_info(user_id):
             user_info = json.load(f)
             return user_info
     else:
-        with open(file, "w") as f:
-            user_info = {"join_date": None,
-                         "exp": [
-                             {"voice": 0,
-                              "text": 0}
-                         ]}
-            json.dump(user_info, f)
-            return user_info
+        empty_data = {"join_date": None,
+                      "exp": [
+                          {"voice": 0,
+                           "text": 0}
+                      ]}
+        return empty_data
 
 
 def write_raw_info(user_id, data):
@@ -27,10 +25,10 @@ def write_raw_info(user_id, data):
         json.dump(data, f)
 
 
-def get_specific_info(user_id, info):
+def get_specific_info(user_id, info_name):
     user_info = get_raw_info(user_id)
-    if info:
-        return user_info[info]
+    if info_name:
+        return user_info[info_name]
     else:
         return user_info
 
