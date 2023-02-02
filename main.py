@@ -4,6 +4,7 @@ from discord.ext import commands
 from discord.ext import tasks
 from discord import Option
 import os
+import time
 from dotenv import load_dotenv
 from random import choice
 from random import randint
@@ -66,6 +67,34 @@ async def check_voice_channel():
                                 return str(e)
                     else:
                         return None
+
+
+@bot.event
+async def on_member_join(member):
+    embed = discord.Embed(title="歡迎新成員！", description=f"歡迎{member.mention}加入**{member.guild}**！", color=0x16D863)
+    join_date = member.joined_at.strftime("%Y-%m-%d %H:%M:%S")
+    embed.set_footer(text=f"於 {join_date} 加入")
+    await member.guild.system_channel.send(embed=embed)
+    user_exp.set_join_date(member.id, join_date)
+    new_member = await bot.fetch_user(member.id)
+    embed = discord.Embed(
+        title=f"歡迎加入 {member.guild.name} ！",
+        description="請到[這裡](https://discord.com/channels/857996539262402570/858373026960637962)查看頻道介紹。",
+        color=0x57c2ea)
+    await new_member.send(embed=embed)
+    embed = discord.Embed(
+        title="在開始之前...",
+        description="什麼頻道都沒看到嗎？這是因為你**並未被分配身分組**。但是放心，我們會盡快確認你的身分，到時你就能加入我們了！",
+        color=0x57c2ea)
+    await new_member.send(embed=embed)
+
+
+@bot.event
+async def on_member_remove(member):
+    embed = discord.Embed(title="有人離開了我們...", description=f"{member.name} 離開了 **{member.guild}** ...", color=0x095997)
+    leave_date = time.strftime("%Y-%m-%d %H:%M:%S")
+    embed.set_footer(text=f"於 {leave_date} 離開")
+    await member.guild.system_channel.send(embed=embed)
 
 
 @bot.event
