@@ -184,7 +184,7 @@ async def qrcode(ctx,
                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     import urllib.parse
     text = urllib.parse.quote(內容)
-    url = f"https://api.qrserver.com/v1/create-qr-code/?size=500x500&data={text}"
+    url = f"https://chart.apis.google.com/chart?cht=qr&chs=500x500&choe=UTF-8&chld=H|1&chl={text}"
     embed = discord.Embed(title="QR Code", description=f"內容：{內容}", color=default_color)
     embed.set_image(url=url)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
