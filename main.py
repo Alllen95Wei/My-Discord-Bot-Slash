@@ -1,3 +1,4 @@
+# coding: utf-8
 import discord
 from discord.ext import commands
 from discord.ext import tasks
@@ -167,11 +168,11 @@ async def exp(ctx,
         使用者 = ctx.author
     text_exp = user_exp.get_exp(使用者.id, "text")
     voice_exp = user_exp.get_exp(使用者.id, "voice")
-    avatar = 使用者.avatar_url
+    avatar = 使用者.display_avatar
     embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}的經驗值", color=default_color)
     embed.add_field(name="文字經驗值", value=f"{text_exp}", inline=False)
     embed.add_field(name="語音經驗值", value=f"{voice_exp}", inline=False)
-    embed.set_image(url=avatar)
+    embed.set_thumbnail(url=avatar)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
