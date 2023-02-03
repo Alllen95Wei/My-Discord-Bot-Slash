@@ -282,7 +282,7 @@ async def dps(ctx,
               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     embed = discord.Embed(title="伺服器電腦資訊", color=default_color)
     embed.add_field(name="CPU使用率", value=f"{detect_pc_status.get_cpu_usage()}%")
-    embed.add_field(name="記憶體使用率", value=f"{detect_pc_status.get_ram_usage_detail()}%")
+    embed.add_field(name="記憶體使用率", value=f"{detect_pc_status.get_ram_usage_detail()}")
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
