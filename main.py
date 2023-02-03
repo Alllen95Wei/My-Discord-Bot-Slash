@@ -118,8 +118,8 @@ async def on_ready():
 async def help(ctx,
                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     embed = discord.Embed(title="指令協助", color=default_color)
-    embed.add_field(name="</help:1069227660816957491>", value="提供指令協助。", inline=False)
-    embed.add_field(name="</about:1070982017983971388>", value="提供關於這隻機器人的資訊。", inline=False)
+    embed.add_field(name="</help:1069235277433942057>", value="提供指令協助。", inline=False)
+    embed.add_field(name="</about:1070988511961948181>", value="提供關於這隻機器人的資訊。", inline=False)
     embed.add_field(name="</ping:1069046879473647637>", value="查詢機器人PING值(ms)。", inline=False)
     embed.add_field(name="</ama:1059105845629165568>", value="就是8號球，給你這個問題的隨機回答。", inline=False)
     embed.add_field(name="</random:1059754228882616360>", value="在指定數字範圍隨機取得一數，不指定範圍則設為1~100。", inline=False)
