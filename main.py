@@ -228,8 +228,7 @@ async def exp(ctx,
 async def sizecheck(ctx,
                     私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     size = check_folder_size.check_size()
-    embed = discord.Embed(title="資料夾大小", description=f"\"C:\\MusicBot\\audio_cache\"的大小：{size}",
-                          color=default_color)
+    embed = discord.Embed(title="資料夾大小", description=size, color=default_color)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
