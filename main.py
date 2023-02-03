@@ -34,7 +34,7 @@ async def give_voice_exp():  # 給予語音經驗
                 voice_channel_lists.append(channel)
                 members = channel.members
                 for member in members:
-                    if not member.bot:
+                    if not member.bot and not member.voice.self_deaf:
                         user_exp.add_exp(member.id, "voice", 1)
 
 
