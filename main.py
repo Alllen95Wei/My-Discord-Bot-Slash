@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 from discord.ext import tasks
 from discord import Option
+import git
 import os
 import time
 from dotenv import load_dotenv
@@ -118,6 +119,7 @@ async def help(ctx,
                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     embed = discord.Embed(title="指令協助", color=default_color)
     embed.add_field(name="</help:1069227660816957491>", value="提供指令協助。", inline=False)
+    embed.add_field(name="</about:1070982017983971388>", value="提供關於這隻機器人的資訊。", inline=False)
     embed.add_field(name="</ping:1069046879473647637>", value="查詢機器人PING值(ms)。", inline=False)
     embed.add_field(name="</ama:1059105845629165568>", value="就是8號球，給你這個問題的隨機回答。", inline=False)
     embed.add_field(name="</random:1059754228882616360>", value="在指定數字範圍隨機取得一數，不指定範圍則設為1~100。", inline=False)
@@ -132,6 +134,22 @@ async def help(ctx,
     embed.add_field(name="</dps:1068693011858456659>", value="查詢伺服器電腦的CPU及記憶體使用率。", inline=False)
     embed.add_field(name="</cmd:1069046879473647638>", value="在伺服器端執行指令並傳回結果。", inline=False)
     embed.add_field(name="</update:1069046879473647639>", value="更新機器人。", inline=False)
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
+@bot.slash_command(name="about", description="提供關於這隻機器人的資訊。")
+async def about(ctx,
+                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    embed = discord.Embed(title="關於", color=default_color)
+    embed.set_thumbnail(url=bot.user.display_avatar)
+    embed.add_field(name="程式碼與授權", value="本機器人由<@657519721138094080>維護，使用[Py-cord]"
+                    "(https://github.com/Pycord-Development/pycord)進行開發。\n"
+                    "本機器人的程式碼及檔案皆可在[這裡](https://github.com/Alllen95Wei/My-Discord-Bot-Slash)查看。", inline=True)
+    embed.add_field(name="聯絡", value="如果有任何技術問題及建議，請聯絡<@657519721138094080>。", inline=True)
+    repo = git.Repo(search_parent_directories=True)
+    sha = repo.head.object.hexsha
+    year = time.strftime("%Y")
+    embed.set_footer(text=f"©Allen Why, {year} | 版本：commit {sha[:7]}")
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
