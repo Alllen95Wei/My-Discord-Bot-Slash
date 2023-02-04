@@ -354,6 +354,9 @@ async def update(ctx,
 @bot.event
 async def on_message(message):
     msg_in = message.content
+    exclude_channel = [1035754607286169631, 1035754607286169631]
+    if message.channel in exclude_channel:
+        return
     if not message.author.bot and isinstance(msg_in, str):
         user_exp.add_exp(message.author.id, "text", len(msg_in))
     elif not message.author.bot and isinstance(msg_in, discord.File):
