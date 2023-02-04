@@ -91,6 +91,46 @@ async def on_member_join(member):
 
 
 @bot.event
+async def on_member_update(before, after):
+    new_roles_list = {}
+    embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！")
+    if before.roles == after.roles:
+        return
+    normal_role = discord.utils.get(discord.guild.Role, id=858365679102328872)
+    if normal_role in after.roles:
+        if normal_role in before.roles:
+            return
+        else:
+            new_roles_list["旁觀者"] = "「貓娘實驗室」中的最基本身分組。\n" \
+                                       "取得此身分組後，可以存取大多數頻道。"
+    GAMER = discord.utils.get(discord.guild.Role, id=993094175484559441)
+    if GAMER in after.roles:
+        if GAMER in before.roles:
+            return
+        else:
+            new_roles_list["GAMER"] = "「貓娘實驗室」中，遊戲玩家們專用的身分組。\n" \
+                                      "你現在可以存取「遊戲討論」的所有頻道！"
+    VIEWER = discord.utils.get(discord.guild.Role, id=1066721427862077571)
+    if VIEWER in after.roles:
+        if VIEWER in before.roles:
+            return
+        else:
+            new_roles_list["VIEWER"] = "「貓娘實驗室」中，遊戲觀眾的身分組。\n" \
+                                       "現在起，當有玩家選擇在「遊戲討論」的語音頻道中直播，你將能參與觀看！"
+    one_o_four = discord.utils.get(discord.guild.Role, id=1060075117822083163)
+    if one_o_four in after.roles:
+        if one_o_four in before.roles:
+            return
+        else:
+            new_roles_list["104"] = "「貓娘實驗室」中，104班同學們的專用身分組。\n" \
+                                    "你可以加入104班的專屬頻道，跟大家參與討論。"
+    for i in new_roles_list:
+        embed.add_field(name=i, value=new_roles_list[i], inline=False)
+    embed.set_footer(text="如果你認為被意外分配到錯誤的身分組，請聯絡管理員。")
+    await after.send(embed=embed)
+
+
+@bot.event
 async def on_member_remove(member):
     embed = discord.Embed(title="有人離開了我們...", description=f"{member.name} 離開了 **{member.guild}** ...", color=0x095997)
     leave_date = time.strftime("%Y-%m-%d %H:%M:%S")
