@@ -381,6 +381,7 @@ async def cmd(ctx,
               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if ctx.author == bot.get_user(657519721138094080):
         try:
+            await ctx.defer()
             command = split(指令)
             result = str(run(command, capture_output=True, text=True).stdout)
             if result != "":
