@@ -24,6 +24,9 @@ bot = commands.Bot(intents=intents, help_command=None)
 base_dir = os.path.abspath(os.path.dirname(__file__))
 default_color = 0x5FE1EA
 error_color = 0xF1411C
+# 載入TOKEN
+load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
+TOKEN = str(os.getenv("TOKEN"))
 
 
 @tasks.loop(seconds=10)
@@ -148,9 +151,10 @@ async def on_ready():
     await check_voice_channel()
     for guild in bot.guilds:
         for member in guild.members:
-            date = member.joined_at.strftime("%Y-%m-%d %H:%M:%S")
-            user_exp.set_join_date(member.id, date)
-            print(f"{member.name} 加入於 {date}")
+            join_at_list = [member.joined_at.year, member.joined_at.month, member.joined_at.day,
+                            member.joined_at.hour, member.joined_at.minute, member.joined_at.second]
+            print(f"{member.name}: {join_at_list}")
+            user_exp.set_join_date(member.id, join_at_list)
     await give_voice_exp.start()
 
 
@@ -167,7 +171,7 @@ async def help(ctx,
     embed.add_field(name="</sizecheck:1068693011858456656>", value="檢查`C:\\MusicBot\\audio_cache`的大小。", inline=False)
     embed.add_field(name="</ytdl:1068693011858456657>", value="將YouTube影片下載為mp3。由於Discord有檔案大小限制，因此有時可能會失敗。",
                     inline=False)
-    embed.add_field(name="</exp:1070304015012864020>", value="取得使用者的經驗值資訊。", inline=False)
+    embed.add_field(name="</user_info:1070304015012864020>", value="取得使用者的資訊。", inline=False)
     embed.add_field(name="</rc:1068693011858456658>", value="重新連接至語音頻道。可指定頻道，否則將自動檢測<@885723595626676264>"
                                                             "及<@657519721138094080>在哪個頻道並加入。", inline=False)
     embed.add_field(name="</dc:1069046879473647636>", value="從目前的語音頻道中斷連接。", inline=False)
@@ -248,8 +252,8 @@ async def qrcode(ctx,
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
-@bot.slash_command(name="exp", description="取得使用者的經驗值資訊。")
-async def exp(ctx,
+@bot.slash_command(name="user_info", description="取得使用者的資訊。")
+async def user_info(ctx,
               使用者: Option(discord.Member, "要查詢的使用者", required=False) = None,
               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if 使用者 is None:
@@ -260,6 +264,10 @@ async def exp(ctx,
     embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}的經驗值", color=default_color)
     embed.add_field(name="文字經驗值", value=f"{text_exp}", inline=False)
     embed.add_field(name="語音經驗值", value=f"{voice_exp}", inline=False)
+    date = user_exp.get_join_date_in_str(使用者.id)
+    embed.add_field(name="加入時間", value=f"{date}", inline=False)
+    joined_date = user_exp.joined_time(使用者.id)
+    embed.add_field(name="已加入", value=f"{joined_date}", inline=False)
     embed.set_thumbnail(url=avatar)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
@@ -353,6 +361,20 @@ async def ping(ctx,
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
+@bot.slash_command(name="restart", description="重啟機器人。")
+async def restart(ctx,
+                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    if ctx.author == bot.get_user(657519721138094080):
+        embed = discord.Embed(title="機器人重啟中", description="機器人正在重啟中。", color=default_color)
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
+        event = discord.Activity(type=discord.ActivityType.playing, name="重啟中...")
+        await bot.change_presence(status=discord.Status.do_not_disturb, activity=event)
+        upd.restart_running_bot(os.getpid(), system())
+    else:
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用這個指令。", color=error_color)
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
 @bot.slash_command(name="cmd", description="在伺服器端執行指令並傳回結果。")
 async def cmd(ctx,
               指令: Option(str, "要執行的指令", required=True),
@@ -413,6 +435,4 @@ async def on_message(message):
             await message.channel.send(ap_cmd)
 
 
-load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
-TOKEN = str(os.getenv("TOKEN"))
 bot.run(TOKEN)
