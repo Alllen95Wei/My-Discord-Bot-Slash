@@ -39,7 +39,10 @@ async def give_voice_exp():  # 給予語音經驗
                 members = channel.members
                 for member in members:
                     if not member.bot and not member.voice.self_deaf:
-                        user_exp.add_exp(member.id, "voice", 1)
+                        if member.voice.self_mute:
+                            user_exp.add_exp(member.id, "voice", 0.5)
+                        else:
+                            user_exp.add_exp(member.id, "voice", 1)
 
 
 async def check_voice_channel():
@@ -254,8 +257,8 @@ async def qrcode(ctx,
 
 @bot.slash_command(name="user_info", description="取得使用者的資訊。")
 async def user_info(ctx,
-              使用者: Option(discord.Member, "要查詢的使用者", required=False) = None,
-              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                    使用者: Option(discord.Member, "要查詢的使用者", required=False) = None,
+                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if 使用者 is None:
         使用者 = ctx.author
     text_exp = user_exp.get_exp(使用者.id, "text")
