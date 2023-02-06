@@ -422,21 +422,22 @@ async def update(ctx,
 @bot.event
 async def on_message(message):
     msg_in = message.content
-    exclude_channel = [1035754607286169631, 1035754607286169631]
-    if message.channel in exclude_channel:
-        return
-    if not message.author.bot and isinstance(msg_in, str):
-        user_exp.add_exp(message.author.id, "text", len(msg_in))
-    elif not message.author.bot and isinstance(msg_in, discord.File):
-        user_exp.add_exp(message.author.id, "text", 1)
-    if message.channel == bot.get_channel(891665312028713001):
-        if "https://www.youtube.com" == msg_in[:23] or "https://youtu.be" == msg_in[:16] or "https://open.spotify.com" \
-                == msg_in[:24]:
+    exclude_channel = [1035754607286169631, 1035754607286169631, 891665312028713001]
+    if message.channel.id == 891665312028713001:
+        if msg_in.startswith("https://www.youtube.com") or msg_in.startswith("https://youtu.be") or \
+                msg_in.startswith("https://open.spotify.com"):
             if "&list=" in msg_in:
                 msg_in = msg_in[:msg_in.find("&list=")]
                 await message.channel.send(f"<@{message.author.id}> 偵測到此連結來自播放清單！已轉換為單一影片連結。")
             ap_cmd = "ap!p " + msg_in
             await message.channel.send(ap_cmd)
+            return
+    if message.channel.id in exclude_channel:
+        return
+    if not message.author.bot and isinstance(msg_in, str):
+        user_exp.add_exp(message.author.id, "text", len(msg_in))
+    elif not message.author.bot and isinstance(msg_in, discord.File):
+        user_exp.add_exp(message.author.id, "text", 1)
 
 
 bot.run(TOKEN)
