@@ -237,9 +237,9 @@ async def random(ctx,
                  range_min: Option(name="min", description="最小值", required=False, input_type=int) = 1,
                  range_max: Option(name="max", description="最大值", required=False, input_type=int) = 100,
                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
-    ans = randint(range_min, range_max)
+    ans = randint(int(range_min), int(range_max))
     embed = discord.Embed(title="隨機", description=f"數字範圍：{range_min}~{range_max}", color=default_color)
-    embed.add_field(name="結果", value=f"\"{ans}\"", inline=False)
+    embed.add_field(name="結果", value=f"`{ans}`", inline=False)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
