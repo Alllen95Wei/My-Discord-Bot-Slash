@@ -286,11 +286,11 @@ async def sizecheck(ctx,
 @bot.slash_command(name="ytdl", description="將YouTube影片下載為mp3。由於Discord有"
                                             "檔案大小限制，因此有時可能會失敗。")
 async def ytdl(ctx,
-               url: Option(str, "欲下載的YouTube影片網址", required=True),
+               連結: Option(str, "欲下載的YouTube影片網址", required=True),
                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     await ctx.defer()
-    file_name = str(ctx.author) + url[-11:]
-    if main_dl(url, file_name, file_name + ".mp3") == "finished":
+    file_name = str(ctx.author) + 連結[-11:]
+    if main_dl(連結, file_name, file_name + ".mp3") == "finished":
         try:
             await ctx.respond(file=discord.File(file_name + ".mp3"), ephemeral=私人訊息)
             os.remove(file_name + ".mp3")
