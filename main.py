@@ -315,7 +315,7 @@ async def rc(ctx,
     if 頻道 is None:
         msg = await check_voice_channel()
         if isinstance(msg, int):
-            embed = discord.Embed(title="已加入頻道", description=f"已經加入了 <#{msg}>！", color=default_color)
+            embed = discord.Embed(title="已加入頻道", description=f"已經自動加入了 <#{msg}>！", color=default_color)
         elif isinstance(msg, str):
             embed = discord.Embed(title="錯誤", description="發生錯誤：`" + msg + "`", color=error_color)
         elif msg is None:
@@ -386,6 +386,10 @@ async def cmd(ctx,
         try:
             await ctx.defer()
             command = split(指令)
+            if command[0] == "cmd":
+                embed = discord.Embed(title="錯誤", description="基於安全原因，你不能執行這個指令。", color=error_color)
+                await ctx.respond(embed=embed, ephemeral=私人訊息)
+                return
             result = str(run(command, capture_output=True, text=True).stdout)
             if result != "":
                 embed = discord.Embed(title="執行結果", description=f"```{result}```", color=default_color)
