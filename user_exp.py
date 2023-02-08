@@ -12,10 +12,13 @@ def get_raw_info(user_id):
             return user_info
     else:
         empty_data = {"join_date": None,
-                      "exp": [
+                      "exp":
+                          {"voice": 0,
+                           "text": 0},
+                      "level":
                           {"voice": 0,
                            "text": 0}
-                      ]}
+                      }
         return empty_data
 
 
@@ -34,18 +37,18 @@ def get_specific_info(user_id, info_name):
         return user_info
 
 
-def get_exp(user_id, exp_type: ["voice", "text"]):
+def get_exp(user_id, exp_type):
     user_info = get_raw_info(user_id)
     if exp_type in ["voice", "text"]:
-        return user_info["exp"][0][exp_type]
+        return user_info["exp"][exp_type]
     else:
         raise ValueError("exp_type must be either \"voice\" or \"text\"")
 
 
-def add_exp(user_id, exp_type: ["voice", "text"], amount):
+def add_exp(user_id, exp_type, amount):
     user_info = get_raw_info(user_id)
     if exp_type in ["voice", "text"]:
-        user_info["exp"][0][exp_type] += amount
+        user_info["exp"][exp_type] += amount
         write_raw_info(user_id, user_info)
     else:
         raise ValueError("exp_type must be either \"voice\" or \"text\"")
@@ -65,7 +68,15 @@ def get_join_date(user_id):
 def get_join_date_in_str(user_id):
     raw_date = get_join_date(user_id)
     if raw_date is not None:
-        str_date = f"{raw_date[0]}/{raw_date[1]}/{raw_date[2]} {raw_date[3]}:{raw_date[4]}:{raw_date[5]}"
+        if len(str(raw_date[4])) == 1:
+            min_reformat = "0" + str(raw_date[4])
+        else:
+            min_reformat = raw_date[4]
+        if len(str(raw_date[5])) == 1:
+            sec_reformat = "0" + str(raw_date[5])
+        else:
+            sec_reformat = raw_date[5]
+        str_date = f"{raw_date[0]}/{raw_date[1]}/{raw_date[2]} {raw_date[3]}:{min_reformat}:{sec_reformat}"
         return str_date
     else:
         return None
@@ -83,3 +94,43 @@ def joined_time(user_id):
         return time_diff
     else:
         return None
+
+
+def get_level(user_id, level_type):
+    if level_type in ["voice", "text"]:
+        user_info = get_raw_info(user_id)
+        return user_info["level"][level_type]
+    else:
+        raise ValueError("level_type must be either \"voice\" or \"text\"")
+
+
+def add_level(user_id, level_type, level):
+    user_info = get_raw_info(user_id)
+    user_info["level"][level_type] += level
+    write_raw_info(user_id, user_info)
+
+
+def upgrade_exp_needed(user_id, level_type):
+    if level_type in ["voice", "text"]:
+        current_level = get_level(user_id, level_type)
+        if level_type == "text":
+            exp_needed = 80 + (20 * current_level)
+        else:
+            exp_needed = 50 + (25 * current_level)
+        return exp_needed
+    else:
+        raise ValueError("level_type must be either \"voice\" or \"text\"")
+
+
+def level_calc(user_id, level_type):
+    if level_type in ["voice", "text"]:
+        exp = get_exp(user_id, level_type)
+        exp_needed = upgrade_exp_needed(user_id, level_type)
+        if exp >= exp_needed:
+            add_level(user_id, level_type, 1)
+            add_exp(user_id, level_type, -exp_needed)
+            return True
+        else:
+            return False
+    else:
+        raise ValueError("level_type must be either \"voice\" or \"text\"")

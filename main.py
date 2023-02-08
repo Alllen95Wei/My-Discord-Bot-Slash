@@ -43,6 +43,13 @@ async def give_voice_exp():  # 給予語音經驗
                             user_exp.add_exp(member.id, "voice", 0.5)
                         else:
                             user_exp.add_exp(member.id, "voice", 1)
+                        if user_exp.level_calc(member.id, "voice"):
+                            embed = discord.Embed(title="等級提升",
+                                                  description=f"恭喜 <@{member.id}> *語音*等級升級到 "
+                                                              f"**{user_exp.get_level(member.id, 'text')}** 等！",
+                                                  color=default_color)
+                            embed.set_thumbnail(url=member.display_avatar)
+                            await member.send(embed=embed)
 
 
 async def check_voice_channel():
@@ -78,7 +85,8 @@ async def check_voice_channel():
 
 @bot.event
 async def on_member_join(member):
-    embed = discord.Embed(title="歡迎新成員！", description=f"歡迎{member.mention}加入**{member.guild}**！", color=0x16D863)
+    embed = discord.Embed(title="歡迎新成員！", description=f"歡迎{member.mention}加入**{member.guild}**！",
+                          color=0x16D863)
     join_date = member.joined_at.strftime("%Y-%m-%d %H:%M:%S")
     embed.set_footer(text=f"於 {join_date} 加入")
     await member.guild.system_channel.send(embed=embed)
@@ -98,36 +106,32 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_update(before, after):
+    server_list = []
+    for server in bot.guilds:
+        server_list.append(server)
+    only_server = server_list[0]
     new_roles_list = {}
-    embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！")
+    embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=default_color)
     if before.roles == after.roles:
         return
-    normal_role = discord.utils.get(discord.guild.Role, id=858365679102328872)
+    normal_role = discord.utils.get(only_server.roles, id=858365679102328872)
     if normal_role in after.roles:
-        if normal_role in before.roles:
-            return
-        else:
+        if normal_role not in before.roles:
             new_roles_list["旁觀者"] = "「貓娘實驗室」中的最基本身分組。\n" \
-                                       "取得此身分組後，可以存取大多數頻道。"
-    GAMER = discord.utils.get(discord.guild.Role, id=993094175484559441)
+                                      "取得此身分組後，可以存取大多數頻道。"
+    GAMER = discord.utils.get(only_server.roles, id=993094175484559441)
     if GAMER in after.roles:
-        if GAMER in before.roles:
-            return
-        else:
+        if GAMER not in before.roles:
             new_roles_list["GAMER"] = "「貓娘實驗室」中，遊戲玩家們專用的身分組。\n" \
                                       "你現在可以存取「遊戲討論」的所有頻道！"
-    VIEWER = discord.utils.get(discord.guild.Role, id=1066721427862077571)
+    VIEWER = discord.utils.get(only_server.roles, id=1066721427862077571)
     if VIEWER in after.roles:
-        if VIEWER in before.roles:
-            return
-        else:
+        if VIEWER not in before.roles:
             new_roles_list["VIEWER"] = "「貓娘實驗室」中，遊戲觀眾的身分組。\n" \
                                        "現在起，當有玩家選擇在「遊戲討論」的語音頻道中直播，你將能參與觀看！"
-    one_o_four = discord.utils.get(discord.guild.Role, id=1060075117822083163)
+    one_o_four = discord.utils.get(only_server.roles, id=1060075117822083163)
     if one_o_four in after.roles:
-        if one_o_four in before.roles:
-            return
-        else:
+        if one_o_four not in before.roles:
             new_roles_list["104"] = "「貓娘實驗室」中，104班同學們的專用身分組。\n" \
                                     "你可以加入104班的專屬頻道，跟大家參與討論。"
     for i in new_roles_list:
@@ -138,7 +142,8 @@ async def on_member_update(before, after):
 
 @bot.event
 async def on_member_remove(member):
-    embed = discord.Embed(title="有人離開了我們...", description=f"{member.name} 離開了 **{member.guild}** ...", color=0x095997)
+    embed = discord.Embed(title="有人離開了我們...", description=f"{member.name} 離開了 **{member.guild}** ...",
+                          color=0x095997)
     leave_date = time.strftime("%Y-%m-%d %H:%M:%S")
     embed.set_footer(text=f"於 {leave_date} 離開")
     await member.guild.system_channel.send(embed=embed)
@@ -169,10 +174,13 @@ async def help(ctx,
     embed.add_field(name="</about:1070988511961948181>", value="提供關於這隻機器人的資訊。", inline=False)
     embed.add_field(name="</ping:1069046879473647637>", value="查詢機器人PING值(ms)。", inline=False)
     embed.add_field(name="</ama:1059105845629165568>", value="就是8號球，給你這個問題的隨機回答。", inline=False)
-    embed.add_field(name="</random:1059754228882616360>", value="在指定數字範圍隨機取得一數，不指定範圍則設為1~100。", inline=False)
+    embed.add_field(name="</random:1059754228882616360>", value="在指定數字範圍隨機取得一數，不指定範圍則設為1~100。",
+                    inline=False)
     embed.add_field(name="</qrcode:1063349408223207516>", value="將輸入的文字轉為QR Code。", inline=False)
-    embed.add_field(name="</sizecheck:1068693011858456656>", value="檢查`C:\\MusicBot\\audio_cache`的大小。", inline=False)
-    embed.add_field(name="</ytdl:1068693011858456657>", value="將YouTube影片下載為mp3。由於Discord有檔案大小限制，因此有時可能會失敗。",
+    embed.add_field(name="</sizecheck:1068693011858456656>", value="檢查`C:\\MusicBot\\audio_cache`的大小。",
+                    inline=False)
+    embed.add_field(name="</ytdl:1068693011858456657>",
+                    value="將YouTube影片下載為mp3。由於Discord有檔案大小限制，因此有時可能會失敗。",
                     inline=False)
     embed.add_field(name="</user_info:1071752534638735440>", value="取得使用者的資訊。", inline=False)
     embed.add_field(name="</rc:1068693011858456658>", value="重新連接至語音頻道。可指定頻道，否則將自動檢測<@885723595626676264>"
@@ -191,7 +199,8 @@ async def about(ctx,
     embed.set_thumbnail(url=bot.user.display_avatar)
     embed.add_field(name="程式碼與授權", value="本機器人由<@657519721138094080>維護，使用[Py-cord]"
                     "(https://github.com/Pycord-Development/pycord)進行開發。\n"
-                    "本機器人的程式碼及檔案皆可在[這裡](https://github.com/Alllen95Wei/My-Discord-Bot-Slash)查看。", inline=True)
+                    "本機器人的程式碼及檔案皆可在[這裡](https://github.com/Alllen95Wei/My-Discord-Bot-Slash)查看。",
+                    inline=True)
     embed.add_field(name="聯絡", value="如果有任何技術問題及建議，請聯絡<@657519721138094080>。", inline=True)
     repo = git.Repo(search_parent_directories=True)
     sha = repo.head.object.hexsha
@@ -255,24 +264,83 @@ async def qrcode(ctx,
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
-@bot.slash_command(name="user_info", description="取得使用者的資訊。")
-async def user_info(ctx,
-                    使用者: Option(discord.Member, "要查詢的使用者", required=False) = None,
-                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+user_info = bot.create_group(name="user_info", description="使用者的資訊、經驗值等。")
+
+
+@user_info.command(name="show", description="顯示使用者的資訊。")
+async def show(ctx,
+               使用者: Option(discord.Member, "要查詢的使用者", required=False) = None,
+               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if 使用者 is None:
         使用者 = ctx.author
     text_exp = user_exp.get_exp(使用者.id, "text")
+    text_level = user_exp.get_level(使用者.id, "text")
     voice_exp = user_exp.get_exp(使用者.id, "voice")
+    voice_level = user_exp.get_level(使用者.id, "voice")
     avatar = 使用者.display_avatar
     embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}的經驗值", color=default_color)
-    embed.add_field(name="文字經驗值", value=f"{text_exp}", inline=False)
-    embed.add_field(name="語音經驗值", value=f"{voice_exp}", inline=False)
+    embed.add_field(name="文字等級", value=f"{text_level}", inline=True)
+    embed.add_field(name="文字經驗值", value=f"{text_exp}", inline=True)
+    embed.add_field(name="語音等級", value=f"{voice_level}", inline=False)
+    embed.add_field(name="語音經驗值", value=f"{voice_exp}", inline=True)
     date = user_exp.get_join_date_in_str(使用者.id)
     embed.add_field(name="加入時間", value=f"{date}", inline=False)
     joined_date = user_exp.joined_time(使用者.id)
     embed.add_field(name="已加入", value=f"{joined_date}", inline=False)
     embed.set_thumbnail(url=avatar)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
+edit = user_info.create_subgroup(name="edit", description="編輯使用者的資訊。")
+
+
+# TODO: 解決參數丟失問題
+@edit.command(name="exp", description="編輯使用者的經驗值。")
+async def exp(ctx,
+              使用者: Option(discord.Member, "要編輯的使用者", required=True),
+              類型: Option(str, "要編輯的經驗值類型", required=True, choices=["text", "voice"]),
+              經驗值: Option(int, "要編輯的經驗值數量，若要扣除則輸入負值", required=True),
+              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    if ctx.author == bot.get_user(657519721138094080):
+        before_exp = user_exp.get_exp(使用者.id, 類型)
+        user_exp.add_exp(使用者.id, 類型, 經驗值)
+        after_exp = user_exp.get_exp(使用者.id, 類型)
+        embed = discord.Embed(title="編輯經驗值", description=f"已編輯{使用者.mention}的**{類型}**經驗值。",
+                              color=default_color)
+        embed.add_field(name="編輯前", value=before_exp, inline=True)
+        if 經驗值 > 0:
+            embed.add_field(name="➡️增加", value=f"*{經驗值}*", inline=True)
+        else:
+            embed.add_field(name="減少", value=f"*{abs(經驗值)}*", inline=True)
+        embed.add_field(name="編輯後", value=after_exp, inline=True)
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
+    else:
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用這個指令。", color=error_color)
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
+@edit.command(name="lvl", description="編輯使用者的等級。")
+async def lvl(ctx,
+              使用者: Option(discord.Member, "要編輯的使用者", required=True),
+              類型: Option(str, "要編輯的等級類型", required=True, choices=["text", "voice"]),
+              等級: Option(int, "要編輯的等級數量，若要扣除則輸入負值", required=True),
+              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    if ctx.author == bot.get_user(657519721138094080):
+        before_lvl = user_exp.get_level(使用者.id, 類型)
+        user_exp.add_level(使用者.id, 類型, 等級)
+        after_lvl = user_exp.get_level(使用者.id, 類型)
+        embed = discord.Embed(title="編輯經驗值", description=f"已編輯{使用者.mention}的**{類型}**等級。",
+                              color=default_color)
+        embed.add_field(name="編輯前", value=before_lvl, inline=True)
+        if 等級 > 0:
+            embed.add_field(name="增加", value=f"*{等級}*", inline=True)
+        else:
+            embed.add_field(name="減少", value=abs(等級), inline=True)
+        embed.add_field(name="編輯後", value=after_lvl, inline=True)
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
+    else:
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用這個指令。", color=error_color)
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="sizecheck", description="檢查\"C:\\MusicBot\\audio_cache\"的大小。")
@@ -442,6 +510,11 @@ async def on_message(message):
         user_exp.add_exp(message.author.id, "text", len(msg_in))
     elif not message.author.bot and isinstance(msg_in, discord.File):
         user_exp.add_exp(message.author.id, "text", 1)
+    if user_exp.level_calc(message.author.id, "text"):
+        embed = discord.Embed(title="等級提升", description=f"恭喜 <@{message.author.id}> *文字*等級升級到 "
+                              f"**{user_exp.get_level(message.author.id, 'text')}** 等！", color=default_color)
+        embed.set_thumbnail(url=message.author.display_avatar)
+        await message.channel.send(embed=embed)
 
 
 bot.run(TOKEN)
