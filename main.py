@@ -508,7 +508,10 @@ async def on_message(message):
     if message.channel.id in exclude_channel:
         return
     if not message.author.bot and isinstance(msg_in, str):
-        user_exp.add_exp(message.author.id, "text", len(msg_in))
+        if len(msg_in) <= 15:
+            user_exp.add_exp(message.author.id, "text", len(msg_in))
+        else:
+            user_exp.add_exp(message.author.id, "text", 15)
     elif not message.author.bot and isinstance(msg_in, discord.File):
         user_exp.add_exp(message.author.id, "text", 1)
     if user_exp.level_calc(message.author.id, "text"):
