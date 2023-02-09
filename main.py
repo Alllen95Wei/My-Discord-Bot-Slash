@@ -46,7 +46,7 @@ async def give_voice_exp():  # 給予語音經驗
                         if user_exp.level_calc(member.id, "voice"):
                             embed = discord.Embed(title="等級提升",
                                                   description=f"恭喜 <@{member.id}> *語音*等級升級到 "
-                                                              f"**{user_exp.get_level(member.id, 'text')}** 等！",
+                                                              f"**{user_exp.get_level(member.id, 'voice')}** 等！",
                                                   color=default_color)
                             embed.set_thumbnail(url=member.display_avatar)
                             await member.send(embed=embed)
