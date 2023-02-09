@@ -204,7 +204,7 @@ async def about(ctx,
     embed.add_field(name="聯絡", value="如果有任何技術問題及建議，請聯絡<@657519721138094080>。", inline=True)
     repo = git.Repo(search_parent_directories=True)
     update_msg = repo.head.reference.commit.message
-    sha = repo.head.object.hexsha
+    sha = repo.head.object.hexsha[:7]
     embed.add_field(name=f"分支訊息：{sha}", value=update_msg, inline=False)
     year = time.strftime("%Y")
     embed.set_footer(text=f"©Allen Why, {year} | 版本：commit {sha[:7]}")
