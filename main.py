@@ -442,7 +442,8 @@ async def restart(ctx,
         await bot.change_presence(status=discord.Status.do_not_disturb, activity=event)
         upd.restart_running_bot(os.getpid(), system())
     else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用這個指令。", color=error_color)
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+        私人訊息 = True
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
