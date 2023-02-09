@@ -311,7 +311,7 @@ async def edit_exp(ctx,
         if 經驗值 > 0:
             embed.add_field(name="➡️增加", value=f"*{經驗值}*", inline=True)
         else:
-            embed.add_field(name="減少", value=f"*{abs(經驗值)}*", inline=True)
+            embed.add_field(name="➡️減少", value=f"*{abs(經驗值)}*", inline=True)
         embed.add_field(name="編輯後", value=after_exp, inline=True)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
@@ -333,9 +333,9 @@ async def edit_lvl(ctx,
                               color=default_color)
         embed.add_field(name="編輯前", value=before_lvl, inline=True)
         if 等級 > 0:
-            embed.add_field(name="增加", value=f"*{等級}*", inline=True)
+            embed.add_field(name="➡️增加", value=f"*{等級}*", inline=True)
         else:
-            embed.add_field(name="減少", value=abs(等級), inline=True)
+            embed.add_field(name="➡️減少", value=abs(等級), inline=True)
         embed.add_field(name="編輯後", value=after_lvl, inline=True)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
