@@ -279,10 +279,10 @@ async def show(ctx,
     voice_level = user_exp.get_level(使用者.id, "voice")
     avatar = 使用者.display_avatar
     embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}的經驗值", color=default_color)
-    embed.add_field(name="文字等級", value=f"{text_level}", inline=True)
-    embed.add_field(name="文字經驗值", value=f"{text_exp}", inline=True)
+    embed.add_field(name="文字等級", value=f"{text_level}", inline=False)
+    embed.add_field(name="文字經驗值", value=f"{text_exp}", inline=False)
     embed.add_field(name="語音等級", value=f"{voice_level}", inline=False)
-    embed.add_field(name="語音經驗值", value=f"{voice_exp}", inline=True)
+    embed.add_field(name="語音經驗值", value=f"{voice_exp}", inline=False)
     date = user_exp.get_join_date_in_str(使用者.id)
     embed.add_field(name="加入時間", value=f"{date}", inline=False)
     joined_date = user_exp.joined_time(使用者.id)
