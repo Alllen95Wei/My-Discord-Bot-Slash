@@ -295,12 +295,12 @@ edit = user_info.create_subgroup(name="edit", description="編輯使用者的資
 
 
 # TODO: 解決參數丟失問題
-@edit.command(name="exp", description="編輯使用者的經驗值。")
-async def exp(ctx,
-              使用者: Option(discord.Member, "要編輯的使用者", required=True),
-              類型: Option(str, "要編輯的經驗值類型", required=True, choices=["text", "voice"]),
-              經驗值: Option(int, "要編輯的經驗值數量，若要扣除則輸入負值", required=True),
-              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+@user_info.command(name="edit_exp", description="編輯使用者的經驗值。")
+async def edit_exp(ctx,
+                   使用者: Option(discord.Member, "要編輯的使用者", required=True),
+                   類型: Option(str, "要編輯的經驗值類型", required=True, choices=["text", "voice"]),
+                   經驗值: Option(int, "要編輯的經驗值數量，若要扣除則輸入負值", required=True),
+                   私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if ctx.author == bot.get_user(657519721138094080):
         before_exp = user_exp.get_exp(使用者.id, 類型)
         user_exp.add_exp(使用者.id, 類型, 經驗值)
@@ -319,12 +319,12 @@ async def exp(ctx,
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
-@edit.command(name="lvl", description="編輯使用者的等級。")
-async def lvl(ctx,
-              使用者: Option(discord.Member, "要編輯的使用者", required=True),
-              類型: Option(str, "要編輯的等級類型", required=True, choices=["text", "voice"]),
-              等級: Option(int, "要編輯的等級數量，若要扣除則輸入負值", required=True),
-              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+@user_info.command(name="edit_lvl", description="編輯使用者的等級。")
+async def edit_lvl(ctx,
+                   使用者: Option(discord.Member, "要編輯的使用者", required=True),
+                   類型: Option(str, "要編輯的等級類型", required=True, choices=["text", "voice"]),
+                   等級: Option(int, "要編輯的等級數量，若要扣除則輸入負值", required=True),
+                   私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if ctx.author == bot.get_user(657519721138094080):
         before_lvl = user_exp.get_level(使用者.id, 類型)
         user_exp.add_level(使用者.id, 類型, 等級)
