@@ -17,7 +17,8 @@ def get_raw_info(user_id):
                            "text": 0},
                       "level":
                           {"voice": 0,
-                           "text": 0}
+                           "text": 0},
+                      "last_active_time": None
                       }
         return empty_data
 
@@ -134,3 +135,15 @@ def level_calc(user_id, level_type):
             return False
     else:
         raise ValueError("level_type must be either \"voice\" or \"text\"")
+
+
+def get_last_active_time(user_id):
+    user_info = get_raw_info(user_id)
+    time = user_info["last_active_time"]
+    return time
+
+
+def set_last_active_time(user_id, time):
+    user_info = get_raw_info(user_id)
+    user_info["last_active_time"] = time
+    write_raw_info(user_id, user_info)

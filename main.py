@@ -559,6 +559,11 @@ async def on_message(message):
             return
     if message.channel.id in exclude_channel:
         return
+    time_delta = time.time() - user_exp.get_last_active_time(message.author.id)
+    if time_delta < 300:
+        return
+    if "Direct Message" in str(message.channel):
+        return
     if not message.author.bot and isinstance(msg_in, str):
         if len(msg_in) <= 15:
             user_exp.add_exp(message.author.id, "text", len(msg_in))
@@ -566,6 +571,7 @@ async def on_message(message):
             user_exp.add_exp(message.author.id, "text", 15)
     elif not message.author.bot and isinstance(msg_in, discord.File):
         user_exp.add_exp(message.author.id, "text", 1)
+    user_exp.set_last_active_time(message.author.id, time.time())
     if user_exp.level_calc(message.author.id, "text"):
         embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
                               f"**{user_exp.get_level(message.author.id, 'text')}** 等！", color=default_color)
