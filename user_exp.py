@@ -114,9 +114,9 @@ def upgrade_exp_needed(user_id, level_type):
     if level_type in ["voice", "text"]:
         current_level = get_level(user_id, level_type)
         if level_type == "text":
-            exp_needed = 80 + (20 * current_level)
+            exp_needed = 80 + (25 * current_level)
         else:
-            exp_needed = 50 + (25 * current_level)
+            exp_needed = 50 + (30 * current_level)
         return exp_needed
     else:
         raise ValueError("level_type must be either \"voice\" or \"text\"")

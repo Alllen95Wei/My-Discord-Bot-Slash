@@ -135,6 +135,8 @@ async def on_member_update(before, after):
             new_roles_list["104"] = "「貓娘實驗室」中，104班同學們的專用身分組。\n" \
                                     "你可以加入104班的專屬頻道，跟大家參與討論。"
     for i in new_roles_list:
+        if new_roles_list == {}:
+            return
         embed.add_field(name=i, value=new_roles_list[i], inline=False)
     embed.set_footer(text="如果你認為被意外分配到錯誤的身分組，請聯絡管理員。")
     await after.send(embed=embed)
@@ -314,7 +316,27 @@ async def require(ctx,
                     inline=False)
     embed.add_field(name=f"語音等級：{voice_lvl}", value=f"升級需要`{voice_require}`點\n目前：`{voice_now}`點 ({voice_percent}%)",
                     inline=False)
+    embed.set_footer(text="關於升等所需的經驗值，請輸入/user_info about")
     await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
+@user_info.command(name="about", description="顯示關於經驗值及等級的計算。")
+async def about(ctx):
+    embed = discord.Embed(title="關於經驗值及等級", description="訊息將分別以2則訊息傳送！", color=default_color)
+    ctx.respond(embed=embed, ephemeral=True)
+    embed = discord.Embed(title="關於經驗值", description="經驗值分為**文字**及**語音**，分別以下列方式計算：", color=default_color)
+    embed.add_field(name="文字", value="以訊息長度計算，1字1點。", inline=False)
+    embed.add_field(name="語音", value="以待在語音頻道的時長計算，10秒1點。", inline=False)
+    embed.add_field(name="其它限制", value="文字：每則訊息**最多15點**。\n"
+                    "語音：若使用者處於**靜音**狀態，則每10秒僅能**拿到0.5點**。若處於**拒聽**狀態，則**無法獲得經驗值**。", inline=False)
+    embed.set_footer(text="有1位使用者使用了指令，因此傳送此訊息。")
+    await ctx.channel.send(embed=embed)
+    embed = discord.Embed(title="關於等級", description="等級同樣分為**文字**及**語音**。\n根據使用者目前的等級，升級所需的經驗值也有所不同。",
+                          color=default_color)
+    embed.add_field(name="文字", value="**文字**等級升級所需經驗值的公式為：`80 + 25 × 目前文字等級`", inline=False)
+    embed.add_field(name="語音", value="**語音**等級升級所需經驗值的公式為：`50 + 30 × 目前語音等級`", inline=False)
+    embed.set_footer(text="有1位使用者使用了指令，因此傳送此訊息。")
+    await ctx.channel.send(embed=embed)
 
 
 edit = user_info.create_subgroup(name="edit", description="編輯使用者的資訊。")
