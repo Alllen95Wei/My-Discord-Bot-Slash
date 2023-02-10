@@ -323,7 +323,7 @@ async def require(ctx,
 @user_info.command(name="about", description="顯示關於經驗值及等級的計算。")
 async def about(ctx):
     embed = discord.Embed(title="關於經驗值及等級", description="訊息將分別以2則訊息傳送！", color=default_color)
-    ctx.respond(embed=embed, ephemeral=True)
+    await ctx.respond(embed=embed, ephemeral=True)
     embed = discord.Embed(title="關於經驗值", description="經驗值分為**文字**及**語音**，分別以下列方式計算：", color=default_color)
     embed.add_field(name="文字", value="以訊息長度計算，1字1點。", inline=False)
     embed.add_field(name="語音", value="以待在語音頻道的時長計算，10秒1點。", inline=False)
