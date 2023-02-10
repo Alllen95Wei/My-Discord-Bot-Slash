@@ -45,7 +45,7 @@ async def give_voice_exp():  # 給予語音經驗
                             user_exp.add_exp(member.id, "voice", 1)
                         if user_exp.level_calc(member.id, "voice"):
                             embed = discord.Embed(title="等級提升",
-                                                  description=f"恭喜 <@{member.id}> *語音*等級升級到 "
+                                                  description=f":tada:恭喜 <@{member.id}> *語音*等級升級到 "
                                                               f"**{user_exp.get_level(member.id, 'voice')}** 等！",
                                                   color=default_color)
                             embed.set_thumbnail(url=member.display_avatar)
@@ -294,6 +294,28 @@ async def show(ctx,
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
+@user_info.command(name="require", description="查詢距離下次升等還差多少經驗值。")
+async def require(ctx,
+                  使用者: Option(discord.Member, "要查詢的使用者", required=False) = None,
+                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    if 使用者 is None:
+        使用者 = ctx.author
+    text_lvl = user_exp.get_level(使用者.id, "text")
+    text_require = user_exp.upgrade_exp_needed(使用者.id, "text")
+    text_now = user_exp.get_exp(使用者.id, "text")
+    text_percent = (round(text_now / text_require * 1000)) / 10
+    voice_lvl = user_exp.get_level(使用者.id, "voice")
+    voice_require = user_exp.upgrade_exp_needed(使用者.id, "voice")
+    voice_now = user_exp.get_exp(使用者.id, "voice")
+    voice_percent = (round(voice_now / voice_require * 1000)) / 10
+    embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}距離升級還差...", color=default_color)
+    embed.add_field(name=f"文字等級：{text_lvl}", value=f"升級需要`{text_require}`點\n目前：`{text_now}`點 ({text_percent}%)",
+                    inline=False)
+    embed.add_field(name=f"語音等級：{voice_lvl}", value=f"升級需要`{voice_require}`點\n目前：`{voice_now}`點 ({voice_percent}%)",
+                    inline=False)
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
 edit = user_info.create_subgroup(name="edit", description="編輯使用者的資訊。")
 
 
@@ -316,6 +338,7 @@ async def edit_exp(ctx,
         else:
             embed.add_field(name="➡️減少", value=f"*{abs(經驗值)}*", inline=True)
         embed.add_field(name="編輯後", value=after_exp, inline=True)
+        embed.set_footer(text="編輯後等級提升而未跳出通知為正常現象。下次當機器人自動增加經驗值時，即會跳出升級訊息。")
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用這個指令。", color=error_color)
@@ -338,8 +361,9 @@ async def edit_lvl(ctx,
         if 等級 > 0:
             embed.add_field(name="➡️增加", value=f"*{等級}*", inline=True)
         else:
-            embed.add_field(name="➡️減少", value=abs(等級), inline=True)
+            embed.add_field(name="➡️減少", value=f"{abs(等級)}", inline=True)
         embed.add_field(name="編輯後", value=after_lvl, inline=True)
+        embed.set_footer(text="編輯後等級提升而未跳出通知為正常現象。下次當機器人自動增加經驗值時，即會跳出升級訊息。")
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用這個指令。", color=error_color)
@@ -518,7 +542,7 @@ async def on_message(message):
     elif not message.author.bot and isinstance(msg_in, discord.File):
         user_exp.add_exp(message.author.id, "text", 1)
     if user_exp.level_calc(message.author.id, "text"):
-        embed = discord.Embed(title="等級提升", description=f"恭喜 <@{message.author.id}> *文字*等級升級到 "
+        embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
                               f"**{user_exp.get_level(message.author.id, 'text')}** 等！", color=default_color)
         embed.set_thumbnail(url=message.author.display_avatar)
         await message.channel.send(embed=embed)
