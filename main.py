@@ -32,9 +32,10 @@ TOKEN = str(os.getenv("TOKEN"))
 @tasks.loop(seconds=10)
 async def give_voice_exp():  # 給予語音經驗
     voice_channel_lists = []
+    exclude_channel = [888707777659289660]
     for server in bot.guilds:
         for channel in server.channels:
-            if channel.type == discord.ChannelType.voice:
+            if channel.type == discord.ChannelType.voice and channel.id not in exclude_channel:
                 voice_channel_lists.append(channel)
                 members = channel.members
                 for member in members:
@@ -333,6 +334,7 @@ async def about(ctx):
     await ctx.channel.send(embed=embed)
     embed = discord.Embed(title="關於等級", description="等級同樣分為**文字**及**語音**。\n根據使用者目前的等級，升級所需的經驗值也有所不同。",
                           color=default_color)
+    embed.add_field(name="⚠️注意！", value="每次升級，皆會**__將所需經驗值扣除！__**")
     embed.add_field(name="文字", value="**文字**等級升級所需經驗值的公式為：`80 + 25 × 目前文字等級`", inline=False)
     embed.add_field(name="語音", value="**語音**等級升級所需經驗值的公式為：`50 + 30 × 目前語音等級`", inline=False)
     embed.set_footer(text="有1位使用者使用了指令，因此傳送此訊息。")
