@@ -183,6 +183,7 @@ async def help(ctx,
                     value="將YouTube影片下載為mp3。由於Discord有檔案大小限制，因此有時可能會失敗。",
                     inline=False)
     embed.add_field(name="</user_info show:1071752534638735440>", value="取得使用者的資訊。", inline=False)
+    embed.add_field(name="</user_info require:1071752534638735440>", value="查詢距離下次升等還差多少經驗值。", inline=False)
     embed.add_field(name="</rc:1068693011858456658>", value="重新連接至語音頻道。可指定頻道，否則將自動檢測<@885723595626676264>"
                                                             "及<@657519721138094080>在哪個頻道並加入。", inline=False)
     embed.add_field(name="</dc:1069046879473647636>", value="從目前的語音頻道中斷連接。", inline=False)
