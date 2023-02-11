@@ -12,6 +12,7 @@ from random import randint
 from shlex import split
 from subprocess import run
 from platform import system
+from PIL import ImageGrab
 
 import check_folder_size
 from youtube_to_mp3 import main_dl
@@ -166,6 +167,7 @@ async def on_ready():
                             member.joined_at.hour, member.joined_at.minute, member.joined_at.second]
             print(f"{member.name}: {join_at_list}")
             user_exp.set_join_date(member.id, join_at_list)
+            user_exp.set_last_active_time(member.id, time.time())
     await give_voice_exp.start()
 
 
@@ -366,7 +368,8 @@ async def edit_exp(ctx,
         embed.set_footer(text="編輯後等級提升而未跳出通知為正常現象。下次當機器人自動增加經驗值時，即會跳出升級訊息。")
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用這個指令。", color=error_color)
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+        私人訊息 = True
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
@@ -391,7 +394,8 @@ async def edit_lvl(ctx,
         embed.set_footer(text="編輯後等級提升而未跳出通知為正常現象。下次當機器人自動增加經驗值時，即會跳出升級訊息。")
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用這個指令。", color=error_color)
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+        私人訊息 = True
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
@@ -493,6 +497,27 @@ async def restart(ctx,
         event = discord.Activity(type=discord.ActivityType.playing, name="重啟中...")
         await bot.change_presence(status=discord.Status.do_not_disturb, activity=event)
         upd.restart_running_bot(os.getpid(), system())
+    else:
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+        私人訊息 = True
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
+@bot.slash_command(name="screenshot", description="在機器人伺服器端截圖。")
+async def screenshot(ctx,
+                     私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    if ctx.author == bot.get_user(657519721138094080):
+        try:
+            await ctx.defer()
+            # 截圖
+            img = ImageGrab.grab()
+            img.save("screenshot.png")
+            file = discord.File("screenshot.png")
+            embed = discord.Embed(title="截圖", color=default_color)
+            await ctx.respond(embed=embed, file=file, ephemeral=私人訊息)
+        except Exception as e:
+            embed = discord.Embed(title="錯誤", description="發生錯誤：`" + str(e) + "`", color=error_color)
+            await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
         私人訊息 = True

@@ -16,6 +16,10 @@ def get_update_files():
 
 def restart_running_bot(pid, os):
     subprocess.Popen("python main.py", creationflags=subprocess.CREATE_NEW_CONSOLE)
+    kill_running_bot(pid, os)
+
+
+def kill_running_bot(pid, os):
     if os == "Windows":
         subprocess.run(['taskkill', '/f', '/PID', str(format(pid))])
     elif os == "Linux":
