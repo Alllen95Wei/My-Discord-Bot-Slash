@@ -193,6 +193,8 @@ async def help(ctx,
     embed.add_field(name="</dc:1069046879473647636>", value="從目前的語音頻道中斷連接。", inline=False)
     embed.add_field(name="</dps:1068693011858456659>", value="查詢伺服器電腦的CPU及記憶體使用率。", inline=False)
     embed.add_field(name="</cmd:1069046879473647638>", value="在伺服器端執行指令並傳回結果。", inline=False)
+    embed.add_field(name="</restart:1071752534638735441>", value="重啟機器人。", inline=False)
+    embed.add_field(name="</screenshot:1073759072186277920>", value="在機器人伺服器端截圖。", inline=False)
     embed.add_field(name="</update:1069046879473647639>", value="更新機器人。", inline=False)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
