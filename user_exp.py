@@ -18,7 +18,7 @@ def get_raw_info(user_id):
                       "level":
                           {"voice": 0,
                            "text": 0},
-                      "last_active_time": None
+                      "last_active_time": 0
                       }
         return empty_data
 
