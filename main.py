@@ -167,7 +167,6 @@ async def on_ready():
                             member.joined_at.hour, member.joined_at.minute, member.joined_at.second]
             print(f"{member.name}: {join_at_list}")
             user_exp.set_join_date(member.id, join_at_list)
-            user_exp.set_last_active_time(member.id, time.time())
     await give_voice_exp.start()
 
 
