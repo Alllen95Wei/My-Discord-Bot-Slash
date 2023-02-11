@@ -331,7 +331,7 @@ async def about(ctx):
     embed = discord.Embed(title="關於經驗值", description="經驗值分為**文字**及**語音**，分別以下列方式計算：", color=default_color)
     embed.add_field(name="文字", value="以訊息長度計算，1字1點。", inline=False)
     embed.add_field(name="語音", value="以待在語音頻道的時長計算，10秒1點。", inline=False)
-    embed.add_field(name="其它限制", value="文字：每則訊息**最多15點**。\n"
+    embed.add_field(name="其它限制", value="文字：每則訊息**最多15點**。每個使用者有1則訊息被計入經驗值後，需要**5分鐘冷卻時間**才會繼續計算。\n"
                     "語音：若使用者處於**靜音**狀態，則每10秒僅能**拿到0.5點**。若處於**拒聽**狀態，則**無法獲得經驗值**。", inline=False)
     embed.set_footer(text="有1位使用者使用了指令，因此傳送此訊息。")
     await ctx.channel.send(embed=embed)
