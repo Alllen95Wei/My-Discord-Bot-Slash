@@ -572,12 +572,12 @@ async def update(ctx,
 
 @bot.user_command(name="查看經驗值")
 async def user_info_show_user(ctx, user: discord.Member):
-    await show(ctx, user)
+    await show(ctx, user, 私人訊息=True)
 
 
 @bot.user_command(name="查看升等仍需經驗值")
 async def user_info_require_user(ctx, user: discord.Member):
-    await require(ctx, user)
+    await require(ctx, user, 私人訊息=True)
 
 
 @bot.event
