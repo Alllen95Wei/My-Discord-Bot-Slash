@@ -39,11 +39,13 @@ async def give_voice_exp():  # 給予語音經驗
             if channel.type == discord.ChannelType.voice and channel.id not in exclude_channel:
                 voice_channel_lists.append(channel)
                 members = channel.members
-                for member in members:
-                    if not member.bot and not member.voice.self_deaf:
-                        if member.voice.self_mute:
-                            user_exp.add_exp(member.id, "voice", 0.5)
-                        else:
+                human_members = []
+                for member in members:  # 將機器人排除
+                    if not member.bot:
+                        human_members.append(member)
+                for member in human_members:
+                    if len(human_members) > 1:  # 若語音頻道人數大於1
+                        if not member.voice.self_mute and not member.voice.self_deaf:  # 若成員沒有靜音或拒聽
                             user_exp.add_exp(member.id, "voice", 1)
                         if user_exp.level_calc(member.id, "voice"):
                             embed = discord.Embed(title="等級提升",
@@ -332,7 +334,7 @@ async def about(ctx):
     embed.add_field(name="文字", value="以訊息長度計算，1字1點。", inline=False)
     embed.add_field(name="語音", value="以待在語音頻道的時長計算，10秒1點。", inline=False)
     embed.add_field(name="其它限制", value="文字：每則訊息**最多15點**。每個使用者有1則訊息被計入經驗值後，需要**5分鐘冷卻時間**才會繼續計算。\n"
-                    "語音：若使用者處於**靜音**狀態，則每10秒僅能**拿到0.5點**。若處於**拒聽**狀態，則**無法獲得經驗值**。", inline=False)
+                    "語音：在同一頻道的**真人成員**必須至少2位。若使用者處於**靜音**或**拒聽**狀態，則**無法獲得經驗值**。", inline=False)
     embed.set_footer(text="有1位使用者使用了指令，因此傳送此訊息。")
     await ctx.channel.send(embed=embed)
     embed = discord.Embed(title="關於等級", description="等級同樣分為**文字**及**語音**。\n根據使用者目前的等級，升級所需的經驗值也有所不同。",
