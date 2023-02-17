@@ -120,21 +120,24 @@ async def on_member_update(before, after):
     normal_role = discord.utils.get(only_server.roles, id=858365679102328872)
     if normal_role in after.roles:
         if normal_role not in before.roles:
-            new_roles_list["旁觀者"] = "「貓娘實驗室」中的最基本身分組。\n" \
-                                      "取得此身分組後，可以存取大多數頻道。"
+            embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0xe4b400)
+            new_roles_list["旁觀者"] = "「貓娘實驗室」中的最基本身分組。\n取得此身分組後，可以存取大多數頻道。"
     GAMER = discord.utils.get(only_server.roles, id=993094175484559441)
     if GAMER in after.roles:
         if GAMER not in before.roles:
+            embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0x7f591b)
             new_roles_list["GAMER"] = "「貓娘實驗室」中，遊戲玩家們專用的身分組。\n" \
                                       "你現在可以存取「遊戲討論」的所有頻道！"
     VIEWER = discord.utils.get(only_server.roles, id=1066721427862077571)
     if VIEWER in after.roles:
         if VIEWER not in before.roles:
+            embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0xAD1457)
             new_roles_list["VIEWER"] = "「貓娘實驗室」中，遊戲觀眾的身分組。\n" \
                                        "現在起，當有玩家選擇在「遊戲討論」的語音頻道中直播，你將能參與觀看！"
     one_o_four = discord.utils.get(only_server.roles, id=1060075117822083163)
     if one_o_four in after.roles:
         if one_o_four not in before.roles:
+            embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0x3498DB)
             new_roles_list["104"] = "「貓娘實驗室」中，104班同學們的專用身分組。\n" \
                                     "你可以加入104班的專屬頻道，跟大家參與討論。"
         if new_roles_list == {}:
@@ -188,7 +191,8 @@ async def help(ctx,
                     value="將YouTube影片下載為mp3。由於Discord有檔案大小限制，因此有時可能會失敗。",
                     inline=False)
     embed.add_field(name="</user_info show:1071752534638735440>", value="取得使用者的資訊。", inline=False)
-    embed.add_field(name="</user_info require:1071752534638735440>", value="查詢距離下次升等還差多少經驗值。", inline=False)
+    embed.add_field(name="</user_info require:1071752534638735440>", value="查詢距離下次升等還差多少經驗值。",
+                    inline=False)
     embed.add_field(name="</rc:1068693011858456658>", value="重新連接至語音頻道。可指定頻道，否則將自動檢測<@885723595626676264>"
                                                             "及<@657519721138094080>在哪個頻道並加入。", inline=False)
     embed.add_field(name="</dc:1069046879473647636>", value="從目前的語音頻道中斷連接。", inline=False)
@@ -206,8 +210,8 @@ async def about(ctx,
     embed = discord.Embed(title="關於", color=default_color)
     embed.set_thumbnail(url=bot.user.display_avatar)
     embed.add_field(name="程式碼與授權", value="本機器人由<@657519721138094080>維護，使用[Py-cord]"
-                    "(https://github.com/Pycord-Development/pycord)進行開發。\n"
-                    "本機器人的程式碼及檔案皆可在[這裡](https://github.com/Alllen95Wei/My-Discord-Bot-Slash)查看。",
+                                               "(https://github.com/Pycord-Development/pycord)進行開發。\n"
+                                               "本機器人的程式碼及檔案皆可在[這裡](https://github.com/Alllen95Wei/My-Discord-Bot-Slash)查看。",
                     inline=True)
     embed.add_field(name="聯絡", value="如果有任何技術問題及建議，請聯絡<@657519721138094080>。", inline=True)
     repo = git.Repo(search_parent_directories=True)
@@ -317,9 +321,11 @@ async def require(ctx,
     voice_now = user_exp.get_exp(使用者.id, "voice")
     voice_percent = (round(voice_now / voice_require * 1000)) / 10
     embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}距離升級還差...", color=default_color)
-    embed.add_field(name=f"文字等級：{text_lvl}", value=f"升級需要`{text_require}`點\n目前：`{text_now}`點 ({text_percent}%)",
+    embed.add_field(name=f"文字等級：{text_lvl}",
+                    value=f"升級需要`{text_require}`點\n目前：`{text_now}`點 ({text_percent}%)",
                     inline=False)
-    embed.add_field(name=f"語音等級：{voice_lvl}", value=f"升級需要`{voice_require}`點\n目前：`{voice_now}`點 ({voice_percent}%)",
+    embed.add_field(name=f"語音等級：{voice_lvl}",
+                    value=f"升級需要`{voice_require}`點\n目前：`{voice_now}`點 ({voice_percent}%)",
                     inline=False)
     embed.set_footer(text="關於升等所需的經驗值，請輸入/user_info about")
     await ctx.respond(embed=embed, ephemeral=私人訊息)
@@ -329,14 +335,17 @@ async def require(ctx,
 async def about(ctx):
     embed = discord.Embed(title="關於經驗值及等級", description="訊息將分別以2則訊息傳送！", color=default_color)
     await ctx.respond(embed=embed, ephemeral=True)
-    embed = discord.Embed(title="關於經驗值", description="經驗值分為**文字**及**語音**，分別以下列方式計算：", color=default_color)
+    embed = discord.Embed(title="關於經驗值", description="經驗值分為**文字**及**語音**，分別以下列方式計算：",
+                          color=default_color)
     embed.add_field(name="文字", value="以訊息長度計算，1字1點。", inline=False)
     embed.add_field(name="語音", value="以待在語音頻道的時長計算，10秒1點。", inline=False)
     embed.add_field(name="其它限制", value="文字：每則訊息**最多15點**。每個使用者有1則訊息被計入經驗值後，需要**5分鐘冷卻時間**才會繼續計算。\n"
-                    "語音：在同一頻道的**真人成員**必須至少2位。若使用者處於**靜音**或**拒聽**狀態，則**無法獲得經驗值**。", inline=False)
+                                           "語音：在同一頻道的**真人成員**必須至少2位。若使用者處於**靜音**或**拒聽**狀態，則**無法獲得經驗值**。",
+                    inline=False)
     embed.set_footer(text="有1位使用者使用了指令，因此傳送此訊息。")
     await ctx.channel.send(embed=embed)
-    embed = discord.Embed(title="關於等級", description="等級同樣分為**文字**及**語音**。\n根據使用者目前的等級，升級所需的經驗值也有所不同。",
+    embed = discord.Embed(title="關於等級",
+                          description="等級同樣分為**文字**及**語音**。\n根據使用者目前的等級，升級所需的經驗值也有所不同。",
                           color=default_color)
     embed.add_field(name="⚠️注意！", value="每次升級，皆會**__將所需經驗值扣除！__**")
     embed.add_field(name="文字", value="**文字**等級升級所需經驗值的公式為：`80 + 25 × 目前文字等級`", inline=False)
@@ -611,7 +620,8 @@ async def on_message(message):
     user_exp.set_last_active_time(message.author.id, time.time())
     if user_exp.level_calc(message.author.id, "text"):
         embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
-                              f"**{user_exp.get_level(message.author.id, 'text')}** 等！", color=default_color)
+                                                            f"**{user_exp.get_level(message.author.id, 'text')}** 等！",
+                              color=default_color)
         embed.set_thumbnail(url=message.author.display_avatar)
         await message.channel.send(embed=embed)
 
