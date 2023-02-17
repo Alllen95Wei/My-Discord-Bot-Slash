@@ -136,9 +136,9 @@ async def on_member_update(before, after):
         if one_o_four not in before.roles:
             new_roles_list["104"] = "「貓娘實驗室」中，104班同學們的專用身分組。\n" \
                                     "你可以加入104班的專屬頻道，跟大家參與討論。"
-    for i in new_roles_list:
         if new_roles_list == {}:
             return
+    for i in new_roles_list:
         embed.add_field(name=i, value=new_roles_list[i], inline=False)
     embed.set_footer(text="如果你認為被意外分配到錯誤的身分組，請聯絡管理員。")
     await after.send(embed=embed)
