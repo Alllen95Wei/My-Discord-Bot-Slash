@@ -39,14 +39,13 @@ async def give_voice_exp():  # 給予語音經驗
             if channel.type == discord.ChannelType.voice and channel.id not in exclude_channel:
                 voice_channel_lists.append(channel)
                 members = channel.members
-                human_members = []
-                for member in members:  # 將機器人排除
-                    if not member.bot:
-                        human_members.append(member)
-                for member in human_members:
-                    if len(human_members) > 1:  # 若語音頻道人數大於1
-                        if not member.voice.self_mute and not member.voice.self_deaf:  # 若成員沒有靜音或拒聽
-                            user_exp.add_exp(member.id, "voice", 1)
+                active_human_members = []
+                for member in members:  # 將機器人、靜音/拒聽的成員排除
+                    if not member.bot and not member.voice.self_mute and not member.voice.self_deaf:
+                        active_human_members.append(member)
+                for member in active_human_members:
+                    if len(active_human_members) > 1:  # 若語音頻道人數大於1
+                        user_exp.add_exp(member.id, "voice", 1)
                         if user_exp.level_calc(member.id, "voice"):
                             embed = discord.Embed(title="等級提升",
                                                   description=f":tada:恭喜 <@{member.id}> *語音*等級升級到 "
