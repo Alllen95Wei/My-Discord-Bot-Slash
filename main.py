@@ -414,15 +414,18 @@ async def edit_lvl(ctx,
 
 @user_info.command(name="enable", description="開關經驗值計算功能。")
 async def enable(ctx,
-                 啟用: Option(bool, "是否啟用經驗值計算功能", required=True),
+                 啟用: Option(bool, "是否啟用經驗值計算功能", required=False) = None,
                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     global exp_enabled
     if ctx.author == bot.get_user(657519721138094080):
-        exp_enabled = 啟用
-        if 啟用:
-            embed = discord.Embed(title="經驗值計算功能已**啟用**。", color=default_color)
+        if 啟用 is None:
+            embed = discord.Embed(title="經驗值計算狀態", description=str(exp_enabled), color=default_color)
         else:
-            embed = discord.Embed(title="經驗值計算功能已**停用**。", color=default_color)
+            exp_enabled = 啟用
+            if 啟用:
+                embed = discord.Embed(title="經驗值計算功能已**啟用**。", color=default_color)
+            else:
+                embed = discord.Embed(title="經驗值計算功能已**停用**。", color=default_color)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
