@@ -25,6 +25,7 @@ bot = commands.Bot(intents=intents, help_command=None)
 base_dir = os.path.abspath(os.path.dirname(__file__))
 default_color = 0x5FE1EA
 error_color = 0xF1411C
+exp_enabled = True
 # 載入TOKEN
 load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
 TOKEN = str(os.getenv("TOKEN"))
@@ -44,15 +45,16 @@ async def give_voice_exp():  # 給予語音經驗
                     if not member.bot and not member.voice.self_mute and not member.voice.self_deaf:
                         active_human_members.append(member)
                 for member in active_human_members:
-                    if len(active_human_members) > 1:  # 若語音頻道人數大於1
-                        user_exp.add_exp(member.id, "voice", 1)
-                        if user_exp.level_calc(member.id, "voice"):
-                            embed = discord.Embed(title="等級提升",
-                                                  description=f":tada:恭喜 <@{member.id}> *語音*等級升級到 "
-                                                              f"**{user_exp.get_level(member.id, 'voice')}** 等！",
-                                                  color=default_color)
-                            embed.set_thumbnail(url=member.display_avatar)
-                            await member.send(embed=embed)
+                    if exp_enabled:
+                        if len(active_human_members) > 1:  # 若語音頻道人數大於1
+                            user_exp.add_exp(member.id, "voice", 1)
+                            if user_exp.level_calc(member.id, "voice"):
+                                embed = discord.Embed(title="等級提升",
+                                                      description=f":tada:恭喜 <@{member.id}> *語音*等級升級到 "
+                                                                  f"**{user_exp.get_level(member.id, 'voice')}** 等！",
+                                                      color=default_color)
+                                embed.set_thumbnail(url=member.display_avatar)
+                                await member.send(embed=embed)
 
 
 async def check_voice_channel():
@@ -410,6 +412,24 @@ async def edit_lvl(ctx,
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
+@user_info.command(name="enable", description="開關經驗值計算功能。")
+async def enable(ctx,
+                 啟用: Option(bool, "是否啟用經驗值計算功能", required=True),
+                 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    global exp_enabled
+    if ctx.author == bot.get_user(657519721138094080):
+        exp_enabled = 啟用
+        if 啟用:
+            embed = discord.Embed(title="經驗值計算功能已**啟用**。", color=default_color)
+        else:
+            embed = discord.Embed(title="經驗值計算功能已**停用**。", color=default_color)
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
+    else:
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+        私人訊息 = True
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
 @bot.slash_command(name="sizecheck", description="檢查\"C:\\MusicBot\\audio_cache\"的大小。")
 async def sizecheck(ctx,
                     私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
@@ -605,25 +625,26 @@ async def on_message(message):
             return
     if message.channel.id in exclude_channel:
         return
-    time_delta = time.time() - user_exp.get_last_active_time(message.author.id)
-    if time_delta < 300:
-        return
-    if "Direct Message" in str(message.channel):
-        return
-    if not message.author.bot and isinstance(msg_in, str):
-        if len(msg_in) <= 15:
-            user_exp.add_exp(message.author.id, "text", len(msg_in))
-        else:
-            user_exp.add_exp(message.author.id, "text", 15)
-    elif not message.author.bot and isinstance(msg_in, discord.File):
-        user_exp.add_exp(message.author.id, "text", 1)
-    user_exp.set_last_active_time(message.author.id, time.time())
-    if user_exp.level_calc(message.author.id, "text"):
-        embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
-                              f"**{user_exp.get_level(message.author.id, 'text')}** 等！",
-                              color=default_color)
-        embed.set_thumbnail(url=message.author.display_avatar)
-        await message.channel.send(embed=embed)
+    if exp_enabled:
+        time_delta = time.time() - user_exp.get_last_active_time(message.author.id)
+        if time_delta < 300:
+            return
+        if "Direct Message" in str(message.channel):
+            return
+        if not message.author.bot and isinstance(msg_in, str):
+            if len(msg_in) <= 15:
+                user_exp.add_exp(message.author.id, "text", len(msg_in))
+            else:
+                user_exp.add_exp(message.author.id, "text", 15)
+        elif not message.author.bot and isinstance(msg_in, discord.File):
+            user_exp.add_exp(message.author.id, "text", 1)
+        user_exp.set_last_active_time(message.author.id, time.time())
+        if user_exp.level_calc(message.author.id, "text"):
+            embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
+                                  f"**{user_exp.get_level(message.author.id, 'text')}** 等！",
+                                  color=default_color)
+            embed.set_thumbnail(url=message.author.display_avatar)
+            await message.channel.send(embed=embed)
 
 
 bot.run(TOKEN)
