@@ -26,6 +26,7 @@ base_dir = os.path.abspath(os.path.dirname(__file__))
 default_color = 0x5FE1EA
 error_color = 0xF1411C
 exp_enabled = True
+normal_activity = discord.Activity(name="斜線指令 參戰！", type=discord.ActivityType.playing)
 # 載入TOKEN
 load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
 TOKEN = str(os.getenv("TOKEN"))
@@ -164,8 +165,7 @@ async def on_ready():
     print("機器人準備完成！")
     print(f"PING值：{round(bot.latency * 1000)}ms")
     print(f"登入身分：{bot.user.name}#{bot.user.discriminator}")
-    status = discord.Activity(name="斜線指令 參戰！", type=discord.ActivityType.playing)
-    await bot.change_presence(activity=status, status=discord.Status.online)
+    await bot.change_presence(activity=normal_activity, status=discord.Status.online)
     await check_voice_channel()
     for guild in bot.guilds:
         for member in guild.members:
@@ -424,10 +424,10 @@ async def enable(ctx,
             exp_enabled = 啟用
             if 啟用:
                 embed = discord.Embed(title="經驗值計算功能已啟用。", color=default_color)
-                await bot.change_presence(status=discord.Status.online)
+                await bot.change_presence(activity=normal_activity, status=discord.Status.online)
             else:
                 embed = discord.Embed(title="經驗值計算功能已停用。", color=default_color)
-                await bot.change_presence(status=discord.Status.do_not_disturb)
+                await bot.change_presence(activity=normal_activity, status=discord.Status.do_not_disturb)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
