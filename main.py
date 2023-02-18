@@ -423,9 +423,11 @@ async def enable(ctx,
         else:
             exp_enabled = 啟用
             if 啟用:
-                embed = discord.Embed(title="經驗值計算功能已**啟用**。", color=default_color)
+                embed = discord.Embed(title="經驗值計算功能已啟用。", color=default_color)
+                await bot.change_presence(status=discord.Status.online)
             else:
-                embed = discord.Embed(title="經驗值計算功能已**停用**。", color=default_color)
+                embed = discord.Embed(title="經驗值計算功能已停用。", color=default_color)
+                await bot.change_presence(status=discord.Status.do_not_disturb)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
@@ -448,7 +450,9 @@ async def ytdl(ctx,
                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     await ctx.defer()
     file_name = str(ctx.author) + 連結[-11:]
+    await bot.change_presence(status=discord.Status.idle)
     if main_dl(連結, file_name, file_name + ".mp3") == "finished":
+        await bot.change_presence(status=discord.Status.online)
         try:
             await ctx.respond(file=discord.File(file_name + ".mp3"), ephemeral=私人訊息)
             os.remove(file_name + ".mp3")
@@ -529,7 +533,7 @@ async def restart(ctx,
         embed = discord.Embed(title="機器人重啟中", description="機器人正在重啟中。", color=default_color)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
         event = discord.Activity(type=discord.ActivityType.playing, name="重啟中...")
-        await bot.change_presence(status=discord.Status.do_not_disturb, activity=event)
+        await bot.change_presence(status=discord.Status.idle, activity=event)
         upd.restart_running_bot(os.getpid(), system())
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
@@ -595,7 +599,7 @@ async def update(ctx,
         embed = discord.Embed(title="更新中", description="更新流程啟動。", color=default_color)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
         event = discord.Activity(type=discord.ActivityType.playing, name="更新中...")
-        await bot.change_presence(status=discord.Status.do_not_disturb, activity=event)
+        await bot.change_presence(status=discord.Status.idle, activity=event)
         upd.update(os.getpid(), system())
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
