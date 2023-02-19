@@ -35,7 +35,7 @@ TOKEN = str(os.getenv("TOKEN"))
 @tasks.loop(seconds=10)
 async def give_voice_exp():  # 給予語音經驗
     voice_channel_lists = []
-    exclude_channel = [888707777659289660]
+    exclude_channel = [888707777659289660, 1076702101964599337]
     for server in bot.guilds:
         for channel in server.channels:
             if channel.type == discord.ChannelType.voice and channel.id not in exclude_channel:
