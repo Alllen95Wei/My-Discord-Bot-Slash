@@ -2,7 +2,7 @@ def webm_to_mp3(file_name, mp3_file_path):
     import os
 
     print(mp3_file_path)
-    command = "ffmpeg -i \"" + file_name + ".m4a\"" + " -vn -ab 160k -ar 44100 -y \"" + mp3_file_path + "\""
+    command = "ffmpeg -i \"" + file_name + ".m4a\"" + " -vn -ab 128k -ar 44100 -y \"" + mp3_file_path + "\""
     print(command)
     os.system(command)
     os.remove(file_name + ".m4a")

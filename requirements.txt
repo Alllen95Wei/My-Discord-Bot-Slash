@@ -1,6 +1,6 @@
 py-cord
-youtube-dl
-python-dotenv
-psutil
+yt-dlp
+python-dotenv~=0.21.1
+psutil~=5.9.4
 gitpython
-Pillow
+Pillow~=9.4.0

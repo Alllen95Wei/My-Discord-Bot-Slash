@@ -6,6 +6,8 @@ from discord import Option
 import git
 import os
 import time
+import datetime
+import zoneinfo
 from dotenv import load_dotenv
 from random import choice
 from random import randint
@@ -20,12 +22,15 @@ import detect_pc_status
 import update as upd
 import user_exp
 
+# 機器人
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, help_command=None)
+# 常用變數
 base_dir = os.path.abspath(os.path.dirname(__file__))
 default_color = 0x5FE1EA
 error_color = 0xF1411C
 exp_enabled = True
+now_tz = zoneinfo.ZoneInfo("Asia/Taipei")
 normal_activity = discord.Activity(name="斜線指令 參戰！", type=discord.ActivityType.playing)
 # 載入TOKEN
 load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
@@ -93,7 +98,7 @@ async def check_voice_channel():
 async def on_member_join(member):
     embed = discord.Embed(title="歡迎新成員！", description=f"歡迎{member.mention}加入**{member.guild}**！",
                           color=0x16D863)
-    join_date = member.joined_at.strftime("%Y-%m-%d %H:%M:%S")
+    join_date = member.joined_at.astimezone(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
     embed.set_footer(text=f"於 {join_date} 加入")
     await member.guild.system_channel.send(embed=embed)
     user_exp.set_join_date(member.id, join_date)
@@ -155,7 +160,7 @@ async def on_member_update(before, after):
 async def on_member_remove(member):
     embed = discord.Embed(title="有人離開了我們...", description=f"{member.name} 離開了 **{member.guild}** ...",
                           color=0x095997)
-    leave_date = time.strftime("%Y-%m-%d %H:%M:%S")
+    leave_date = datetime.datetime.now(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
     embed.set_footer(text=f"於 {leave_date} 離開")
     await member.guild.system_channel.send(embed=embed)
 
@@ -169,8 +174,9 @@ async def on_ready():
     await check_voice_channel()
     for guild in bot.guilds:
         for member in guild.members:
-            join_at_list = [member.joined_at.year, member.joined_at.month, member.joined_at.day,
-                            member.joined_at.hour, member.joined_at.minute, member.joined_at.second]
+            member_join_date = member.joined_at.astimezone(tz=now_tz)
+            join_at_list = [member_join_date.year, member_join_date.month, member_join_date.day,
+                            member_join_date.hour, member_join_date.minute, member_join_date.second]
             print(f"{member.name}: {join_at_list}")
             user_exp.set_join_date(member.id, join_at_list)
     await give_voice_exp.start()
@@ -457,7 +463,7 @@ async def ytdl(ctx,
             await ctx.respond(file=discord.File(file_name + ".mp3"), ephemeral=私人訊息)
             os.remove(file_name + ".mp3")
         except Exception as e:
-            if "Payload Too Large" in str(e):
+            if "Request entity too large" in str(e):
                 embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
                 embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
             else:
