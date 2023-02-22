@@ -1,5 +1,5 @@
 def youtube_download(url, file_name):
-    import youtube_dl
+    import yt_dlp as youtube_dl
 
     ydl_opts = {
         'format': 'bestaudio',
