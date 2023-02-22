@@ -1,6 +1,7 @@
 py-cord
 yt-dlp
-python-dotenv~=0.21.1
-psutil~=5.9.4
+python-dotenv
+psutil
 gitpython
-Pillow~=9.4.0
+Pillow
+tzdata
