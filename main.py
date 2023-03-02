@@ -603,7 +603,7 @@ async def cmd(ctx,
             txt_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'full_msg.txt')
             with open(txt_file_path, "w") as file:
                 file.write(str(result))
-            await ctx.respond("由於訊息長度過長，因此改以文字檔方式呈現。", file=discord.File(txt_file_path))
+            await ctx.respond("由於訊息長度過長，因此改以文字檔方式呈現。", file=discord.File(txt_file_path), ephemeral=私人訊息)
             os.remove(txt_file_path)
 
 
