@@ -100,6 +100,7 @@ async def on_member_join(member):
                           color=0x16D863)
     join_date = member.joined_at.astimezone(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
     embed.set_footer(text=f"於 {join_date} 加入")
+    embed.set_thumbnail(url=member.display_avatar)
     await member.guild.system_channel.send(embed=embed)
     user_exp.set_join_date(member.id, join_date)
     new_member = await bot.fetch_user(member.id)
