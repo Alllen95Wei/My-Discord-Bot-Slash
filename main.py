@@ -94,6 +94,32 @@ async def check_voice_channel():
                         return None
 
 
+def get_tmp_role():  # credit: 鄭詠鴻
+    btn = discord.ui.Button(style=discord.ButtonStyle.primary, label="取得臨時身分組", emoji="✨")
+
+    async def btn_callback(interaction: discord.Interaction):
+        server = await bot.fetch_guild(857996539262402570)
+        try:
+            await interaction.user.add_roles(discord.utils.get(server.roles, id=1083536792717885522))
+            embed = discord.Embed(
+                title="取得臨時身分組成功！",
+                description="已經將你加入臨時身分組！你可以查看文字頻道的內容，但是不能參與對談。",
+                color=0x57c2ea)
+            await interaction.response.send_message(embed=embed)
+        except Exception as e:
+            embed = discord.Embed(
+                title="取得臨時身分組失敗！",
+                description=f"請聯絡管理員。\n錯誤訊息：\n```{e}```",
+                color=error_color)
+            embed.set_footer(text="聯絡管理員時，請提供錯誤訊息以做為參考。")
+            await interaction.response.send_message(embed=embed)
+    btn.callback = btn_callback
+
+    view = discord.ui.View()
+    view.add_item(btn)
+    return view
+
+
 @bot.event
 async def on_member_join(member):
     embed = discord.Embed(title="歡迎新成員！", description=f"歡迎{member.mention}加入**{member.guild}**！",
@@ -114,6 +140,9 @@ async def on_member_join(member):
         description="什麼頻道都沒看到嗎？這是因為你**並未被分配身分組**。但是放心，我們會盡快確認你的身分，到時你就能加入我們了！",
         color=0x57c2ea)
     await new_member.send(embed=embed)
+    embed = discord.Embed(
+        title="取得臨時身分組", description="請點擊下方按鈕取得臨時身分組。", color=0x57c2ea)
+    await new_member.send(embed=embed, view=get_tmp_role())
 
 
 @bot.event
@@ -367,7 +396,6 @@ async def about(ctx):
 edit = user_info.create_subgroup(name="edit", description="編輯使用者的資訊。")
 
 
-# TODO: 解決參數丟失問題
 @user_info.command(name="edit_exp", description="編輯使用者的經驗值。")
 async def edit_exp(ctx,
                    使用者: Option(discord.Member, "要編輯的使用者", required=True),
@@ -604,7 +632,8 @@ async def cmd(ctx,
             txt_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'full_msg.txt')
             with open(txt_file_path, "w") as file:
                 file.write(str(result))
-            await ctx.respond("由於訊息長度過長，因此改以文字檔方式呈現。", file=discord.File(txt_file_path), ephemeral=私人訊息)
+            await ctx.respond("由於訊息長度過長，因此改以文字檔方式呈現。", file=discord.File(txt_file_path),
+                              ephemeral=私人訊息)
             os.remove(txt_file_path)
 
 
