@@ -18,6 +18,7 @@ from PIL import ImageGrab
 
 import check_folder_size
 from youtube_to_mp3 import main_dl
+import youtube_download as yt_download
 import detect_pc_status
 import update as upd
 import user_exp
@@ -485,13 +486,12 @@ async def ytdl(ctx,
                連結: Option(str, "欲下載的YouTube影片網址", required=True),
                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     await ctx.defer()
-    file_name = str(ctx.author) + 連結[-11:]
+    file_name = yt_download.get_id(連結)
     await bot.change_presence(status=discord.Status.idle)
-    if main_dl(連結, file_name, file_name + ".mp3") == "finished":
-        await bot.change_presence(status=discord.Status.online)
+    if main_dl(連結, file_name, file_name + ".mp3") == "finished" or os.path.exists(file_name + ".mp3"):
+        await bot.change_presence(status=discord.Status.online, activity=normal_activity)
         try:
             await ctx.respond(file=discord.File(file_name + ".mp3"), ephemeral=私人訊息)
-            os.remove(file_name + ".mp3")
         except Exception as e:
             if "Request entity too large" in str(e):
                 embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
