@@ -3,7 +3,7 @@ def youtube_download(url, file_name):
 
     ydl_opts = {
         'format': 'bestaudio',
-        'outtmpl': file_name,
+        'outtmpl': "\\ytdl\\" + file_name,
         'restrictfilenames': True,
         'noplaylist': True,
         'nocheckcertificate': True,

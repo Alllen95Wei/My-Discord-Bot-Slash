@@ -1,11 +1,11 @@
 def webm_to_mp3(file_name, mp3_file_path):
     import os
 
-    print(mp3_file_path)
-    command = "ffmpeg -i \"" + file_name + ".m4a\"" + " -vn -ab 128k -ar 44100 -y \"" + mp3_file_path + "\""
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    command = f"ffmpeg -i \"{base_dir}\\ytdl\\{file_name}.m4a\" -vn -ab 128k -ar 44100 -y \"{base_dir}\\ytdl\\{mp3_file_path}\""
     print(command)
     os.system(command)
-    os.remove(file_name + ".m4a")
+    os.remove(f"{base_dir}\\ytdl\\{file_name}.m4a")
 
 
 if __name__ == "__main__":

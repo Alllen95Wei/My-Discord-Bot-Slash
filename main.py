@@ -488,11 +488,12 @@ async def ytdl(ctx,
     await ctx.defer()
     file_name = yt_download.get_id(連結)
     mp3_file_name = file_name + ".mp3"
+    mp3_file_path = base_dir + "\\ytdl\\" + mp3_file_name
     await bot.change_presence(status=discord.Status.idle)
-    if os.path.exists(mp3_file_name) or main_dl(連結, file_name, mp3_file_name) == "finished":
+    if os.path.exists(mp3_file_path) or main_dl(連結, file_name, mp3_file_name) == "finished":
         await bot.change_presence(status=discord.Status.online, activity=normal_activity)
         try:
-            await ctx.respond(file=discord.File(mp3_file_name), ephemeral=私人訊息)
+            await ctx.respond(file=discord.File(mp3_file_path), ephemeral=私人訊息)
         except Exception as e:
             if "Request entity too large" in str(e):
                 embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
