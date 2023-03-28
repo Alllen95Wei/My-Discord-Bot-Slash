@@ -142,7 +142,7 @@ async def on_member_join(member):
         color=0x57c2ea)
     await new_member.send(embed=embed)
     embed = discord.Embed(
-        title="取得臨時身分組", description="請點擊下方按鈕取得臨時身分組。", color=0x57c2ea)
+        title="取得臨時身分組", description="在取得正式身分組前，請點擊下方按鈕取得臨時身分組。", color=0x57c2ea)
     await new_member.send(embed=embed, view=get_tmp_role())
 
 
