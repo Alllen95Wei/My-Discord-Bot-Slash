@@ -631,7 +631,7 @@ async def cmd(ctx,
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     except discord.errors.HTTPException as HTTPError:
         if "fewer in length" in str(HTTPError):
-            txt_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'full_msg.txt')
+            txt_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "full_msg.txt")
             with open(txt_file_path, "w") as file:
                 file.write(str(result))
             await ctx.respond("由於訊息長度過長，因此改以文字檔方式呈現。", file=discord.File(txt_file_path),
