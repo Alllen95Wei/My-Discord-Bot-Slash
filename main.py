@@ -603,6 +603,7 @@ async def screenshot(ctx,
 @bot.slash_command(name="cmd", description="在伺服器端執行指令並傳回結果。")
 async def cmd(ctx,
               指令: Option(str, "要執行的指令", required=True),
+              執行模組: Option(str, choices=["subprocess", "os"], description="執行指令的模組", required=False) = "subprocess",
               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if ctx.author == bot.get_user(657519721138094080):
         try:
@@ -612,14 +613,17 @@ async def cmd(ctx,
                 embed = discord.Embed(title="錯誤", description="基於安全原因，你不能執行這個指令。", color=error_color)
                 await ctx.respond(embed=embed, ephemeral=私人訊息)
                 return
-            result = str(run(command, capture_output=True, text=True).stdout)
+            if 執行模組 == "subprocess":
+                result = str(run(command, capture_output=True, text=True).stdout)
+            else:
+                result = str(os.popen(指令).read())
             if result != "":
                 embed = discord.Embed(title="執行結果", description=f"```{result}```", color=default_color)
             else:
                 embed = discord.Embed(title="執行結果", description="終端未傳回回應。", color=default_color)
         except WindowsError as e:
             if e.winerror == 2:
-                embed = discord.Embed(title="錯誤", description="找不到指令。", color=error_color)
+                embed = discord.Embed(title="錯誤", description="找不到指令。請嘗試更換執行模組。", color=error_color)
             else:
                 embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
         except Exception as e:
