@@ -23,5 +23,12 @@ def get_id(url):
     return vid.replace("\n", "")
 
 
+def get_length(url):
+    from subprocess import run
+
+    length = str(run(f"yt-dlp --skip-download --print \"%(duration)s\" {url}", capture_output=True, text=True).stdout)
+    return int(length.replace("\n", ""))
+
+
 if __name__ == "__main__":
     youtube_download(url=input("請貼上要下載的連結："), file_name=input("請輸入下載後的檔案名稱："))

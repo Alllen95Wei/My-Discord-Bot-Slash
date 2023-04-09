@@ -121,6 +121,56 @@ def get_tmp_role():  # credit: 鄭詠鴻
     return view
 
 
+def confirm_download(url: str, private: bool):
+    yes_btn = discord.ui.Button(style=discord.ButtonStyle.primary, label="確認下載", emoji="✅")
+    no_btn = discord.ui.Button(style=discord.ButtonStyle.danger, label="取消下載", emoji="❌")
+
+    async def yes_btn_callback(interaction: discord.Interaction):
+        embed = discord.Embed(
+            title="確認下載",
+            description="已開始下載，請稍候。",
+            color=0x18bc1e)
+        await interaction.response.send_message(embed=embed, ephemeral=private)
+        result = await youtube_start_download(url)
+        if isinstance(result, discord.File):
+            try:
+                await interaction.edit_original_response(embed=None, file=result)
+            except Exception as e:
+                if "Request entity too large" in str(e):
+                    embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
+                    embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+                else:
+                    embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
+                    embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+                await interaction.edit_original_response(embed=embed)
+        elif isinstance(result, discord.Embed):
+            await interaction.edit_original_response(embed=result)
+    yes_btn.callback = yes_btn_callback
+
+    async def no_btn_callback(interaction: discord.Interaction):
+        embed = discord.Embed(
+            title="取消下載",
+            description="已取消下載。",
+            color=error_color)
+        await interaction.response.send_message(embed=embed)
+    no_btn.callback = no_btn_callback
+
+    view = discord.ui.View()
+    view.add_item(yes_btn)
+    view.add_item(no_btn)
+    return view
+
+
+async def youtube_start_download(url: str):
+    file_name = yt_download.get_id(url)
+    mp3_file_name = file_name + ".mp3"
+    mp3_file_path = base_dir + "\\ytdl\\" + mp3_file_name
+    await bot.change_presence(status=discord.Status.idle)
+    if os.path.exists(mp3_file_path) or main_dl(url, file_name, mp3_file_name) == "finished":
+        await bot.change_presence(status=discord.Status.online, activity=normal_activity)
+        return discord.File(mp3_file_path)
+
+
 @bot.event
 async def on_member_join(member):
     embed = discord.Embed(title="歡迎新成員！", description=f"歡迎{member.mention}加入**{member.guild}**！",
@@ -486,25 +536,31 @@ async def ytdl(ctx,
                連結: Option(str, "欲下載的YouTube影片網址", required=True),
                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     await ctx.defer()
-    file_name = yt_download.get_id(連結)
-    mp3_file_name = file_name + ".mp3"
-    mp3_file_path = base_dir + "\\ytdl\\" + mp3_file_name
-    await bot.change_presence(status=discord.Status.idle)
-    if os.path.exists(mp3_file_path) or main_dl(連結, file_name, mp3_file_name) == "finished":
-        await bot.change_presence(status=discord.Status.online, activity=normal_activity)
-        try:
-            await ctx.respond(file=discord.File(mp3_file_path), ephemeral=私人訊息)
-        except Exception as e:
-            if "Request entity too large" in str(e):
-                embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
-                embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-            else:
-                embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
-                embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-            await ctx.respond(embed=embed, ephemeral=私人訊息)
+    length = yt_download.get_length(連結)
+    if length > 512:
+        embed = discord.Embed(title="影片長度過長", description=f"影片長度(`{length}`秒)超過512秒，下載後可能無法成功上傳。是否仍要嘗試下載？",
+                              color=error_color)
+        await ctx.respond(embed=embed, ephemeral=私人訊息, view=confirm_download(連結, 私人訊息))
     else:
-        embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
+        file_name = yt_download.get_id(連結)
+        mp3_file_name = file_name + ".mp3"
+        mp3_file_path = base_dir + "\\ytdl\\" + mp3_file_name
+        await bot.change_presence(status=discord.Status.idle)
+        if os.path.exists(mp3_file_path) or main_dl(連結, file_name, mp3_file_name) == "finished":
+            await bot.change_presence(status=discord.Status.online, activity=normal_activity)
+            try:
+                await ctx.respond(file=discord.File(mp3_file_path), ephemeral=私人訊息)
+            except Exception as e:
+                if "Request entity too large" in str(e):
+                    embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
+                    embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+                else:
+                    embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
+                    embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+                await ctx.respond(embed=embed, ephemeral=私人訊息)
+        else:
+            embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
+            await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="rc",
