@@ -95,18 +95,46 @@ async def check_voice_channel():
                         return None
 
 
-def get_tmp_role():  # credit: 鄭詠鴻
-    btn = discord.ui.Button(style=discord.ButtonStyle.primary, label="取得臨時身分組", emoji="✨")
+# def get_tmp_role():  # credit: 鄭詠鴻
+#     btn = discord.ui.Button(style=discord.ButtonStyle.primary, label="取得臨時身分組", emoji="✨")
+#
+#     async def btn_callback(self, button, interaction: discord.Interaction):
+#         server = await bot.fetch_guild(857996539262402570)
+#         try:
+#             button.disabled = True
+#             await interaction.user.add_roles(discord.utils.get(server.roles, id=1083536792717885522))
+#             embed = discord.Embed(
+#                 title="取得臨時身分組成功！",
+#                 description="已經將你加入臨時身分組！你可以查看文字頻道的內容，但是不能參與對談。",
+#                 color=0x57c2ea)
+#             await interaction.response.edit_message(view=self)
+#             await interaction.response.send_message(embed=embed)
+#         except Exception as e:
+#             embed = discord.Embed(
+#                 title="取得臨時身分組失敗！",
+#                 description=f"請聯絡管理員。\n錯誤訊息：\n```{e}```",
+#                 color=error_color)
+#             embed.set_footer(text="聯絡管理員時，請提供錯誤訊息以做為參考。")
+#             await interaction.response.send_message(embed=embed)
+#     btn.callback = btn_callback
+#
+#     view = discord.ui.View()
+#     view.add_item(btn)
+#     return view
 
-    async def btn_callback(interaction: discord.Interaction):
+
+class GetTmpRole(discord.ui.View):
+    @discord.ui.button(label="取得臨時身分組", style=discord.ButtonStyle.primary, emoji="✨")
+    async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
         server = await bot.fetch_guild(857996539262402570)
         try:
+            button.disabled = True
             await interaction.user.add_roles(discord.utils.get(server.roles, id=1083536792717885522))
             embed = discord.Embed(
                 title="取得臨時身分組成功！",
                 description="已經將你加入臨時身分組！你可以查看文字頻道的內容，但是不能參與對談。",
                 color=0x57c2ea)
-            await interaction.response.send_message(embed=embed)
+            await interaction.response.edit_message(embed=embed, view=self)
         except Exception as e:
             embed = discord.Embed(
                 title="取得臨時身分組失敗！",
@@ -114,24 +142,67 @@ def get_tmp_role():  # credit: 鄭詠鴻
                 color=error_color)
             embed.set_footer(text="聯絡管理員時，請提供錯誤訊息以做為參考。")
             await interaction.response.send_message(embed=embed)
-    btn.callback = btn_callback
-
-    view = discord.ui.View()
-    view.add_item(btn)
-    return view
 
 
-def confirm_download(url: str, private: bool):
-    yes_btn = discord.ui.Button(style=discord.ButtonStyle.primary, label="確認下載", emoji="✅")
-    no_btn = discord.ui.Button(style=discord.ButtonStyle.danger, label="取消下載", emoji="❌")
+# def confirm_download(url: str, private: bool):
+#     yes_btn = discord.ui.Button(style=discord.ButtonStyle.primary, label="確認下載", emoji="✅")
+#     no_btn = discord.ui.Button(style=discord.ButtonStyle.danger, label="取消下載", emoji="❌")
+#
+#     async def yes_btn_callback(self, button, interaction: discord.Interaction):
+#         button.disabled = True
+#         embed = discord.Embed(
+#             title="確認下載",
+#             description="已開始下載，請稍候。",
+#             color=0x18bc1e)
+#         await interaction.response.edit_message(view=self)
+#         await interaction.response.send_message(embed=embed, ephemeral=private)
+#         result = await youtube_start_download(url)
+#         if isinstance(result, discord.File):
+#             try:
+#                 await interaction.edit_original_response(embed=None, file=result)
+#             except Exception as e:
+#                 if "Request entity too large" in str(e):
+#                     embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
+#                     embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+#                 else:
+#                     embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
+#                     embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+#                 await interaction.edit_original_response(embed=embed)
+#         elif isinstance(result, discord.Embed):
+#             await interaction.edit_original_response(embed=result)
+#     yes_btn.callback = yes_btn_callback
+#
+#     async def no_btn_callback(self, button, interaction: discord.Interaction):
+#         button.disabled = True
+#         embed = discord.Embed(
+#             title="取消下載",
+#             description="已取消下載。",
+#             color=error_color)
+#         await interaction.response.edit_message(view=self)
+#         await interaction.response.send_message(embed=embed)
+#     no_btn.callback = no_btn_callback
+#
+#     view = discord.ui.View()
+#     view.add_item(yes_btn)
+#     view.add_item(no_btn)
+#     return view
 
-    async def yes_btn_callback(interaction: discord.Interaction):
+
+class ConfirmDownload(discord.ui.View):
+    def __init__(self, url: str, private: bool):
+        super().__init__()
+        self.url = url
+        self.private = private
+
+    @discord.ui.button(style=discord.ButtonStyle.primary, label="確認下載", emoji="✅")
+    async def yes_btn(self, button: discord.ui.Button, interaction: discord.Interaction):
+        button.disabled = True
         embed = discord.Embed(
             title="確認下載",
             description="已開始下載，請稍候。",
             color=0x18bc1e)
-        await interaction.response.send_message(embed=embed, ephemeral=private)
-        result = await youtube_start_download(url)
+        await interaction.response.edit_message(embed=embed, view=None)
+        result = await youtube_start_download(self.url)
         if isinstance(result, discord.File):
             try:
                 await interaction.edit_original_response(embed=None, file=result)
@@ -145,20 +216,15 @@ def confirm_download(url: str, private: bool):
                 await interaction.edit_original_response(embed=embed)
         elif isinstance(result, discord.Embed):
             await interaction.edit_original_response(embed=result)
-    yes_btn.callback = yes_btn_callback
 
-    async def no_btn_callback(interaction: discord.Interaction):
+    @discord.ui.button(style=discord.ButtonStyle.danger, label="取消下載", emoji="❌")
+    async def no_btn(self, button: discord.ui.Button, interaction: discord.Interaction):
+        button.disabled = True
         embed = discord.Embed(
             title="取消下載",
             description="已取消下載。",
             color=error_color)
-        await interaction.response.send_message(embed=embed)
-    no_btn.callback = no_btn_callback
-
-    view = discord.ui.View()
-    view.add_item(yes_btn)
-    view.add_item(no_btn)
-    return view
+        await interaction.response.edit_message(embed=embed, view=None)
 
 
 async def youtube_start_download(url: str):
@@ -193,7 +259,7 @@ async def on_member_join(member):
     await new_member.send(embed=embed)
     embed = discord.Embed(
         title="取得臨時身分組", description="在取得正式身分組前，請點擊下方按鈕取得臨時身分組。", color=0x57c2ea)
-    await new_member.send(embed=embed, view=get_tmp_role())
+    await new_member.send(embed=embed, view=GetTmpRole())
 
 
 @bot.event
@@ -540,7 +606,8 @@ async def ytdl(ctx,
     if length > 512:
         embed = discord.Embed(title="影片長度過長", description=f"影片長度(`{length}`秒)超過512秒，下載後可能無法成功上傳。是否仍要嘗試下載？",
                               color=error_color)
-        await ctx.respond(embed=embed, ephemeral=私人訊息, view=confirm_download(連結, 私人訊息))
+        confirm_download = ConfirmDownload(url=連結, private=私人訊息)
+        await ctx.respond(embed=embed, ephemeral=私人訊息, view=confirm_download)
     else:
         file_name = yt_download.get_id(連結)
         mp3_file_name = file_name + ".mp3"
