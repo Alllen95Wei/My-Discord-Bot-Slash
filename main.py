@@ -189,10 +189,9 @@ class GetTmpRole(discord.ui.View):
 
 
 class ConfirmDownload(discord.ui.View):
-    def __init__(self, url: str, private: bool):
+    def __init__(self, url: str):
         super().__init__()
         self.url = url
-        self.private = private
 
     @discord.ui.button(style=discord.ButtonStyle.primary, label="確認下載", emoji="✅")
     async def yes_btn(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -606,7 +605,7 @@ async def ytdl(ctx,
     if length > 512:
         embed = discord.Embed(title="影片長度過長", description=f"影片長度(`{length}`秒)超過512秒，下載後可能無法成功上傳。是否仍要嘗試下載？",
                               color=error_color)
-        confirm_download = ConfirmDownload(url=連結, private=私人訊息)
+        confirm_download = ConfirmDownload(url=連結)
         await ctx.respond(embed=embed, ephemeral=私人訊息, view=confirm_download)
     else:
         file_name = yt_download.get_id(連結)
