@@ -199,7 +199,7 @@ class ConfirmDownload(discord.ui.View):
         embed = discord.Embed(
             title="確認下載",
             description="已開始下載，請稍候。",
-            color=0x18bc1e)
+            color=default_color)
         await interaction.response.edit_message(embed=embed, view=None)
         result = await youtube_start_download(self.url)
         if isinstance(result, discord.File):
@@ -603,29 +603,28 @@ async def ytdl(ctx,
     await ctx.defer()
     length = yt_download.get_length(連結)
     if length > 512:
-        embed = discord.Embed(title="影片長度過長", description=f"影片長度(`{length}`秒)超過512秒，下載後可能無法成功上傳。是否仍要嘗試下載？",
+        embed = discord.Embed(title="影片長度過長",
+                              description=f"影片長度(`{length}`秒)超過512秒，下載後可能無法成功上傳。是否仍要嘗試下載？",
                               color=error_color)
         confirm_download = ConfirmDownload(url=連結)
         await ctx.respond(embed=embed, ephemeral=私人訊息, view=confirm_download)
     else:
-        file_name = yt_download.get_id(連結)
-        mp3_file_name = file_name + ".mp3"
-        mp3_file_path = base_dir + "\\ytdl\\" + mp3_file_name
-        await bot.change_presence(status=discord.Status.idle)
-        if os.path.exists(mp3_file_path) or main_dl(連結, file_name, mp3_file_name) == "finished":
-            await bot.change_presence(status=discord.Status.online, activity=normal_activity)
-            try:
-                await ctx.respond(file=discord.File(mp3_file_path), ephemeral=私人訊息)
-            except Exception as e:
-                if "Request entity too large" in str(e):
-                    embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
-                    embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-                else:
-                    embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
-                    embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-                await ctx.respond(embed=embed, ephemeral=私人訊息)
-        else:
-            embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
+        embed = discord.Embed(title="確認下載",
+                              description="已開始下載，請稍候。",
+                              color=default_color)
+        embed.set_footer(text="下載所需時間依影片長度及網路狀況而定。")
+        start_dl_message = await ctx.respond(embed=embed, ephemeral=私人訊息)
+        try:
+            await start_dl_message.delete()
+            await ctx.respond(file=await youtube_start_download(連結), ephemeral=私人訊息)
+        except Exception as e:
+            if "Request entity too large" in str(e):
+                embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
+                embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+            else:
+                embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
+                embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+            await start_dl_message.delete()
             await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
