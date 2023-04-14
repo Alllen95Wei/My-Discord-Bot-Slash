@@ -22,6 +22,7 @@ import youtube_download as yt_download
 import detect_pc_status
 import update as upd
 import user_exp
+from read_RPC import get_RPC_context
 
 # 機器人
 intents = discord.Intents.all()
@@ -32,7 +33,7 @@ default_color = 0x5FE1EA
 error_color = 0xF1411C
 exp_enabled = True
 now_tz = zoneinfo.ZoneInfo("Asia/Taipei")
-normal_activity = discord.Activity(name="斜線指令 參戰！", type=discord.ActivityType.playing)
+normal_activity = discord.Activity(name=get_RPC_context(), type=discord.ActivityType.playing)
 # 載入TOKEN
 load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
 TOKEN = str(os.getenv("TOKEN"))
