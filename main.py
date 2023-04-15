@@ -15,6 +15,8 @@ from shlex import split
 from subprocess import run
 from platform import system
 from PIL import ImageGrab
+import logging
+from colorlog import ColoredFormatter
 
 import check_folder_size
 from youtube_to_mp3 import main_dl
@@ -27,7 +29,7 @@ from read_RPC import get_RPC_context
 # 機器人
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, help_command=None)
-# 常用變數
+# 常用物件、變數
 base_dir = os.path.abspath(os.path.dirname(__file__))
 default_color = 0x5FE1EA
 error_color = 0xF1411C
@@ -37,6 +39,33 @@ normal_activity = discord.Activity(name=get_RPC_context(), type=discord.Activity
 # 載入TOKEN
 load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
 TOKEN = str(os.getenv("TOKEN"))
+
+
+def setup_logger() -> logging.Logger:
+    formatter = ColoredFormatter(
+        fmt="%(white)s[%(asctime)s] %(log_color)s%(levelname)-8s%(reset)s %(blue)s%(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        reset=True,
+        log_colors={
+            "DEBUG": "cyan",
+            "INFO": "green",
+            "WARNING": "yellow",
+            "ERROR": "red",
+            "CRITICAL": "red",
+        },
+    )
+
+    logger = logging.getLogger()
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.DEBUG)
+
+    return logger
+
+
+# 建立logger
+real_logger = setup_logger()
 
 
 @tasks.loop(seconds=10)
@@ -57,6 +86,8 @@ async def give_voice_exp():  # 給予語音經驗
                         if len(active_human_members) > 1:  # 若語音頻道人數大於1
                             user_exp.add_exp(member.id, "voice", 1)
                             if user_exp.level_calc(member.id, "voice"):
+                                real_logger.info(f"等級提升：{member.name} 語音等級"
+                                                 f"達到 {user_exp.get_level(member.id, 'voice')} 等")
                                 embed = discord.Embed(title="等級提升",
                                                       description=f":tada:恭喜 <@{member.id}> *語音*等級升級到 "
                                                                   f"**{user_exp.get_level(member.id, 'voice')}** 等！",
@@ -72,12 +103,12 @@ async def check_voice_channel():
         for channel in server.channels:
             if channel.type == discord.ChannelType.voice:
                 voice_channel_lists.append(channel)
-                print(server.name + "/" + channel.name)
+                real_logger.debug(f"找到語音頻道：{server.name}/{channel.name}")
                 members = channel.members
                 # msg = ""
                 # 列出所有語音頻道的成員
                 for member in members:
-                    print("   ⌊" + member.name)
+                    real_logger.debug(f"   ⌊{member.name}")
                     if member == bot.get_user(885723595626676264) or member == bot.get_user(657519721138094080):
                         # 若找到Allen Music Bot或Allen Why，則嘗試加入該語音頻道
                         try:
@@ -127,16 +158,20 @@ async def check_voice_channel():
 class GetTmpRole(discord.ui.View):
     @discord.ui.button(label="取得臨時身分組", style=discord.ButtonStyle.primary, emoji="✨")
     async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
+        real_logger.debug(f"{interaction.user.name} 按下了「取得臨時身分組」按鈕")
         server = await bot.fetch_guild(857996539262402570)
         try:
             button.disabled = True
             await interaction.user.add_roles(discord.utils.get(server.roles, id=1083536792717885522))
+            real_logger.debug(f"成功將 {interaction.user.name} 加入臨時身分組")
             embed = discord.Embed(
                 title="取得臨時身分組成功！",
                 description="已經將你加入臨時身分組！你可以查看文字頻道的內容，但是不能參與對談。",
                 color=0x57c2ea)
             await interaction.response.edit_message(embed=embed, view=self)
         except Exception as e:
+            real_logger.error(f"將 {interaction.user.name} 加入臨時身分組時發生錯誤")
+            real_logger.error(e)
             embed = discord.Embed(
                 title="取得臨時身分組失敗！",
                 description=f"請聯絡管理員。\n錯誤訊息：\n```{e}```",
@@ -314,9 +349,9 @@ async def on_member_remove(member):
 
 @bot.event
 async def on_ready():
-    print("機器人準備完成！")
-    print(f"PING值：{round(bot.latency * 1000)}ms")
-    print(f"登入身分：{bot.user.name}#{bot.user.discriminator}")
+    real_logger.info("機器人準備完成！")
+    real_logger.info(f"PING值：{round(bot.latency * 1000)}ms")
+    real_logger.info(f"登入身分：{bot.user.name}#{bot.user.discriminator}")
     await bot.change_presence(activity=normal_activity, status=discord.Status.online)
     await check_voice_channel()
     for guild in bot.guilds:
@@ -324,7 +359,7 @@ async def on_ready():
             member_join_date = member.joined_at.astimezone(tz=now_tz)
             join_at_list = [member_join_date.year, member_join_date.month, member_join_date.day,
                             member_join_date.hour, member_join_date.minute, member_join_date.second]
-            print(f"{member.name}: {join_at_list}")
+            real_logger.debug(f"{member.name}: {join_at_list}")
             user_exp.set_join_date(member.id, join_at_list)
     await give_voice_exp.start()
 
@@ -791,6 +826,11 @@ async def user_info_require_user(ctx, user: discord.Member):
 
 
 @bot.event
+async def on_application_command(ctx):
+    real_logger.info(f"{ctx.author} 執行了斜線指令 \"{ctx.command.name}\"")
+
+
+@bot.event
 async def on_message(message):
     msg_in = message.content
     exclude_channel = [1035754607286169631, 1035754607286169631, 891665312028713001]
@@ -820,6 +860,8 @@ async def on_message(message):
             user_exp.add_exp(message.author.id, "text", 1)
         user_exp.set_last_active_time(message.author.id, time.time())
         if user_exp.level_calc(message.author.id, "text"):
+            real_logger.info(f"等級提升：{message.author.name} 文字等級"
+                             f"達到 {user_exp.get_level(message.author.id, 'text')} 等")
             embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
                                   f"**{user_exp.get_level(message.author.id, 'text')}** 等！",
                                   color=default_color)
