@@ -674,7 +674,7 @@ async def rc(ctx,
         if isinstance(msg, int):
             embed = discord.Embed(title="已加入頻道", description=f"已經自動加入了 <#{msg}>！", color=default_color)
         elif isinstance(msg, str):
-            embed = discord.Embed(title="錯誤", description="發生錯誤：`" + msg + "`", color=error_color)
+            embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{msg}`", color=error_color)
         elif msg is None:
             embed = discord.Embed(title="錯誤",
                                   description="找不到<@885723595626676264>及<@657519721138094080>在哪個頻道。",
@@ -686,7 +686,7 @@ async def rc(ctx,
             await 頻道.guild.change_voice_state(channel=頻道, self_mute=True, self_deaf=True)
             embed = discord.Embed(title="已加入頻道", description=f"已經加入了 <#{頻道.id}>！", color=default_color)
         except Exception as e:
-            embed = discord.Embed(title="錯誤", description="發生錯誤：`" + str(e) + "`", color=error_color)
+            embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
@@ -700,7 +700,7 @@ async def dc(ctx,
         if str(e) == "'NoneType' object has no attribute 'disconnect'":
             embed = discord.Embed(title="錯誤", description="目前沒有連接到任何語音頻道。", color=error_color)
         else:
-            embed = discord.Embed(title="錯誤", description="發生錯誤：`" + str(e) + "`", color=error_color)
+            embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
@@ -749,7 +749,7 @@ async def screenshot(ctx,
             embed = discord.Embed(title="截圖", color=default_color)
             await ctx.respond(embed=embed, file=file, ephemeral=私人訊息)
         except Exception as e:
-            embed = discord.Embed(title="錯誤", description="發生錯誤：`" + str(e) + "`", color=error_color)
+            embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
             await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
