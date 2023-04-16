@@ -69,7 +69,7 @@ real_logger = setup_logger()
 
 
 @tasks.loop(seconds=10)
-async def give_voice_exp():  # 給予語音經驗
+async def give_voice_exp() -> None:  # 給予語音經驗
     voice_channel_lists = []
     exclude_channel = [888707777659289660, 1076702101964599337]
     for server in bot.guilds:
@@ -262,7 +262,7 @@ class ConfirmDownload(discord.ui.View):
         await interaction.response.edit_message(embed=embed, view=None)
 
 
-async def youtube_start_download(url: str):
+async def youtube_start_download(url: str) -> discord.File:
     file_name = yt_download.get_id(url)
     mp3_file_name = file_name + ".mp3"
     mp3_file_path = base_dir + "\\ytdl\\" + mp3_file_name
