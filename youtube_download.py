@@ -1,9 +1,10 @@
 def youtube_download(url, file_name):
     import yt_dlp as youtube_dl
+    import os
 
     ydl_opts = {
         'format': 'bestaudio',
-        'outtmpl': "\\ytdl\\" + file_name,
+        'outtmpl': os.path.join("ytdl", file_name),
         'restrictfilenames': True,
         'noplaylist': True,
         'nocheckcertificate': True,

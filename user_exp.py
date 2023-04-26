@@ -4,8 +4,7 @@ import datetime
 
 
 def get_raw_info(user_id):
-    folder = os.path.abspath(os.path.dirname(__file__)) + "\\user_data\\"
-    file = folder + str(user_id) + ".json"
+    file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", str(user_id) + ".json")
     if os.path.exists(file):
         with open(file, "r") as f:
             user_info = json.loads(f.read())
@@ -24,8 +23,7 @@ def get_raw_info(user_id):
 
 
 def write_raw_info(user_id, data):
-    folder = os.path.abspath(os.path.dirname(__file__)) + "\\user_data\\"
-    file = folder + str(user_id) + ".json"
+    file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", str(user_id) + ".json")
     with open(file, "w") as f:
         json.dump(data, f)
 
