@@ -46,16 +46,18 @@ class CreateLogger:
         super().__init__()
         self.c_logger = self.color_logger()
         self.f_logger = self.file_logger()
+        logging.addLevelName(25, "ANONYMOUS")
 
     @staticmethod
     def color_logger():
         formatter = ColoredFormatter(
-            fmt="%(white)s[%(asctime)s] %(log_color)s%(levelname)-8s%(reset)s %(blue)s%(message)s",
+            fmt="%(white)s[%(asctime)s] %(log_color)s%(levelname)-10s%(reset)s %(blue)s%(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
             reset=True,
             log_colors={
                 "DEBUG": "cyan",
                 "INFO": "green",
+                "ANONYMOUS": "purple",
                 "WARNING": "yellow",
                 "ERROR": "red",
                 "CRITICAL": "red",
@@ -103,6 +105,10 @@ class CreateLogger:
     def critical(self, message: str):
         self.c_logger.critical(message)
         self.f_logger.critical(message)
+
+    def anonymous(self, message: str):
+        self.c_logger.log(25, message)
+        self.f_logger.log(25, message)
 
 
 # 建立logger
@@ -783,7 +789,7 @@ async def register(ctx,
         json_assistant.set_anonymous_identity(ctx.author.id, new_identity)
         embed = discord.Embed(title="建立身分成功！", description="你的匿名身分已建立成功！", color=default_color)
         embed.add_field(name="你的身分", value=f"{身分} #{new_identity_id}", inline=False)
-        real_logger.info(f"{ctx.author} 建立了匿名身分 {身分} #{new_identity_id}。")
+        real_logger.anonymous(f"{ctx.author} 建立了匿名身分 {身分} #{new_identity_id}。")
     await ctx.respond(embed=embed, ephemeral=True)
 
 
@@ -812,8 +818,8 @@ async def send_anonymous_msg(ctx,
             msg_embed.add_field(name="訊息內容", value=訊息)
             msg_embed.set_footer(text="如果不想收到匿名訊息，可以使用/anonymous allow指令來調整接受與否。")
             await 對象.send(embed=msg_embed)
-            real_logger.info(f"{user_identity_str} 傳送了匿名訊息給 {對象.name}。")
-            real_logger.info(f"訊息內容：{訊息}")
+            real_logger.anonymous(f"{user_identity_str} 傳送了匿名訊息給 {對象.name}。")
+            real_logger.anonymous(f"訊息內容：{訊息}")
         except discord.errors.HTTPException:
             embed = discord.Embed(title="錯誤", description="對方不允許陌生人傳送訊息。", color=error_color)
         else:
@@ -832,10 +838,10 @@ async def allow_anonymous_msg(ctx,
         await ctx.respond(embed=embed, ephemeral=True)
         return
     if 允許:
-        real_logger.info(f"{ctx.author} 設定為 允許 接收匿名訊息。")
+        real_logger.anonymous(f"{ctx.author} 設定為 允許 接收匿名訊息。")
         embed = discord.Embed(title="設定成功！", description="你已**允許**接收匿名訊息。", color=default_color)
     else:
-        real_logger.info(f"{ctx.author} 設定為 拒絕 接收匿名訊息。")
+        real_logger.anonymous(f"{ctx.author} 設定為 拒絕 接收匿名訊息。")
         embed = discord.Embed(title="設定成功！", description="你已**拒絕**接收匿名訊息。", color=default_color)
     await ctx.respond(embed=embed, ephemeral=True)
 
