@@ -23,7 +23,7 @@ from youtube_to_mp3 import main_dl
 import youtube_download as yt_download
 import detect_pc_status
 import update as upd
-import user_exp
+import json_assistant
 from read_RPC import get_RPC_context
 
 # 機器人
@@ -41,31 +41,72 @@ load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
 TOKEN = str(os.getenv("TOKEN"))
 
 
-def setup_logger() -> logging.Logger:
-    formatter = ColoredFormatter(
-        fmt="%(white)s[%(asctime)s] %(log_color)s%(levelname)-8s%(reset)s %(blue)s%(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-        reset=True,
-        log_colors={
-            "DEBUG": "cyan",
-            "INFO": "green",
-            "WARNING": "yellow",
-            "ERROR": "red",
-            "CRITICAL": "red",
-        },
-    )
+class CreateLogger:
+    def __init__(self):
+        super().__init__()
+        self.c_logger = self.color_logger()
+        self.f_logger = self.file_logger()
 
-    logger = logging.getLogger()
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
+    @staticmethod
+    def color_logger():
+        formatter = ColoredFormatter(
+            fmt="%(white)s[%(asctime)s] %(log_color)s%(levelname)-8s%(reset)s %(blue)s%(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+            reset=True,
+            log_colors={
+                "DEBUG": "cyan",
+                "INFO": "green",
+                "WARNING": "yellow",
+                "ERROR": "red",
+                "CRITICAL": "red",
+            },
+        )
 
-    return logger
+        logger = logging.getLogger()
+        handler = logging.StreamHandler()
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
+
+        return logger
+
+    @staticmethod
+    def file_logger():
+        formatter = logging.Formatter(
+            fmt="[%(asctime)s] %(levelname)-8s %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S")
+
+        logger = logging.getLogger()
+        handler = logging.FileHandler("logs.log", encoding="utf-8")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
+
+        return logger
+
+    def debug(self, message: str):
+        self.c_logger.debug(message)
+        self.f_logger.debug(message)
+
+    def info(self, message: str):
+        self.c_logger.info(message)
+        self.f_logger.info(message)
+
+    def warning(self, message: str):
+        self.c_logger.warning(message)
+        self.f_logger.warning(message)
+
+    def error(self, message: str):
+        self.c_logger.error(message)
+        self.f_logger.error(message)
+
+    def critical(self, message: str):
+        self.c_logger.critical(message)
+        self.f_logger.critical(message)
 
 
 # 建立logger
-real_logger = setup_logger()
+real_logger = CreateLogger()
 
 
 @tasks.loop(seconds=10)
@@ -84,13 +125,13 @@ async def give_voice_exp() -> None:  # 給予語音經驗
                 for member in active_human_members:
                     if exp_enabled:
                         if len(active_human_members) > 1:  # 若語音頻道人數大於1
-                            user_exp.add_exp(member.id, "voice", 1)
-                            if user_exp.level_calc(member.id, "voice"):
+                            json_assistant.add_exp(member.id, "voice", 1)
+                            if json_assistant.level_calc(member.id, "voice"):
                                 real_logger.info(f"等級提升：{member.name} 語音等級"
-                                                 f"達到 {user_exp.get_level(member.id, 'voice')} 等")
+                                                 f"達到 {json_assistant.get_level(member.id, 'voice')} 等")
                                 embed = discord.Embed(title="等級提升",
                                                       description=f":tada:恭喜 <@{member.id}> *語音*等級升級到 "
-                                                                  f"**{user_exp.get_level(member.id, 'voice')}** 等！",
+                                                                  f"**{json_assistant.get_level(member.id, 'voice')}** 等！",
                                                       color=default_color)
                                 embed.set_thumbnail(url=member.display_avatar)
                                 await member.send(embed=embed)
@@ -171,7 +212,7 @@ class GetTmpRole(discord.ui.View):
             await interaction.response.edit_message(embed=embed, view=self)
         except Exception as e:
             real_logger.error(f"將 {interaction.user.name} 加入臨時身分組時發生錯誤")
-            real_logger.error(e)
+            real_logger.error(str(e))
             embed = discord.Embed(
                 title="取得臨時身分組失敗！",
                 description=f"請聯絡管理員。\n錯誤訊息：\n```{e}```",
@@ -195,7 +236,7 @@ class GetTmpRole(discord.ui.View):
 #         result = await youtube_start_download(url)
 #         if isinstance(result, discord.File):
 #             try:
-#                 await interaction.edit_original_response(embed=None, file=result)
+#                 await interaction.edit_original_response(embed=None, anonymous_file=result)
 #             except Exception as e:
 #                 if "Request entity too large" in str(e):
 #                     embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
@@ -280,7 +321,7 @@ async def on_member_join(member):
     embed.set_footer(text=f"於 {join_date} 加入")
     embed.set_thumbnail(url=member.display_avatar)
     await member.guild.system_channel.send(embed=embed)
-    user_exp.set_join_date(member.id, join_date)
+    json_assistant.set_join_date(member.id, join_date)
     new_member = await bot.fetch_user(member.id)
     embed = discord.Embed(
         title=f"歡迎加入 {member.guild.name} ！",
@@ -360,7 +401,7 @@ async def on_ready():
             join_at_list = [member_join_date.year, member_join_date.month, member_join_date.day,
                             member_join_date.hour, member_join_date.minute, member_join_date.second]
             real_logger.debug(f"{member.name}: {join_at_list}")
-            user_exp.set_join_date(member.id, join_at_list)
+            json_assistant.set_join_date(member.id, join_at_list)
     await give_voice_exp.start()
 
 
@@ -479,19 +520,19 @@ async def show(ctx,
                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if 使用者 is None:
         使用者 = ctx.author
-    text_exp = user_exp.get_exp(使用者.id, "text")
-    text_level = user_exp.get_level(使用者.id, "text")
-    voice_exp = user_exp.get_exp(使用者.id, "voice")
-    voice_level = user_exp.get_level(使用者.id, "voice")
+    text_exp = json_assistant.get_exp(使用者.id, "text")
+    text_level = json_assistant.get_level(使用者.id, "text")
+    voice_exp = json_assistant.get_exp(使用者.id, "voice")
+    voice_level = json_assistant.get_level(使用者.id, "voice")
     avatar = 使用者.display_avatar
     embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}的經驗值", color=default_color)
     embed.add_field(name="文字等級", value=f"{text_level}", inline=False)
     embed.add_field(name="文字經驗值", value=f"{text_exp}", inline=False)
     embed.add_field(name="語音等級", value=f"{voice_level}", inline=False)
     embed.add_field(name="語音經驗值", value=f"{voice_exp}", inline=False)
-    date = user_exp.get_join_date_in_str(使用者.id)
+    date = json_assistant.get_join_date_in_str(使用者.id)
     embed.add_field(name="加入時間", value=f"{date}", inline=False)
-    joined_date = user_exp.joined_time(使用者.id)
+    joined_date = json_assistant.joined_time(使用者.id)
     embed.add_field(name="已加入", value=f"{joined_date}", inline=False)
     embed.set_thumbnail(url=avatar)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
@@ -503,13 +544,13 @@ async def require(ctx,
                   私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if 使用者 is None:
         使用者 = ctx.author
-    text_lvl = user_exp.get_level(使用者.id, "text")
-    text_require = user_exp.upgrade_exp_needed(使用者.id, "text")
-    text_now = user_exp.get_exp(使用者.id, "text")
+    text_lvl = json_assistant.get_level(使用者.id, "text")
+    text_require = json_assistant.upgrade_exp_needed(使用者.id, "text")
+    text_now = json_assistant.get_exp(使用者.id, "text")
     text_percent = (round(text_now / text_require * 1000)) / 10
-    voice_lvl = user_exp.get_level(使用者.id, "voice")
-    voice_require = user_exp.upgrade_exp_needed(使用者.id, "voice")
-    voice_now = user_exp.get_exp(使用者.id, "voice")
+    voice_lvl = json_assistant.get_level(使用者.id, "voice")
+    voice_require = json_assistant.upgrade_exp_needed(使用者.id, "voice")
+    voice_now = json_assistant.get_exp(使用者.id, "voice")
     voice_percent = (round(voice_now / voice_require * 1000)) / 10
     embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}距離升級還差...", color=default_color)
     embed.add_field(name=f"文字等級：{text_lvl}",
@@ -555,9 +596,9 @@ async def edit_exp(ctx,
                    經驗值: Option(int, "要編輯的經驗值數量，若要扣除則輸入負值", required=True),
                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if ctx.author == bot.get_user(657519721138094080):
-        before_exp = user_exp.get_exp(使用者.id, 類型)
-        user_exp.add_exp(使用者.id, 類型, 經驗值)
-        after_exp = user_exp.get_exp(使用者.id, 類型)
+        before_exp = json_assistant.get_exp(使用者.id, 類型)
+        json_assistant.add_exp(使用者.id, 類型, 經驗值)
+        after_exp = json_assistant.get_exp(使用者.id, 類型)
         embed = discord.Embed(title="編輯經驗值", description=f"已編輯{使用者.mention}的**{類型}**經驗值。",
                               color=default_color)
         embed.add_field(name="編輯前", value=before_exp, inline=True)
@@ -581,9 +622,9 @@ async def edit_lvl(ctx,
                    等級: Option(int, "要編輯的等級數量，若要扣除則輸入負值", required=True),
                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if ctx.author == bot.get_user(657519721138094080):
-        before_lvl = user_exp.get_level(使用者.id, 類型)
-        user_exp.add_level(使用者.id, 類型, 等級)
-        after_lvl = user_exp.get_level(使用者.id, 類型)
+        before_lvl = json_assistant.get_level(使用者.id, 類型)
+        json_assistant.add_level(使用者.id, 類型, 等級)
+        after_lvl = json_assistant.get_level(使用者.id, 類型)
         embed = discord.Embed(title="編輯經驗值", description=f"已編輯{使用者.mention}的**{類型}**等級。",
                               color=default_color)
         embed.add_field(name="編輯前", value=before_lvl, inline=True)
@@ -721,6 +762,78 @@ async def ping(ctx,
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
+anonymous = bot.create_group(name="anonymous", description="匿名訊息系統")
+identity_choices = ["貓", "狗", "天竺鼠", "綠鬣蜥", "駱駝", "樹懶", "狐狸", "鯊魚", "熊", "狼", "獅子", "熊貓", "狐猴",
+                    "猴子", "火星人", "機器人"]
+
+
+@anonymous.command(name="register", description="建立新的匿名身分。")
+async def register(ctx,
+                   身分: Option(str, choices=identity_choices, description="選擇想要的動物身分", required=True)):
+    try:
+        user_identity = json_assistant.get_anonymous_identity(ctx.author.id)
+        embed = discord.Embed(title="錯誤", description="你已建立過匿名身分，無法再建立其他匿名身分。", color=error_color)
+        embed.add_field(name="你目前的匿名身分", value=f"{user_identity[0]} #{user_identity[1]}")
+    except KeyError:
+        new_identity_id = ""
+        for i in range(4):
+            new_identity_id += str(randint(0, 9))
+        new_identity = [身分, new_identity_id]
+        json_assistant.set_anonymous_identity(ctx.author.id, new_identity)
+        embed = discord.Embed(title="建立身分成功！", description="你的匿名身分已建立成功！", color=default_color)
+        embed.add_field(name="你的身分", value=f"{身分} #{new_identity_id}", inline=False)
+    await ctx.respond(embed=embed, ephemeral=True)
+
+
+@anonymous.command(name="send", description="透過匿名身分傳送訊息。")
+async def send_anonymous_msg(ctx,
+                             對象: Option(discord.User, "欲傳送匿名訊息的對象", required=True),
+                             訊息: Option(str, "想傳送的訊息內容", required=True)):
+    try:
+        last_msg_sent_time = json_assistant.get_anonymous_last_msg_sent_time(ctx.author.id)
+    except TypeError:
+        embed = discord.Embed(title="錯誤", description="你尚未建立匿名身分，請先建立匿名身分。", color=error_color)
+        await ctx.respond(embed=embed, ephemeral=True)
+        return
+    time_delta = time.time() - last_msg_sent_time
+    if time_delta < 60:
+        embed = discord.Embed(title="錯誤", description=f"你必須等待`{round(60 - time_delta)}`秒才能再次傳送匿名訊息。",
+                              color=error_color)
+    elif not json_assistant.get_allow_anonymous(對象.id):
+        embed = discord.Embed(title="錯誤", description="對方不允許接收匿名訊息。", color=error_color)
+    else:
+        try:
+            user_identity = json_assistant.get_anonymous_identity(ctx.author.id)
+            user_identity_str = f"{user_identity[0]} #{user_identity[1]}"
+            msg_embed = discord.Embed(title="匿名訊息", description=f"**{user_identity_str}** 傳送了匿名訊息給你。",
+                                      color=default_color)
+            msg_embed.add_field(name="訊息內容", value=訊息)
+            msg_embed.set_footer(text="如果不想收到匿名訊息，可以使用/anonymous allow指令來調整接受與否。")
+            await 對象.send(embed=msg_embed)
+        except discord.errors.HTTPException:
+            embed = discord.Embed(title="錯誤", description="對方不允許陌生人傳送訊息。", color=error_color)
+        else:
+            json_assistant.set_anonymous_last_msg_sent_time(ctx.author.id)
+            embed = discord.Embed(title="傳送成功！", description="匿名訊息已傳送成功！", color=default_color)
+    await ctx.respond(embed=embed, ephemeral=True)
+
+
+@anonymous.command(name="allow", description="允許或拒絕接收匿名訊息。")
+async def allow_anonymous_msg(ctx,
+                              允許: Option(bool, "是否允許接收匿名訊息", required=True)):
+    try:
+        json_assistant.set_allow_anonymous(ctx.author.id, 允許)
+    except TypeError:
+        embed = discord.Embed(title="錯誤", description="你尚未建立匿名身分，請先建立匿名身分。", color=error_color)
+        await ctx.respond(embed=embed, ephemeral=True)
+        return
+    if 允許:
+        embed = discord.Embed(title="設定成功！", description="你已**允許**接收匿名訊息。", color=default_color)
+    else:
+        embed = discord.Embed(title="設定成功！", description="你已**拒絕**接收匿名訊息。", color=default_color)
+    await ctx.respond(embed=embed, ephemeral=True)
+
+
 @bot.slash_command(name="restart", description="重啟機器人。")
 async def restart(ctx,
                   私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
@@ -846,24 +959,24 @@ async def on_message(message):
     if message.channel.id in exclude_channel:
         return
     if exp_enabled:
-        time_delta = time.time() - user_exp.get_last_active_time(message.author.id)
+        time_delta = time.time() - json_assistant.get_last_active_time(message.author.id)
         if time_delta < 300:
             return
         if "Direct Message" in str(message.channel):
             return
         if not message.author.bot and isinstance(msg_in, str):
             if len(msg_in) <= 15:
-                user_exp.add_exp(message.author.id, "text", len(msg_in))
+                json_assistant.add_exp(message.author.id, "text", len(msg_in))
             else:
-                user_exp.add_exp(message.author.id, "text", 15)
+                json_assistant.add_exp(message.author.id, "text", 15)
         elif not message.author.bot and isinstance(msg_in, discord.File):
-            user_exp.add_exp(message.author.id, "text", 1)
-        user_exp.set_last_active_time(message.author.id, time.time())
-        if user_exp.level_calc(message.author.id, "text"):
+            json_assistant.add_exp(message.author.id, "text", 1)
+        json_assistant.set_last_active_time(message.author.id, time.time())
+        if json_assistant.level_calc(message.author.id, "text"):
             real_logger.info(f"等級提升：{message.author.name} 文字等級"
-                             f"達到 {user_exp.get_level(message.author.id, 'text')} 等")
+                             f"達到 {json_assistant.get_level(message.author.id, 'text')} 等")
             embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
-                                  f"**{user_exp.get_level(message.author.id, 'text')}** 等！",
+                                  f"**{json_assistant.get_level(message.author.id, 'text')}** 等！",
                                   color=default_color)
             embed.set_thumbnail(url=message.author.display_avatar)
             await message.channel.send(embed=embed)

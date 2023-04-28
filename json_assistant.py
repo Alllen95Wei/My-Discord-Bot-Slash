@@ -1,6 +1,7 @@
 import json
 import os
 import datetime
+import time as t
 
 
 def get_raw_info(user_id):
@@ -25,15 +26,7 @@ def get_raw_info(user_id):
 def write_raw_info(user_id, data):
     file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", str(user_id) + ".json")
     with open(file, "w") as f:
-        json.dump(data, f)
-
-
-def get_specific_info(user_id, info_name):
-    user_info = get_raw_info(user_id)
-    if info_name:
-        return user_info[info_name]
-    else:
-        return user_info
+        json.dump(data, f, indent=2)
 
 
 def get_exp(user_id, exp_type):
@@ -145,3 +138,75 @@ def set_last_active_time(user_id, time):
     user_info = get_raw_info(user_id)
     user_info["last_active_time"] = time
     write_raw_info(user_id, user_info)
+
+
+anonymous_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", "anonymous.json")
+
+
+def get_anonymous_raw_data():
+    global anonymous_file
+    with open(anonymous_file, "r") as f:
+        data = json.load(f)
+    return data
+
+
+def write_anonymous_raw_data(data):
+    global anonymous_file
+    with open(anonymous_file, "w") as f:
+        json.dump(data, f, indent=2)
+
+
+def get_anonymous_identity(user_id):
+    raw_data = get_anonymous_raw_data()
+    try:
+        identity = raw_data[str(user_id)]["identity"]
+        return identity
+    except KeyError:
+        raise KeyError("User not found")
+
+
+def set_anonymous_identity(user_id, identity: list[2]):
+    raw_data = get_anonymous_raw_data()
+    print(raw_data)
+    raw_data[str(user_id)] = {"identity": identity}
+    write_anonymous_raw_data(raw_data)
+
+
+def get_anonymous_last_msg_sent_time(user_id):
+    raw_data = get_anonymous_raw_data()
+    try:
+        user = raw_data[str(user_id)]
+    except KeyError:
+        raise KeyError("User not found")
+    try:
+        last_time = user["last_message_sent"]
+    except KeyError:
+        last_time = 0
+    return last_time
+
+
+def set_anonymous_last_msg_sent_time(user_id, last_time=t.time()):
+    raw_data = get_anonymous_raw_data()
+    try:
+        raw_data[str(user_id)]["last_message_sent"] = last_time
+    except KeyError:
+        raise KeyError("User not found")
+    write_anonymous_raw_data(raw_data)
+
+
+def get_allow_anonymous(user_id):
+    raw_data = get_anonymous_raw_data()
+    try:
+        allow = raw_data[str(user_id)]["allow_anonymous"]
+    except KeyError:
+        allow = True
+    return allow
+
+
+def set_allow_anonymous(user_id, allow: bool):
+    raw_data = get_anonymous_raw_data()
+    try:
+        raw_data[str(user_id)]["allow_anonymous"] = allow
+    except KeyError:
+        raise KeyError("User not found")
+    write_anonymous_raw_data(raw_data)
