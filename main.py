@@ -125,7 +125,7 @@ async def give_voice_exp() -> None:  # 給予語音經驗
                 for member in active_human_members:
                     if exp_enabled:
                         if len(active_human_members) > 1:  # 若語音頻道人數大於1
-                            json_assistant.add_exp(member.id, "voice", 1)
+                            json_assistant.add_exp(member.id, "voice", 1 + len(active_human_members) / 10)
                             if json_assistant.level_calc(member.id, "voice"):
                                 real_logger.info(f"等級提升：{member.name} 語音等級"
                                                  f"達到 {json_assistant.get_level(member.id, 'voice')} 等")
@@ -571,7 +571,7 @@ async def about(ctx):
     embed = discord.Embed(title="關於經驗值", description="經驗值分為**文字**及**語音**，分別以下列方式計算：",
                           color=default_color)
     embed.add_field(name="文字", value="以訊息長度計算，1字1點。", inline=False)
-    embed.add_field(name="語音", value="以待在語音頻道的時長計算，10秒1點。", inline=False)
+    embed.add_field(name="語音", value="以待在語音頻道的時長計算，10秒可獲得(1 + 有效人數÷10)點。", inline=False)
     embed.add_field(name="其它限制", value="文字：每則訊息**最多15點**。每個使用者有1則訊息被計入經驗值後，需要**5分鐘冷卻時間**才會繼續計算。\n"
                     "語音：在同一頻道的**真人成員**必須至少2位。若使用者處於**靜音**或**拒聽**狀態，則**無法獲得經驗值**。",
                     inline=False)
