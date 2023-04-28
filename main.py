@@ -791,7 +791,7 @@ async def send_anonymous_msg(ctx,
                              訊息: Option(str, "想傳送的訊息內容", required=True)):
     try:
         last_msg_sent_time = json_assistant.get_anonymous_last_msg_sent_time(ctx.author.id)
-    except TypeError:
+    except KeyError:
         embed = discord.Embed(title="錯誤", description="你尚未建立匿名身分，請先建立匿名身分。", color=error_color)
         await ctx.respond(embed=embed, ephemeral=True)
         return
@@ -823,7 +823,7 @@ async def allow_anonymous_msg(ctx,
                               允許: Option(bool, "是否允許接收匿名訊息", required=True)):
     try:
         json_assistant.set_allow_anonymous(ctx.author.id, 允許)
-    except TypeError:
+    except KeyError:
         embed = discord.Embed(title="錯誤", description="你尚未建立匿名身分，請先建立匿名身分。", color=error_color)
         await ctx.respond(embed=embed, ephemeral=True)
         return
