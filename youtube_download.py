@@ -19,15 +19,27 @@ def youtube_download(url, file_name):
 
 def get_id(url):
     from subprocess import run
+    from platform import system
 
-    vid = str(run(f"yt-dlp --skip-download --print \"%(id)s\" {url}", capture_output=True, text=True).stdout)
+    if system() == "Windows":
+        cmd = f"yt-dlp --skip-download --print \"%(id)s\" {url}"
+    else:
+        cmd = f"./yt-dlp --skip-download --print \"%(id)s\" {url}"
+
+    vid = str(run(cmd, capture_output=True, text=True).stdout)
     return vid.replace("\n", "")
 
 
 def get_length(url):
     from subprocess import run
+    from platform import system
 
-    length = str(run(f"yt-dlp --skip-download --print \"%(duration)s\" {url}", capture_output=True, text=True).stdout)
+    if system() == "Windows":
+        cmd = f"yt-dlp --skip-download --print \"%(duration)s\" {url}"
+    else:
+        cmd = f"./yt-dlp --skip-download --print \"%(duration)s\" {url}"
+
+    length = str(run(cmd, capture_output=True, text=True).stdout)
     return int(length.replace("\n", ""))
 
 
