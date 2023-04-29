@@ -310,12 +310,14 @@ class ConfirmDownload(discord.ui.View):
         await interaction.response.edit_message(embed=embed, view=None)
 
 
-async def youtube_start_download(url: str) -> discord.File:
+async def youtube_start_download(url: str, msg_to_delete=None) -> discord.File:
     file_name = yt_download.get_id(url)
     mp3_file_name = file_name + ".mp3"
     mp3_file_path = os.path.join(base_dir, "ytdl", mp3_file_name)
     await bot.change_presence(status=discord.Status.idle)
     if os.path.exists(mp3_file_path) or main_dl(url, file_name, mp3_file_name) == "finished":
+        if msg_to_delete:
+            await msg_to_delete.delete()
         await bot.change_presence(status=discord.Status.online, activity=normal_activity)
         return discord.File(mp3_file_path)
 
@@ -449,8 +451,8 @@ async def about(ctx,
     embed = discord.Embed(title="關於", color=default_color)
     embed.set_thumbnail(url=bot.user.display_avatar)
     embed.add_field(name="程式碼與授權", value="本機器人由<@657519721138094080>維護，使用[Py-cord]"
-                    "(https://github.com/Pycord-Development/pycord)進行開發。\n"
-                    "本機器人的程式碼及檔案皆可在[這裡](https://github.com/Alllen95Wei/My-Discord-Bot-Slash)查看。",
+                                               "(https://github.com/Pycord-Development/pycord)進行開發。\n"
+                                               "本機器人的程式碼及檔案皆可在[這裡](https://github.com/Alllen95Wei/My-Discord-Bot-Slash)查看。",
                     inline=True)
     embed.add_field(name="聯絡", value="如果有任何技術問題及建議，請聯絡<@657519721138094080>。", inline=True)
     repo = git.Repo(search_parent_directories=True)
@@ -579,7 +581,7 @@ async def about(ctx):
     embed.add_field(name="文字", value="以訊息長度計算，1字1點。", inline=False)
     embed.add_field(name="語音", value="以待在語音頻道的時長計算，10秒可獲得(1 + 有效人數÷10)點。", inline=False)
     embed.add_field(name="其它限制", value="文字：每則訊息**最多15點**。每個使用者有1則訊息被計入經驗值後，需要**5分鐘冷卻時間**才會繼續計算。\n"
-                    "語音：在同一頻道的**真人成員**必須至少2位。若使用者處於**靜音**或**拒聽**狀態，則**無法獲得經驗值**。",
+                                           "語音：在同一頻道的**真人成員**必須至少2位。若使用者處於**靜音**或**拒聽**狀態，則**無法獲得經驗值**。",
                     inline=False)
     embed.set_footer(text="有1位使用者使用了指令，因此傳送此訊息。")
     await ctx.channel.send(embed=embed)
@@ -699,8 +701,7 @@ async def ytdl(ctx,
         embed.set_footer(text="下載所需時間依影片長度及網路狀況而定。")
         start_dl_message = await ctx.respond(embed=embed, ephemeral=私人訊息)
         try:
-            await start_dl_message.delete()
-            await ctx.respond(file=await youtube_start_download(連結), ephemeral=私人訊息)
+            await ctx.respond(file=await youtube_start_download(連結, start_dl_message), ephemeral=私人訊息)
         except Exception as e:
             if "Request entity too large" in str(e):
                 embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
@@ -885,7 +886,8 @@ async def screenshot(ctx,
 @bot.slash_command(name="cmd", description="在伺服器端執行指令並傳回結果。")
 async def cmd(ctx,
               指令: Option(str, "要執行的指令", required=True),
-              執行模組: Option(str, choices=["subprocess", "os"], description="執行指令的模組", required=False) = "subprocess",
+              執行模組: Option(str, choices=["subprocess", "os"], description="執行指令的模組",
+                               required=False) = "subprocess",
               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if ctx.author == bot.get_user(657519721138094080):
         try:
@@ -988,7 +990,7 @@ async def on_message(message):
             real_logger.info(f"等級提升：{message.author.name} 文字等級"
                              f"達到 {json_assistant.get_level(message.author.id, 'text')} 等")
             embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
-                                  f"**{json_assistant.get_level(message.author.id, 'text')}** 等！",
+                                                                f"**{json_assistant.get_level(message.author.id, 'text')}** 等！",
                                   color=default_color)
             embed.set_thumbnail(url=message.author.display_avatar)
             await message.channel.send(embed=embed)
