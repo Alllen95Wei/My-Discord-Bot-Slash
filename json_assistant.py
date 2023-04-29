@@ -1,7 +1,6 @@
 import json
 import os
 import datetime
-import time as t
 
 
 def get_raw_info(user_id):
@@ -143,7 +142,7 @@ def set_last_active_time(user_id, time):
 anonymous_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", "anonymous.json")
 
 
-def get_anonymous_raw_data():
+def get_anonymous_raw_data() -> dict:
     global anonymous_file
     with open(anonymous_file, "r") as f:
         data = json.load(f)
@@ -185,7 +184,7 @@ def get_anonymous_last_msg_sent_time(user_id):
     return last_time
 
 
-def set_anonymous_last_msg_sent_time(user_id, last_time=t.time()):
+def set_anonymous_last_msg_sent_time(user_id, last_time):
     raw_data = get_anonymous_raw_data()
     try:
         raw_data[str(user_id)]["last_message_sent"] = last_time
@@ -207,6 +206,24 @@ def set_allow_anonymous(user_id, allow: bool):
     raw_data = get_anonymous_raw_data()
     try:
         raw_data[str(user_id)]["allow_anonymous"] = allow
+    except KeyError:
+        raise KeyError("User not found")
+    write_anonymous_raw_data(raw_data)
+
+
+def get_allow_TOS_of_anonymous(user_id) -> bool:
+    raw_data = get_anonymous_raw_data()
+    try:
+        allow = raw_data[str(user_id)]["allow_TOS"]
+    except KeyError:
+        allow = False
+    return allow
+
+
+def set_allow_TOS_of_anonymous(user_id, allow: bool):
+    raw_data = get_anonymous_raw_data()
+    try:
+        raw_data[str(user_id)]["allow_TOS"] = allow
     except KeyError:
         raise KeyError("User not found")
     write_anonymous_raw_data(raw_data)

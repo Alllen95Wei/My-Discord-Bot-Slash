@@ -451,8 +451,8 @@ async def about(ctx,
     embed = discord.Embed(title="關於", color=default_color)
     embed.set_thumbnail(url=bot.user.display_avatar)
     embed.add_field(name="程式碼與授權", value="本機器人由<@657519721138094080>維護，使用[Py-cord]"
-                                               "(https://github.com/Pycord-Development/pycord)進行開發。\n"
-                                               "本機器人的程式碼及檔案皆可在[這裡](https://github.com/Alllen95Wei/My-Discord-Bot-Slash)查看。",
+                                         "(https://github.com/Pycord-Development/pycord)進行開發。\n"
+                                         "本機器人的程式碼及檔案皆可在[這裡](https://github.com/Alllen95Wei/My-Discord-Bot-Slash)查看。",
                     inline=True)
     embed.add_field(name="聯絡", value="如果有任何技術問題及建議，請聯絡<@657519721138094080>。", inline=True)
     repo = git.Repo(search_parent_directories=True)
@@ -581,7 +581,7 @@ async def about(ctx):
     embed.add_field(name="文字", value="以訊息長度計算，1字1點。", inline=False)
     embed.add_field(name="語音", value="以待在語音頻道的時長計算，10秒可獲得(1 + 有效人數÷10)點。", inline=False)
     embed.add_field(name="其它限制", value="文字：每則訊息**最多15點**。每個使用者有1則訊息被計入經驗值後，需要**5分鐘冷卻時間**才會繼續計算。\n"
-                                           "語音：在同一頻道的**真人成員**必須至少2位。若使用者處於**靜音**或**拒聽**狀態，則**無法獲得經驗值**。",
+                                       "語音：在同一頻道的**真人成員**必須至少2位。若使用者處於**靜音**或**拒聽**狀態，則**無法獲得經驗值**。",
                     inline=False)
     embed.set_footer(text="有1位使用者使用了指令，因此傳送此訊息。")
     await ctx.channel.send(embed=embed)
@@ -775,6 +775,38 @@ identity_choices = ["貓", "狗", "天竺鼠", "綠鬣蜥", "駱駝", "樹懶", 
                     "猴子", "火星人", "機器人"]
 
 
+@anonymous.command(name="tos", description="查看匿名訊息服務的使用條款。")
+async def TOS(ctx):
+    real_logger.anonymous(f"{ctx.author} 查看了匿名訊息服務的使用條款。")
+    embed = discord.Embed(title="關於匿名訊息服務", description="在你使用匿名訊息系統前，我們想先提醒你一些關於匿名訊息系統的事情。"
+                                                        "**請務必詳細閱讀以下內容**，以避免你的權利受到侵害！", color=default_color)
+    embed.add_field(name="使用規定", value="1. 你的匿名訊息不得帶有令人感到不適的內容。我們有權封鎖你的匿名訊息系統使用權。\n"
+                                       "2. 為了避免惡意事件發生，每個`/anonymous`相關的指令操作**皆會被記錄在機器人的紀錄檔中**。"
+                                       "但是請放心，除非有特殊事件發生，否則管理員不會查詢紀錄檔。\n"
+                                       "3. 如果還有任何問題，皆以<@657519721138094080>為準。歡迎詢問任何相關問題！", inline=False)
+    embed.add_field(name="如何同意此使用條款？", value="請使用</anonymous agree_tos:1101424739462959124>指令，以同意此使用條款。\n"
+                                             "在同意此條款後，你便能開始使用匿名訊息服務。", inline=False)
+    embed.set_footer(text="此使用條款有可能隨著機器人的更新而有所變動。因此，你有可能會不定期被導向到這個地方。")
+    await ctx.respond(embed=embed, ephemeral=True)
+
+
+@anonymous.command(name="agree_tos", description="同意匿名訊息服務的使用條款。")
+async def agree_TOS(ctx,
+                    同意: Option(bool, "是否同意匿名訊息服務的使用條款", required=True)):
+    if 同意 is True:
+        json_assistant.set_allow_TOS_of_anonymous(ctx.author.id, True)
+        real_logger.anonymous(f"{ctx.author} 同意匿名訊息服務的使用條款。")
+        embed = discord.Embed(title="成功", description="你已同意匿名訊息服務的使用條款。", color=default_color)
+        embed.set_footer(text="如果你想反悔，一樣使用此指令，但將「同意」改為False即可。")
+        await ctx.respond(embed=embed, ephemeral=True)
+    elif 同意 is False:
+        json_assistant.set_allow_TOS_of_anonymous(ctx.author.id, False)
+        real_logger.anonymous(f"{ctx.author} 反悔同意匿名訊息服務的使用條款。")
+        embed = discord.Embed(title="成功", description="你已反悔同意匿名訊息服務的使用條款。", color=default_color)
+        embed.set_footer(text="如果你想再次同意，一樣使用此指令，但將「同意」改為True即可。")
+        await ctx.respond(embed=embed, ephemeral=True)
+
+
 @anonymous.command(name="register", description="建立新的匿名身分。")
 async def register(ctx,
                    身分: Option(str, choices=identity_choices, description="選擇想要的動物身分", required=True)):
@@ -782,68 +814,107 @@ async def register(ctx,
         user_identity = json_assistant.get_anonymous_identity(ctx.author.id)
         embed = discord.Embed(title="錯誤", description="你已建立過匿名身分，無法再建立其他匿名身分。", color=error_color)
         embed.add_field(name="你目前的匿名身分", value=f"{user_identity[0]} #{user_identity[1]}")
+        await ctx.respond(embed=embed, ephemeral=True)
     except KeyError:
-        new_identity_id = ""
-        for i in range(4):
-            new_identity_id += str(randint(0, 9))
-        new_identity = [身分, new_identity_id]
-        json_assistant.set_anonymous_identity(ctx.author.id, new_identity)
-        embed = discord.Embed(title="建立身分成功！", description="你的匿名身分已建立成功！", color=default_color)
-        embed.add_field(name="你的身分", value=f"{身分} #{new_identity_id}", inline=False)
-        real_logger.anonymous(f"{ctx.author} 建立了匿名身分 {身分} #{new_identity_id}。")
-    await ctx.respond(embed=embed, ephemeral=True)
+        if json_assistant.get_allow_TOS_of_anonymous(ctx.author.id) is False:
+            await TOS(ctx)
+        else:
+            new_identity_id = ""
+            for i in range(4):
+                new_identity_id += str(randint(0, 9))
+            new_identity = [身分, new_identity_id]
+            json_assistant.set_anonymous_identity(ctx.author.id, new_identity)
+            embed = discord.Embed(title="建立身分成功！", description="你的匿名身分已建立成功！", color=default_color)
+            embed.add_field(name="你的身分", value=f"{身分} #{new_identity_id}", inline=False)
+            real_logger.anonymous(f"{ctx.author} 建立了匿名身分 {身分} #{new_identity_id}。")
+            await ctx.respond(embed=embed, ephemeral=True)
+
+
+@anonymous.command(name="show", description="顯示你的匿名身分。")
+async def show_anonymous_identity(ctx):
+    if json_assistant.get_allow_TOS_of_anonymous(ctx.author.id) is False:
+        await TOS(ctx)
+    else:
+        try:
+            user_identity = json_assistant.get_anonymous_identity(ctx.author.id)
+            real_logger.anonymous(f"{ctx.author} 查看了自己的匿名身分。")
+            embed = discord.Embed(title="你的匿名身分", color=default_color)
+            embed.add_field(name="身分", value=user_identity[0])
+            embed.add_field(name="編號", value=user_identity[1])
+        except KeyError:
+            embed = discord.Embed(title="錯誤", description="你尚未建立匿名身分，請先建立匿名身分。", color=error_color)
+        await ctx.respond(embed=embed, ephemeral=True)
 
 
 @anonymous.command(name="send", description="透過匿名身分傳送訊息。")
 async def send_anonymous_msg(ctx,
                              對象: Option(discord.User, "欲傳送匿名訊息的對象", required=True),
                              訊息: Option(str, "想傳送的訊息內容", required=True)):
-    try:
-        last_msg_sent_time = json_assistant.get_anonymous_last_msg_sent_time(ctx.author.id)
-    except KeyError:
-        embed = discord.Embed(title="錯誤", description="你尚未建立匿名身分，請先建立匿名身分。", color=error_color)
-        await ctx.respond(embed=embed, ephemeral=True)
-        return
-    time_delta = time.time() - last_msg_sent_time
-    if time_delta < 60:
-        embed = discord.Embed(title="錯誤", description=f"你必須等待`{round(60 - time_delta)}`秒才能再次傳送匿名訊息。",
-                              color=error_color)
-    elif not json_assistant.get_allow_anonymous(對象.id):
-        embed = discord.Embed(title="錯誤", description="對方不允許接收匿名訊息。", color=error_color)
+    if json_assistant.get_allow_TOS_of_anonymous(ctx.author.id) is False:
+        await TOS(ctx)
     else:
         try:
-            user_identity = json_assistant.get_anonymous_identity(ctx.author.id)
-            user_identity_str = f"{user_identity[0]} #{user_identity[1]}"
-            msg_embed = discord.Embed(title="匿名訊息", description=f"**{user_identity_str}** 傳送了匿名訊息給你。",
-                                      color=default_color)
-            msg_embed.add_field(name="訊息內容", value=訊息)
-            msg_embed.set_footer(text="如果不想收到匿名訊息，可以使用/anonymous allow指令來調整接受與否。")
-            await 對象.send(embed=msg_embed)
-            real_logger.anonymous(f"{user_identity_str} 傳送了匿名訊息給 {對象.name}。")
-            real_logger.anonymous(f"訊息內容：{訊息}")
-        except discord.errors.HTTPException:
-            embed = discord.Embed(title="錯誤", description="對方不允許陌生人傳送訊息。", color=error_color)
+            last_msg_sent_time = json_assistant.get_anonymous_last_msg_sent_time(ctx.author.id)
+        except KeyError:
+            embed = discord.Embed(title="錯誤", description="你尚未建立匿名身分，請先建立匿名身分。", color=error_color)
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
+        time_delta = time.time() - last_msg_sent_time
+        if time_delta < 60:
+            embed = discord.Embed(title="錯誤",
+                                  description=f"你必須等待`{round(60 - time_delta)}`秒才能再次傳送匿名訊息。",
+                                  color=error_color)
+        elif not json_assistant.get_allow_anonymous(對象.id):
+            embed = discord.Embed(title="錯誤", description="對方不允許接收匿名訊息。", color=error_color)
         else:
-            json_assistant.set_anonymous_last_msg_sent_time(ctx.author.id)
-            embed = discord.Embed(title="傳送成功！", description="匿名訊息已傳送成功！", color=default_color)
-    await ctx.respond(embed=embed, ephemeral=True)
+            try:
+                user_identity = json_assistant.get_anonymous_identity(ctx.author.id)
+                user_identity_str = f"{user_identity[0]} #{user_identity[1]}"
+                msg_embed = discord.Embed(title="匿名訊息", description=f"**{user_identity_str}** 傳送了匿名訊息給你。",
+                                          color=default_color)
+                msg_embed.add_field(name="訊息內容", value=訊息)
+                msg_embed.set_footer(text="如果不想收到匿名訊息，可以使用/anonymous allow指令來調整接受與否。")
+                await 對象.send(embed=msg_embed)
+                real_logger.anonymous(f"{user_identity_str} 傳送了匿名訊息給 {對象.name}。")
+                real_logger.anonymous(f"訊息內容：{訊息}")
+                json_assistant.set_anonymous_last_msg_sent_time(ctx.author.id, time.time())
+                embed = discord.Embed(title="傳送成功！", description="匿名訊息已傳送成功！", color=default_color)
+            except discord.errors.HTTPException:
+                embed = discord.Embed(title="錯誤", description="對方不允許陌生人傳送訊息。", color=error_color)
+        await ctx.respond(embed=embed, ephemeral=True)
 
 
 @anonymous.command(name="allow", description="允許或拒絕接收匿名訊息。")
 async def allow_anonymous_msg(ctx,
                               允許: Option(bool, "是否允許接收匿名訊息", required=True)):
-    try:
-        json_assistant.set_allow_anonymous(ctx.author.id, 允許)
-    except KeyError:
-        embed = discord.Embed(title="錯誤", description="你尚未建立匿名身分，請先建立匿名身分。", color=error_color)
-        await ctx.respond(embed=embed, ephemeral=True)
-        return
-    if 允許:
-        real_logger.anonymous(f"{ctx.author} 設定為 允許 接收匿名訊息。")
-        embed = discord.Embed(title="設定成功！", description="你已**允許**接收匿名訊息。", color=default_color)
+    if json_assistant.get_allow_TOS_of_anonymous(ctx.author.id) is False:
+        await TOS(ctx)
     else:
-        real_logger.anonymous(f"{ctx.author} 設定為 拒絕 接收匿名訊息。")
-        embed = discord.Embed(title="設定成功！", description="你已**拒絕**接收匿名訊息。", color=default_color)
+        try:
+            json_assistant.set_allow_anonymous(ctx.author.id, 允許)
+        except KeyError:
+            embed = discord.Embed(title="錯誤", description="你尚未建立匿名身分，請先建立匿名身分。", color=error_color)
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
+        if 允許:
+            real_logger.anonymous(f"{ctx.author} 設定為 允許 接收匿名訊息。")
+            embed = discord.Embed(title="設定成功！", description="你已**允許**接收匿名訊息。", color=default_color)
+        else:
+            real_logger.anonymous(f"{ctx.author} 設定為 拒絕 接收匿名訊息。")
+            embed = discord.Embed(title="設定成功！", description="你已**拒絕**接收匿名訊息。", color=default_color)
+        await ctx.respond(embed=embed, ephemeral=True)
+
+
+@anonymous.command(name="cancel_all_tos", description="取消所有使用者對服務條款的回應。")
+async def cancel_all_tos(ctx):
+    if ctx.author == bot.get_user(657519721138094080):
+        all_anonymous_users = json_assistant.get_anonymous_raw_data().keys()
+        for i in all_anonymous_users:
+            json_assistant.set_allow_TOS_of_anonymous(i, False)
+        real_logger.anonymous(f"{ctx.author} 取消了所有使用者對服務條款的回應。")
+        embed = discord.Embed(title="成功", description="所有使用者對服務條款的回應已被取消。", color=default_color)
+    else:
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
     await ctx.respond(embed=embed, ephemeral=True)
 
 
@@ -887,7 +958,7 @@ async def screenshot(ctx,
 async def cmd(ctx,
               指令: Option(str, "要執行的指令", required=True),
               執行模組: Option(str, choices=["subprocess", "os"], description="執行指令的模組",
-                               required=False) = "subprocess",
+                           required=False) = "subprocess",
               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if ctx.author == bot.get_user(657519721138094080):
         try:
@@ -990,7 +1061,8 @@ async def on_message(message):
             real_logger.info(f"等級提升：{message.author.name} 文字等級"
                              f"達到 {json_assistant.get_level(message.author.id, 'text')} 等")
             embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
-                                                                f"**{json_assistant.get_level(message.author.id, 'text')}** 等！",
+                                                            f"**{json_assistant.get_level(message.author.id, 'text')}"
+                                                            f"** 等！",
                                   color=default_color)
             embed.set_thumbnail(url=message.author.display_avatar)
             await message.channel.send(embed=embed)
