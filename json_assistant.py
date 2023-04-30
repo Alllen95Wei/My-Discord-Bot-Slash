@@ -211,19 +211,19 @@ def set_allow_anonymous(user_id, allow: bool):
     write_anonymous_raw_data(raw_data)
 
 
-def get_allow_TOS_of_anonymous(user_id) -> bool:
+def get_agree_TOS_of_anonymous(user_id) -> bool:
     raw_data = get_anonymous_raw_data()
     try:
-        allow = raw_data[str(user_id)]["allow_TOS"]
+        allow = raw_data[str(user_id)]["agree_TOS"]
     except KeyError:
         allow = False
     return allow
 
 
-def set_allow_TOS_of_anonymous(user_id, allow: bool):
+def set_agree_TOS_of_anonymous(user_id, allow: bool):
     raw_data = get_anonymous_raw_data()
     try:
-        raw_data[str(user_id)]["allow_TOS"] = allow
+        raw_data[str(user_id)] = {"agree_TOS": allow}
     except KeyError:
         raise KeyError("User not found")
     write_anonymous_raw_data(raw_data)

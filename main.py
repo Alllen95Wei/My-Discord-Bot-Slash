@@ -794,13 +794,13 @@ async def TOS(ctx):
 async def agree_TOS(ctx,
                     同意: Option(bool, "是否同意匿名訊息服務的使用條款", required=True)):
     if 同意 is True:
-        json_assistant.set_allow_TOS_of_anonymous(ctx.author.id, True)
+        json_assistant.set_agree_TOS_of_anonymous(ctx.author.id, True)
         real_logger.anonymous(f"{ctx.author} 同意匿名訊息服務的使用條款。")
         embed = discord.Embed(title="成功", description="你已同意匿名訊息服務的使用條款。", color=default_color)
         embed.set_footer(text="如果你想反悔，一樣使用此指令，但將「同意」改為False即可。")
         await ctx.respond(embed=embed, ephemeral=True)
     elif 同意 is False:
-        json_assistant.set_allow_TOS_of_anonymous(ctx.author.id, False)
+        json_assistant.set_agree_TOS_of_anonymous(ctx.author.id, False)
         real_logger.anonymous(f"{ctx.author} 不同意匿名訊息服務的使用條款。")
         embed = discord.Embed(title="成功", description="你已不同意匿名訊息服務的使用條款。\n"
                                                       "注意：你將無法使用匿名訊息系統！", color=default_color)
@@ -817,7 +817,7 @@ async def register(ctx,
         embed.add_field(name="你目前的匿名身分", value=f"{user_identity[0]} #{user_identity[1]}")
         await ctx.respond(embed=embed, ephemeral=True)
     except KeyError:
-        if json_assistant.get_allow_TOS_of_anonymous(ctx.author.id) is False:
+        if json_assistant.get_agree_TOS_of_anonymous(ctx.author.id) is False:
             await TOS(ctx)
         else:
             new_identity_id = ""
@@ -833,7 +833,7 @@ async def register(ctx,
 
 @anonymous.command(name="show", description="顯示你的匿名身分。")
 async def show_anonymous_identity(ctx):
-    if json_assistant.get_allow_TOS_of_anonymous(ctx.author.id) is False:
+    if json_assistant.get_agree_TOS_of_anonymous(ctx.author.id) is False:
         await TOS(ctx)
     else:
         try:
@@ -851,7 +851,7 @@ async def show_anonymous_identity(ctx):
 async def send_anonymous_msg(ctx,
                              對象: Option(discord.User, "欲傳送匿名訊息的對象", required=True),
                              訊息: Option(str, "想傳送的訊息內容", required=True)):
-    if json_assistant.get_allow_TOS_of_anonymous(ctx.author.id) is False:
+    if json_assistant.get_agree_TOS_of_anonymous(ctx.author.id) is False:
         await TOS(ctx)
     else:
         try:
@@ -888,7 +888,7 @@ async def send_anonymous_msg(ctx,
 @anonymous.command(name="allow", description="允許或拒絕接收匿名訊息。")
 async def allow_anonymous_msg(ctx,
                               允許: Option(bool, "是否允許接收匿名訊息", required=True)):
-    if json_assistant.get_allow_TOS_of_anonymous(ctx.author.id) is False:
+    if json_assistant.get_agree_TOS_of_anonymous(ctx.author.id) is False:
         await TOS(ctx)
     else:
         try:
@@ -911,7 +911,7 @@ async def cancel_all_tos(ctx):
     if ctx.author == bot.get_user(657519721138094080):
         all_anonymous_users = json_assistant.get_anonymous_raw_data().keys()
         for i in all_anonymous_users:
-            json_assistant.set_allow_TOS_of_anonymous(i, False)
+            json_assistant.set_agree_TOS_of_anonymous(i, False)
         real_logger.anonymous(f"{ctx.author} 取消了所有使用者對服務條款的回應。")
         embed = discord.Embed(title="成功", description="所有使用者對服務條款的回應已被取消。", color=default_color)
     else:
