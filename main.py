@@ -801,9 +801,10 @@ async def agree_TOS(ctx,
         await ctx.respond(embed=embed, ephemeral=True)
     elif 同意 is False:
         json_assistant.set_allow_TOS_of_anonymous(ctx.author.id, False)
-        real_logger.anonymous(f"{ctx.author} 反悔同意匿名訊息服務的使用條款。")
-        embed = discord.Embed(title="成功", description="你已反悔同意匿名訊息服務的使用條款。", color=default_color)
-        embed.set_footer(text="如果你想再次同意，一樣使用此指令，但將「同意」改為True即可。")
+        real_logger.anonymous(f"{ctx.author} 不同意匿名訊息服務的使用條款。")
+        embed = discord.Embed(title="成功", description="你已不同意匿名訊息服務的使用條款。\n"
+                                                      "注意：你將無法使用匿名訊息系統！", color=default_color)
+        embed.set_footer(text="如果你想同意此條款，一樣使用此指令，但將「同意」改為True即可。")
         await ctx.respond(embed=embed, ephemeral=True)
 
 
