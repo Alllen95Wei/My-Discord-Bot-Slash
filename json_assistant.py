@@ -166,8 +166,10 @@ def get_anonymous_identity(user_id):
 
 def set_anonymous_identity(user_id, identity: list[2]):
     raw_data = get_anonymous_raw_data()
-    print(raw_data)
-    raw_data[str(user_id)] = {"identity": identity}
+    try:
+        raw_data[str(user_id)]["identity"] = identity
+    except KeyError:
+        raw_data[str(user_id)] = {"identity": identity}
     write_anonymous_raw_data(raw_data)
 
 
@@ -223,7 +225,7 @@ def get_agree_TOS_of_anonymous(user_id) -> bool:
 def set_agree_TOS_of_anonymous(user_id, allow: bool):
     raw_data = get_anonymous_raw_data()
     try:
-        raw_data[str(user_id)] = {"agree_TOS": allow}
+        raw_data[str(user_id)]["agree_TOS"] = allow
     except KeyError:
-        raise KeyError("User not found")
+        raw_data[str(user_id)] = {"agree_TOS": allow}
     write_anonymous_raw_data(raw_data)
