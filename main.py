@@ -83,7 +83,7 @@ class CreateLogger:
         handler = logging.FileHandler("logs.log", encoding="utf-8")
         handler.setFormatter(formatter)
         logger.addHandler(handler)
-        logger.setLevel(logging.INFO)
+        logger.setLevel(logging.DEBUG)
 
         return logger
 
