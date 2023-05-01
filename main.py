@@ -97,7 +97,7 @@ class CreateLogger:
         handler = logging.FileHandler("anonymous.log", encoding="utf-8")
         handler.setFormatter(formatter)
         logger.addHandler(handler)
-        logger.setLevel(25)
+        logger.setLevel(logging.DEBUG)
 
         return logger
 
