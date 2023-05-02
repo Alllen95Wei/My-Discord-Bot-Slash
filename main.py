@@ -79,7 +79,7 @@ class CreateLogger:
             fmt="[%(asctime)s] %(levelname)-8s %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S")
 
-        logger = logging.getLogger()
+        logger = logging.getLogger("file_logger")
         handler = logging.FileHandler("logs.log", encoding="utf-8")
         handler.setFormatter(formatter)
         logger.addHandler(handler)
@@ -93,11 +93,11 @@ class CreateLogger:
             fmt="[%(asctime)s] %(levelname)-8s %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S")
 
-        logger = logging.getLogger()
+        logger = logging.getLogger("anonymous_logger")
         handler = logging.FileHandler("anonymous.log", encoding="utf-8")
+        handler.setLevel(25)
         handler.setFormatter(formatter)
         logger.addHandler(handler)
-        logger.setLevel(logging.DEBUG)
 
         return logger
 
