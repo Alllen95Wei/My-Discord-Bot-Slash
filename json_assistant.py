@@ -3,7 +3,7 @@ import os
 import datetime
 
 
-def get_raw_info(user_id):
+def get_raw_info(user_id: int):
     file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", str(user_id) + ".json")
     if os.path.exists(file):
         with open(file, "r") as f:
@@ -22,21 +22,21 @@ def get_raw_info(user_id):
         return empty_data
 
 
-def write_raw_info(user_id, data):
+def write_raw_info(user_id: int, data):
     file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", str(user_id) + ".json")
     with open(file, "w") as f:
         json.dump(data, f, indent=2)
 
 
-def get_exp(user_id, exp_type):
+def get_exp(user_id: int, exp_type):
     user_info = get_raw_info(user_id)
     if exp_type in ["voice", "text"]:
-        return user_info["exp"][exp_type]
+        return round(user_info["exp"][exp_type]*10)/10
     else:
         raise ValueError("exp_type must be either \"voice\" or \"text\"")
 
 
-def add_exp(user_id, exp_type, amount):
+def add_exp(user_id: int, exp_type, amount):
     user_info = get_raw_info(user_id)
     if exp_type in ["voice", "text"]:
         user_info["exp"][exp_type] += amount
@@ -45,18 +45,18 @@ def add_exp(user_id, exp_type, amount):
         raise ValueError("exp_type must be either \"voice\" or \"text\"")
 
 
-def set_join_date(user_id, date):
+def set_join_date(user_id: int, date):
     user_info = get_raw_info(user_id)
     user_info["join_date"] = date
     write_raw_info(user_id, user_info)
 
 
-def get_join_date(user_id):
+def get_join_date(user_id: int):
     user_info = get_raw_info(user_id)
     return user_info["join_date"]
 
 
-def get_join_date_in_str(user_id):
+def get_join_date_in_str(user_id: int):
     raw_date = get_join_date(user_id)
     if raw_date is not None:
         if len(str(raw_date[4])) == 1:
@@ -73,7 +73,7 @@ def get_join_date_in_str(user_id):
         return None
 
 
-def joined_time(user_id):
+def joined_time(user_id: int):
     raw_date = get_join_date(user_id)
     if raw_date is not None:
         join_date = datetime.datetime(year=raw_date[0], month=raw_date[1], day=raw_date[2],
@@ -87,7 +87,7 @@ def joined_time(user_id):
         return None
 
 
-def get_level(user_id, level_type):
+def get_level(user_id: int, level_type):
     if level_type in ["voice", "text"]:
         user_info = get_raw_info(user_id)
         return user_info["level"][level_type]
@@ -95,13 +95,13 @@ def get_level(user_id, level_type):
         raise ValueError("level_type must be either \"voice\" or \"text\"")
 
 
-def add_level(user_id, level_type, level):
+def add_level(user_id: int, level_type, level):
     user_info = get_raw_info(user_id)
     user_info["level"][level_type] += level
     write_raw_info(user_id, user_info)
 
 
-def upgrade_exp_needed(user_id, level_type):
+def upgrade_exp_needed(user_id: int, level_type):
     if level_type in ["voice", "text"]:
         current_level = get_level(user_id, level_type)
         if level_type == "text":
@@ -113,7 +113,7 @@ def upgrade_exp_needed(user_id, level_type):
         raise ValueError("level_type must be either \"voice\" or \"text\"")
 
 
-def level_calc(user_id, level_type):
+def level_calc(user_id: int, level_type):
     if level_type in ["voice", "text"]:
         exp = get_exp(user_id, level_type)
         exp_needed = upgrade_exp_needed(user_id, level_type)
@@ -127,13 +127,13 @@ def level_calc(user_id, level_type):
         raise ValueError("level_type must be either \"voice\" or \"text\"")
 
 
-def get_last_active_time(user_id):
+def get_last_active_time(user_id: int):
     user_info = get_raw_info(user_id)
     time = user_info["last_active_time"]
     return time
 
 
-def set_last_active_time(user_id, time):
+def set_last_active_time(user_id: int, time):
     user_info = get_raw_info(user_id)
     user_info["last_active_time"] = time
     write_raw_info(user_id, user_info)
@@ -155,7 +155,7 @@ def write_anonymous_raw_data(data):
         json.dump(data, f, indent=2)
 
 
-def get_anonymous_identity(user_id):
+def get_anonymous_identity(user_id: int):
     raw_data = get_anonymous_raw_data()
     try:
         identity = raw_data[str(user_id)]["identity"]
@@ -164,7 +164,7 @@ def get_anonymous_identity(user_id):
         raise KeyError("User not found")
 
 
-def set_anonymous_identity(user_id, identity: list[2]):
+def set_anonymous_identity(user_id: int, identity: list[2]):
     raw_data = get_anonymous_raw_data()
     try:
         raw_data[str(user_id)]["identity"] = identity
@@ -173,7 +173,7 @@ def set_anonymous_identity(user_id, identity: list[2]):
     write_anonymous_raw_data(raw_data)
 
 
-def get_anonymous_last_msg_sent_time(user_id):
+def get_anonymous_last_msg_sent_time(user_id: int):
     raw_data = get_anonymous_raw_data()
     try:
         user = raw_data[str(user_id)]
@@ -186,7 +186,7 @@ def get_anonymous_last_msg_sent_time(user_id):
     return last_time
 
 
-def set_anonymous_last_msg_sent_time(user_id, last_time):
+def set_anonymous_last_msg_sent_time(user_id: int, last_time):
     raw_data = get_anonymous_raw_data()
     try:
         raw_data[str(user_id)]["last_message_sent"] = last_time
@@ -195,7 +195,7 @@ def set_anonymous_last_msg_sent_time(user_id, last_time):
     write_anonymous_raw_data(raw_data)
 
 
-def get_allow_anonymous(user_id):
+def get_allow_anonymous(user_id: int):
     raw_data = get_anonymous_raw_data()
     try:
         allow = raw_data[str(user_id)]["allow_anonymous"]
@@ -204,7 +204,7 @@ def get_allow_anonymous(user_id):
     return allow
 
 
-def set_allow_anonymous(user_id, allow: bool):
+def set_allow_anonymous(user_id: int, allow: bool):
     raw_data = get_anonymous_raw_data()
     try:
         raw_data[str(user_id)]["allow_anonymous"] = allow
@@ -213,7 +213,7 @@ def set_allow_anonymous(user_id, allow: bool):
     write_anonymous_raw_data(raw_data)
 
 
-def get_agree_TOS_of_anonymous(user_id) -> bool:
+def get_agree_TOS_of_anonymous(user_id: int) -> bool:
     raw_data = get_anonymous_raw_data()
     try:
         allow = raw_data[str(user_id)]["agree_TOS"]
@@ -222,7 +222,7 @@ def get_agree_TOS_of_anonymous(user_id) -> bool:
     return allow
 
 
-def set_agree_TOS_of_anonymous(user_id, allow: bool):
+def set_agree_TOS_of_anonymous(user_id: int, allow: bool):
     raw_data = get_anonymous_raw_data()
     try:
         raw_data[str(user_id)]["agree_TOS"] = allow

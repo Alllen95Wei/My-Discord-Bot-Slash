@@ -147,7 +147,9 @@ async def give_voice_exp() -> None:  # 給予語音經驗
                 for member in active_human_members:
                     if exp_enabled:
                         if len(active_human_members) > 1:  # 若語音頻道人數大於1
-                            json_assistant.add_exp(member.id, "voice", 1 + len(active_human_members) / 10)
+                            value = 1 + len(active_human_members) / 10
+                            json_assistant.add_exp(member.id, "voice", value)
+                            real_logger.info(f"獲得經驗值：{member.name} 獲得語音經驗 {value}")
                             if json_assistant.level_calc(member.id, "voice"):
                                 real_logger.info(f"等級提升：{member.name} 語音等級"
                                                  f"達到 {json_assistant.get_level(member.id, 'voice')} 等")
@@ -324,6 +326,21 @@ class ConfirmDownload(discord.ui.View):
             description="已取消下載。",
             color=error_color)
         await interaction.response.edit_message(embed=embed, view=None)
+
+
+class AgreeTOS(discord.ui.View):
+    def __init__(self, user_id: int):
+        super().__init__()
+        self.user_id = user_id
+
+    @discord.ui.button(style=discord.ButtonStyle.primary, label="同意", emoji="✅")
+    async def agree_btn_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        button.disabled = True
+        await interaction.response.edit_message(view=None)
+        json_assistant.set_agree_TOS_of_anonymous(self.user_id, True)
+        embed = discord.Embed(title="成功", description="你已同意使用條款，可以開始使用匿名訊息服務。", color=default_color)
+        embed.set_footer(text="如果你想反悔，一樣使用此指令，但將「同意」改為False即可。")
+        await interaction.edit_original_response(embed=embed)
 
 
 async def youtube_start_download(url: str, msg_to_delete=None) -> discord.File:
@@ -800,10 +817,10 @@ async def TOS(ctx):
                                        "2. 為了避免惡意事件發生，每個`/anonymous`相關的指令操作**皆會被記錄在機器人的紀錄檔中**。"
                                        "但是請放心，除非有特殊事件發生，否則管理員不會查詢紀錄檔。\n"
                                        "3. 如果還有任何問題，皆以<@657519721138094080>為準。歡迎詢問任何相關問題！", inline=False)
-    embed.add_field(name="如何同意此使用條款？", value="請使用</anonymous agree_tos:1101424739462959124>指令，以同意此使用條款。\n"
+    embed.add_field(name="如何同意此使用條款？", value="直接點擊下方的「✅同意」按鈕，以同意此使用條款。\n"
                                              "在同意此條款後，你便能開始使用匿名訊息服務。", inline=False)
     embed.set_footer(text="此使用條款有可能隨著機器人的更新而有所變動。因此，你有可能會不定期被導向到這個地方。")
-    await ctx.respond(embed=embed, ephemeral=True)
+    await ctx.respond(embed=embed, view=AgreeTOS(ctx.author.id), ephemeral=True)
 
 
 @anonymous.command(name="agree_tos", description="同意匿名訊息服務的使用條款。")
@@ -1068,10 +1085,13 @@ async def on_message(message):
             return
         if not message.author.bot and isinstance(msg_in, str):
             if len(msg_in) <= 15:
+                real_logger.info(f"獲得經驗值：{message.author.name} 文字經驗值 +{len(msg_in)} (訊息長度：{len(msg_in)})")
                 json_assistant.add_exp(message.author.id, "text", len(msg_in))
             else:
                 json_assistant.add_exp(message.author.id, "text", 15)
+                real_logger.info(f"獲得經驗值：{message.author.name} 文字經驗值 +15 (訊息長度：{len(msg_in)})")
         elif not message.author.bot and isinstance(msg_in, discord.File):
+            real_logger.info(f"獲得經驗值：{message.author.name} 文字經驗值 +1 (傳送檔案)")
             json_assistant.add_exp(message.author.id, "text", 1)
         json_assistant.set_last_active_time(message.author.id, time.time())
         if json_assistant.level_calc(message.author.id, "text"):
