@@ -225,10 +225,11 @@ class GetTmpRole(discord.ui.View):
     @discord.ui.button(label="取得臨時身分組", style=discord.ButtonStyle.primary, emoji="✨")
     async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
         real_logger.debug(f"{interaction.user.name} 按下了「取得臨時身分組」按鈕")
-        server = await bot.fetch_guild(857996539262402570)
+        server = bot.get_guild(857996539262402570)
         try:
             button.disabled = True
-            await interaction.user.add_roles(discord.utils.get(server.roles, id=1083536792717885522))
+            user_member_obj = server.get_member(interaction.user.id)
+            await user_member_obj.add_roles(discord.utils.get(server.roles, id=1083536792717885522))
             real_logger.debug(f"成功將 {interaction.user.name} 加入臨時身分組")
             embed = discord.Embed(
                 title="取得臨時身分組成功！",
