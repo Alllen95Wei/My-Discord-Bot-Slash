@@ -17,6 +17,8 @@ from platform import system
 from PIL import ImageGrab
 import logging
 from colorlog import ColoredFormatter
+import typing
+import functools
 
 import check_folder_size
 from youtube_to_mp3 import main_dl
@@ -25,6 +27,7 @@ import detect_pc_status
 import update as upd
 import json_assistant
 from read_RPC import get_RPC_context
+import ChatGPT
 
 # 機器人
 intents = discord.Intents.all()
@@ -34,6 +37,7 @@ base_dir = os.path.abspath(os.path.dirname(__file__))
 default_color = 0x5FE1EA
 error_color = 0xF1411C
 exp_enabled = True
+last_chat_used_time = 0
 now_tz = zoneinfo.ZoneInfo("Asia/Taipei")
 normal_activity = discord.Activity(name=get_RPC_context(), type=discord.ActivityType.playing)
 # 載入TOKEN
@@ -304,7 +308,7 @@ class ConfirmDownload(discord.ui.View):
             description="已開始下載，請稍候。",
             color=default_color)
         await interaction.response.edit_message(embed=embed, view=None)
-        result = await youtube_start_download(self.url)
+        result = await run_blocking(youtube_start_download, self.url)
         if isinstance(result, discord.File):
             try:
                 await interaction.edit_original_response(embed=None, file=result)
@@ -340,7 +344,7 @@ class AgreeTOS(discord.ui.View):
         await interaction.response.edit_message(view=None)
         json_assistant.set_agree_TOS_of_anonymous(self.user_id, True)
         embed = discord.Embed(title="成功", description="你已同意使用條款，可以開始使用匿名訊息服務。", color=default_color)
-        embed.set_footer(text="如果你想反悔，一樣使用此指令，但將「同意」改為False即可。")
+        embed.set_footer(text="如果你想反悔，請使用/anonymous agree_tos指令，並將「同意」改為False即可。")
         await interaction.edit_original_response(embed=embed)
 
 
@@ -354,6 +358,12 @@ async def youtube_start_download(url: str, msg_to_delete=None) -> discord.File:
             await msg_to_delete.delete()
         await bot.change_presence(status=discord.Status.online, activity=normal_activity)
         return discord.File(mp3_file_path)
+
+
+async def run_blocking(blocking_func: typing.Callable, *args, **kwargs) -> typing.Any:
+    """Runs a blocking function in a non-blocking way"""
+    func = functools.partial(blocking_func, *args, **kwargs)
+    return await bot.loop.run_in_executor(None, func)
 
 
 @bot.event
@@ -452,30 +462,8 @@ async def on_ready():
 async def help(ctx,
                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     embed = discord.Embed(title="指令協助", color=default_color)
-    embed.add_field(name="</help:1069235277433942057>", value="提供指令協助。", inline=False)
-    embed.add_field(name="</about:1070988511961948181>", value="提供關於這隻機器人的資訊。", inline=False)
-    embed.add_field(name="</ping:1069046879473647637>", value="查詢機器人PING值(ms)。", inline=False)
-    embed.add_field(name="</ama:1059105845629165568>", value="就是8號球，給你這個問題的隨機回答。", inline=False)
-    embed.add_field(name="</random:1059754228882616360>", value="在指定數字範圍隨機取得一數，不指定範圍則設為1~100。",
-                    inline=False)
-    embed.add_field(name="</qrcode:1063349408223207516>", value="將輸入的文字轉為QR Code。", inline=False)
-    embed.add_field(name="</sizecheck:1068693011858456656>", value="檢查`C:\\MusicBot\\audio_cache`的大小。",
-                    inline=False)
-    embed.add_field(name="</ytdl:1068693011858456657>",
-                    value="將YouTube影片下載為mp3。由於Discord有檔案大小限制，因此有時可能會失敗。",
-                    inline=False)
-    embed.add_field(name="</user_info show:1071752534638735440>", value="取得使用者的資訊。", inline=False)
-    embed.add_field(name="</user_info require:1071752534638735440>", value="查詢距離下次升等還差多少經驗值。",
-                    inline=False)
-    embed.add_field(name="</user_info about:1071752534638735440>", value="顯示關於經驗值及等級的計算。", inline=False)
-    embed.add_field(name="</rc:1068693011858456658>", value="重新連接至語音頻道。可指定頻道，否則將自動檢測<@885723595626676264>"
-                                                            "及<@657519721138094080>在哪個頻道並加入。", inline=False)
-    embed.add_field(name="</dc:1069046879473647636>", value="從目前的語音頻道中斷連接。", inline=False)
-    embed.add_field(name="</dps:1068693011858456659>", value="查詢伺服器電腦的CPU及記憶體使用率。", inline=False)
-    embed.add_field(name="</cmd:1069046879473647638>", value="在伺服器端執行指令並傳回結果。", inline=False)
-    embed.add_field(name="</restart:1071752534638735441>", value="重啟機器人。", inline=False)
-    embed.add_field(name="</screenshot:1073759072186277920>", value="在機器人伺服器端截圖。", inline=False)
-    embed.add_field(name="</update:1069046879473647639>", value="更新機器人。", inline=False)
+    embed.add_field(name="想要知道如何使用本機器人？", value="請參閱在GitHub上的[Wiki]"
+                    "(https://github.com/Alllen95Wei/My-Discord-Bot-Slash/wiki/)。")
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
@@ -951,6 +939,29 @@ async def cancel_all_tos(ctx):
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
     await ctx.respond(embed=embed, ephemeral=True)
+
+
+@bot.slash_command(name="chat", description="(測試中)與ChatGPT對話。")
+async def chat(ctx,
+               訊息: Option(str, "想要向ChatGPT傳送的訊息", required=True),
+               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    global last_chat_used_time
+    if time.time() - last_chat_used_time >= 5:
+        await ctx.defer()
+        last_chat_used_time = time.time()
+        response = await run_blocking(ChatGPT.chat, 訊息)
+        embed = discord.Embed(title="ChatGPT", description="以下是ChatGPT的回應。", color=default_color)
+        embed.add_field(name="你的訊息", value=訊息, inline=False)
+        embed.add_field(name="ChatGPT的回應", value=response, inline=False)
+        embed.set_footer(text="以上回應皆由ChatGPT產生，與本機器人無關。")
+    else:
+        embed = discord.Embed(title="錯誤", description="短時間內已有人使用此指令。請稍後再試。", color=error_color)
+        embed.add_field(name="為什麼我不能跟其他人一起使用此指令？",
+                        value="由於ChatGPT的時間限制，我們不能在短時間內傳送過多要求，否則可能會無法得到回應。\n"
+                              "為避免此問題，我們才設計了此機制，以避免使用者的體驗不佳。",
+                        inline=False)
+        私人訊息 = True
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="restart", description="重啟機器人。")

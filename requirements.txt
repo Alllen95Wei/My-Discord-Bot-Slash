@@ -6,3 +6,5 @@ gitpython
 Pillow
 tzdata
 colorlog
+revChatGPT
+OpenAIAuth
