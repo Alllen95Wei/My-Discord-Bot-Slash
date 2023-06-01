@@ -708,7 +708,7 @@ async def sizecheck(ctx,
 async def ytdl(ctx,
                連結: Option(str, "欲下載的YouTube影片網址", required=True),
                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
-    await ctx.defer()
+    await ctx.defer(ephemeral=私人訊息)
     length = yt_download.get_length(連結)
     if length > 512:
         embed = discord.Embed(title="影片長度過長",
@@ -947,7 +947,7 @@ async def chat(ctx,
                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     global last_chat_used_time
     if time.time() - last_chat_used_time >= 5:
-        await ctx.defer()
+        await ctx.defer(ephemeral=私人訊息)
         last_chat_used_time = time.time()
         response = await run_blocking(ChatGPT.chat, 訊息)
         embed = discord.Embed(title="ChatGPT", description="以下是ChatGPT的回應。", color=default_color)
@@ -1008,7 +1008,7 @@ async def cmd(ctx,
               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
     if ctx.author == bot.get_user(657519721138094080):
         try:
-            await ctx.defer()
+            await ctx.defer(ephemeral=私人訊息)
             command = split(指令)
             if command[0] == "cmd":
                 embed = discord.Embed(title="錯誤", description="基於安全原因，你不能執行這個指令。", color=error_color)
