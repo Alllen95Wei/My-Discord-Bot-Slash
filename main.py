@@ -902,8 +902,14 @@ async def send_anonymous_msg(ctx,
                 real_logger.anonymous(f"訊息內容：{訊息}")
                 json_assistant.set_anonymous_last_msg_sent_time(ctx.author.id, time.time())
                 embed = discord.Embed(title="傳送成功！", description="匿名訊息已傳送成功！", color=default_color)
-            except discord.errors.HTTPException:
-                embed = discord.Embed(title="錯誤", description="對方不允許陌生人傳送訊息。", color=error_color)
+            except discord.errors.HTTPException as e:
+                if "Cannot send messages to this user" in str(e):
+                    embed = discord.Embed(title="錯誤", description="對方不允許陌生人傳送訊息。", color=error_color)
+                elif "Must be 1024 or fewer in length" in str(e):
+                    embed = discord.Embed(title="錯誤", description="訊息內容過長。", color=error_color)
+                else:
+                    embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
+                    embed.add_field(name="錯誤訊息", value=str(e))
         await ctx.respond(embed=embed, ephemeral=True)
 
 
