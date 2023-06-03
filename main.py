@@ -251,48 +251,33 @@ class GetTmpRole(discord.ui.View):
             await interaction.response.send_message(embed=embed)
 
 
-# def confirm_download(url: str, private: bool):
-#     yes_btn = discord.ui.Button(style=discord.ButtonStyle.primary, label="確認下載", emoji="✅")
-#     no_btn = discord.ui.Button(style=discord.ButtonStyle.danger, label="取消下載", emoji="❌")
-#
-#     async def yes_btn_callback(self, button, interaction: discord.Interaction):
-#         button.disabled = True
-#         embed = discord.Embed(
-#             title="確認下載",
-#             description="已開始下載，請稍候。",
-#             color=0x18bc1e)
-#         await interaction.response.edit_message(view=self)
-#         await interaction.response.send_message(embed=embed, ephemeral=private)
-#         result = await youtube_start_download(url)
-#         if isinstance(result, discord.File):
-#             try:
-#                 await interaction.edit_original_response(embed=None, anonymous_file=result)
-#             except Exception as e:
-#                 if "Request entity too large" in str(e):
-#                     embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
-#                     embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-#                 else:
-#                     embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
-#                     embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-#                 await interaction.edit_original_response(embed=embed)
-#         elif isinstance(result, discord.Embed):
-#             await interaction.edit_original_response(embed=result)
-#     yes_btn.callback = yes_btn_callback
-#
-#     async def no_btn_callback(self, button, interaction: discord.Interaction):
-#         button.disabled = True
-#         embed = discord.Embed(
-#             title="取消下載",
-#             description="已取消下載。",
-#             color=error_color)
-#         await interaction.response.edit_message(view=self)
-#         await interaction.response.send_message(embed=embed)
-#     no_btn.callback = no_btn_callback
-#
-#     view = discord.ui.View()
-#     view.add_item(yes_btn)
-#     view.add_item(no_btn)
-#     return view
+class GetRealName(discord.ui.Modal):
+    def __init__(self, member: discord.Member) -> None:
+        super().__init__(title="審核")
+        self.member = member
+
+        self.add_item(discord.ui.InputText(style=discord.InputTextStyle.short,
+                                           label="請輸入你的真實姓名", max_length=20, required=True))
+
+    async def callback(self, interaction: discord.Interaction):
+        embed = discord.Embed(title="已提交新的審核要求！", description="你的回應已送出！請等待管理員的審核。", color=0x57c2ea)
+        embed.add_field(name="你的帳號名稱", value=f"{interaction.user.name}#{interaction.user.discriminator}", inline=False)
+        embed.add_field(name="你的回應", value=self.children[0].value, inline=False)
+        await interaction.response.edit_message(embed=embed, view=None)
+        embed = discord.Embed(title="收到新的審核要求", description="有新的審核要求，請盡快處理。", color=0x57c2ea)
+        embed.set_thumbnail(url=interaction.user.display_avatar)
+        embed.add_field(name="帳號名稱", value=f"<@{interaction.user.id}>", inline=False)
+        embed.add_field(name="真實姓名", value=self.children[0].value, inline=False)
+        await bot.get_channel(1114444831054376971).send(embed=embed)
+
+
+class ModalToView(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+
+    @discord.ui.button(label="點此開始審核", style=discord.ButtonStyle.green, emoji="📝")
+    async def button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.send_modal(GetRealName(interaction.user))
 
 
 class ConfirmDownload(discord.ui.View):
@@ -368,27 +353,35 @@ async def run_blocking(blocking_func: typing.Callable, *args, **kwargs) -> typin
 
 @bot.event
 async def on_member_join(member):
+    guild_joined = member.guild
     embed = discord.Embed(title="歡迎新成員！", description=f"歡迎{member.mention}加入**{member.guild}**！",
                           color=0x16D863)
     join_date = member.joined_at.astimezone(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
     embed.set_footer(text=f"於 {join_date} 加入")
     embed.set_thumbnail(url=member.display_avatar)
-    await member.guild.system_channel.send(embed=embed)
+    await guild_joined.system_channel.send(embed=embed)
     json_assistant.set_join_date(member.id, join_date)
     new_member = await bot.fetch_user(member.id)
-    embed = discord.Embed(
-        title=f"歡迎加入 {member.guild.name} ！",
-        description="請到[這裡](https://discord.com/channels/857996539262402570/858373026960637962)查看頻道介紹。",
-        color=0x57c2ea)
-    await new_member.send(embed=embed)
-    embed = discord.Embed(
-        title="在開始之前...",
-        description="什麼頻道都沒看到嗎？這是因為你**並未被分配身分組**。但是放心，我們會盡快確認你的身分，到時你就能加入我們了！",
-        color=0x57c2ea)
-    await new_member.send(embed=embed)
-    embed = discord.Embed(
-        title="取得臨時身分組", description="在取得正式身分組前，請點擊下方按鈕取得臨時身分組。", color=0x57c2ea)
-    await new_member.send(embed=embed, view=GetTmpRole())
+    if guild_joined.id == 857996539262402570:
+        embed = discord.Embed(
+            title=f"歡迎加入 {member.guild.name} ！",
+            description="請到[這裡](https://discord.com/channels/857996539262402570/858373026960637962)查看頻道介紹。",
+            color=0x57c2ea)
+        await new_member.send(embed=embed)
+        embed = discord.Embed(
+            title="在開始之前...",
+            description="什麼頻道都沒看到嗎？這是因為你**並未被分配身分組**。但是放心，我們會盡快確認你的身分，到時你就能加入我們了！",
+            color=0x57c2ea)
+        await new_member.send(embed=embed)
+        embed = discord.Embed(
+            title="取得臨時身分組", description="在取得正式身分組前，請點擊下方按鈕取得臨時身分組。", color=0x57c2ea)
+        await new_member.send(embed=embed, view=GetTmpRole())
+    elif guild_joined.id == 1114203090950836284:
+        embed = discord.Embed(
+            title=f"歡迎加入 {member.guild.name} ！",
+            description="在正式加入此伺服器前，請告訴我們你的**真名**，以便我們授予你適當的權限！",
+            color=0x57c2ea)
+        await new_member.send(embed=embed, view=ModalToView())
 
 
 @bot.event
@@ -439,6 +432,16 @@ async def on_member_remove(member):
     leave_date = datetime.datetime.now(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
     embed.set_footer(text=f"於 {leave_date} 離開")
     await member.guild.system_channel.send(embed=embed)
+
+
+@bot.event
+async def on_application_command_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        embed = discord.Embed(title="指令冷卻中", description=f"這個指令正在冷卻中，請在`{round(error.retry_after)}`秒後再試。",
+                              color=error_color)
+        await ctx.respond(embed=embed, ephemeral=True)
+    else:
+        raise error
 
 
 @bot.event
@@ -870,6 +873,7 @@ async def show_anonymous_identity(ctx):
 
 
 @anonymous.command(name="send", description="透過匿名身分傳送訊息。")
+@commands.cooldown(1, 60, commands.BucketType.user)
 async def send_anonymous_msg(ctx,
                              對象: Option(discord.User, "欲傳送匿名訊息的對象", required=True),
                              訊息: Option(str, "想傳送的訊息內容", required=True)):
@@ -948,6 +952,7 @@ async def cancel_all_tos(ctx):
 
 
 @bot.slash_command(name="chat", description="(測試中)與ChatGPT對話。")
+@commands.cooldown(1, 10, commands.BucketType.user)
 async def chat(ctx,
                訊息: Option(str, "想要向ChatGPT傳送的訊息", required=True),
                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
@@ -1063,6 +1068,11 @@ async def update(ctx,
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
         私人訊息 = True
         await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
+@bot.slash_command(name="test", description="測試")
+async def test(ctx):
+    await on_member_join(ctx.guild.get_member(ctx.author.id))
 
 
 @bot.user_command(name="查看經驗值")
