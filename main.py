@@ -451,13 +451,6 @@ async def on_ready():
     real_logger.info(f"登入身分：{bot.user.name}#{bot.user.discriminator}")
     await bot.change_presence(activity=normal_activity, status=discord.Status.online)
     await check_voice_channel()
-    for guild in bot.guilds:
-        for member in guild.members:
-            member_join_date = member.joined_at.astimezone(tz=now_tz)
-            join_at_list = [member_join_date.year, member_join_date.month, member_join_date.day,
-                            member_join_date.hour, member_join_date.minute, member_join_date.second]
-            real_logger.debug(f"{member.name}: {join_at_list}")
-            json_assistant.set_join_date(member.id, join_at_list)
     await give_voice_exp.start()
 
 
@@ -558,17 +551,15 @@ async def show(ctx,
     text_level = json_assistant.get_level(使用者.id, "text")
     voice_exp = json_assistant.get_exp(使用者.id, "voice")
     voice_level = json_assistant.get_level(使用者.id, "voice")
-    avatar = 使用者.display_avatar
+    guild = ctx.guild
     embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}的經驗值", color=default_color)
     embed.add_field(name="文字等級", value=f"{text_level}", inline=False)
     embed.add_field(name="文字經驗值", value=f"{text_exp}", inline=False)
     embed.add_field(name="語音等級", value=f"{voice_level}", inline=False)
     embed.add_field(name="語音經驗值", value=f"{voice_exp}", inline=False)
-    date = json_assistant.get_join_date_in_str(使用者.id)
-    embed.add_field(name="加入時間", value=f"{date}", inline=False)
-    joined_date = json_assistant.joined_time(使用者.id)
-    embed.add_field(name="已加入", value=f"{joined_date}", inline=False)
-    embed.set_thumbnail(url=avatar)
+    date = guild.get_member(使用者.id).joined_at.astimezone(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
+    embed.add_field(name=f"加入 {ctx.guild.name} 時間", value=f"{date}", inline=False)
+    embed.set_thumbnail(url=使用者.display_avatar)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
@@ -1068,11 +1059,6 @@ async def update(ctx,
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
         私人訊息 = True
         await ctx.respond(embed=embed, ephemeral=私人訊息)
-
-
-@bot.slash_command(name="test", description="測試")
-async def test(ctx):
-    await on_member_join(ctx.guild.get_member(ctx.author.id))
 
 
 @bot.user_command(name="查看經驗值")
