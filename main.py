@@ -252,9 +252,8 @@ class GetTmpRole(discord.ui.View):
 
 
 class GetRealName(discord.ui.Modal):
-    def __init__(self, member: discord.Member) -> None:
-        super().__init__(title="審核")
-        self.member = member
+    def __init__(self) -> None:
+        super().__init__(title="審核", timeout=None)
 
         self.add_item(discord.ui.InputText(style=discord.InputTextStyle.short,
                                            label="請輸入你的真實姓名", max_length=20, required=True))
@@ -268,7 +267,8 @@ class GetRealName(discord.ui.Modal):
         embed.set_thumbnail(url=interaction.user.display_avatar)
         embed.add_field(name="帳號名稱", value=f"<@{interaction.user.id}>", inline=False)
         embed.add_field(name="真實姓名", value=self.children[0].value, inline=False)
-        await bot.get_channel(1114444831054376971).send(embed=embed)
+        server = bot.get_guild(857996539262402570)
+        await bot.get_channel(1114424382622793809).send(embed=embed, view=GiveRole(server.get_member(interaction.user.id)))
 
 
 class ModalToView(discord.ui.View):
@@ -277,7 +277,80 @@ class ModalToView(discord.ui.View):
 
     @discord.ui.button(label="點此開始審核", style=discord.ButtonStyle.green, emoji="📝")
     async def button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_modal(GetRealName(interaction.user))
+        await interaction.response.send_modal(GetRealName())
+
+
+class GiveRole(discord.ui.View):
+    def __init__(self, member: discord.Member):
+        super().__init__(timeout=None)
+        self.server = bot.get_guild(1114203090950836284)
+        self.member = member
+
+    # TODO: 修正機器人無法找到身分組的問題
+
+    @discord.ui.button(label="高一", style=discord.ButtonStyle.green, emoji="1️⃣", row=0)
+    async def grade1(self, button: discord.ui.Button, interaction: discord.Interaction):
+        grade1_role = discord.utils.get(self.server.roles, id=1114212978707923167)
+        await self.member.add_roles(grade1_role)
+        await interaction.followup.send(f"已經將 {self.member.mention} 加入 {grade1_role.mention} 身分組！")
+        embed = discord.Embed(title="身分組更新！", description=f"你已加入 {grade1_role.name} 身分組。", color=grade1_role.color)
+        await self.member.send(embed=embed)
+
+    @discord.ui.button(label="高二", style=discord.ButtonStyle.green, emoji="2️⃣", row=0)
+    async def grade2(self, button: discord.ui.Button, interaction: discord.Interaction):
+        grade2_role = discord.utils.get(self.server.roles, id=1114212714634559518)
+        await self.member.add_roles(grade2_role, reason="由管理員透過機器人分配", atomic=True)
+        await interaction.followup.send(f"已經將 {self.member.mention} 加入 {grade2_role.mention} 身分組！")
+        embed = discord.Embed(title="身分組更新！", description=f"你已加入 {grade2_role.name} 身分組。", color=grade2_role.color)
+        await self.member.send(embed=embed)
+
+    @discord.ui.button(label="老人", style=discord.ButtonStyle.green, emoji="🧓", row=0)
+    async def senior(self, button: discord.ui.Button, interaction: discord.Interaction):
+        senior_role = discord.utils.get(self.server.roles, id=1114223380535709767)
+        await self.member.add_roles(senior_role)
+        await interaction.followup.send(f"已經將 {self.member.mention} 加入 {senior_role.mention} 身分組！")
+        embed = discord.Embed(title="身分組更新！", description=f"你已加入 {senior_role.name} 身分組。", color=senior_role.color)
+        await self.member.send(embed=embed)
+
+    @discord.ui.button(label="策略組", style=discord.ButtonStyle.blurple, emoji="🧠", row=1)
+    async def strategy(self, button: discord.ui.Button, interaction: discord.Interaction):
+        strategy_role = discord.utils.get(self.server.roles, id=1114204480976719982)
+        await self.member.add_roles(strategy_role)
+        await interaction.followup.send(f"已經將 {self.member.mention} 加入 {strategy_role.mention} 身分組！")
+        embed = discord.Embed(title="身分組更新！", description=f"你已加入 {strategy_role.name} 身分組。", color=strategy_role.color)
+        await self.member.send(embed=embed)
+
+    @discord.ui.button(label="機構組", style=discord.ButtonStyle.blurple, emoji="⚙️", row=1)
+    async def mechanism(self, button: discord.ui.Button, interaction: discord.Interaction):
+        mechanism_role = discord.utils.get(self.server.roles, id=1114204794509348947)
+        await self.member.add_roles(mechanism_role)
+        await interaction.followup.send(f"已經將 {self.member.mention} 加入 {mechanism_role.mention} 身分組！")
+        embed = discord.Embed(title="身分組更新！", description=f"你已加入 {mechanism_role.name} 身分組。",
+                              color=mechanism_role.color)
+        await self.member.send(embed=embed)
+
+    @discord.ui.button(label="電資組", style=discord.ButtonStyle.blurple, emoji="⚡", row=1)
+    async def electric(self, button: discord.ui.Button, interaction: discord.Interaction):
+        electric_role = discord.utils.get(self.server.roles, id=1114205225977384971)
+        await self.member.add_roles(electric_role)
+        await interaction.followup.send(f"已經將 {self.member.mention} 加入 {electric_role.mention} 身分組！")
+        embed = discord.Embed(title="身分組更新！", description=f"你已加入 {electric_role.name} 身分組。", color=electric_role.color)
+        await self.member.send(embed=embed)
+
+    @discord.ui.button(label="管理員(危險！)", style=discord.ButtonStyle.red, emoji="⚠️", row=2)
+    async def manager(self, button: discord.ui.Button, interaction: discord.Interaction):
+        manager_role = discord.utils.get(self.server.roles, id=1114205838144454807)
+        await self.member.add_roles(manager_role)
+        await interaction.followup.send(f"已經將 {self.member.mention} 加入 {manager_role.mention} 身分組！")
+        embed = discord.Embed(title="身分組更新！", description=f"你已加入 {manager_role.name} 身分組。", color=manager_role.color)
+        await self.member.send(embed=embed)
+
+    @discord.ui.button(label="踢出(危險！)", style=discord.ButtonStyle.red, emoji="⏏️", row=2)
+    async def kick(self, button: discord.ui.Button, interaction: discord.Interaction):
+        embed = discord.Embed(title="審核失敗", description=f"由於管理員認為你的真實身分與帳號不符，你即將被踢出伺服器。", color=error_color)
+        await self.member.send(embed=embed)
+        await self.member.kick()
+        await interaction.followup.send(f"已經將 {self.member.mention} 踢出伺服器！")
 
 
 class ConfirmDownload(discord.ui.View):
@@ -359,7 +432,7 @@ async def on_member_join(member):
     join_date = member.joined_at.astimezone(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
     embed.set_footer(text=f"於 {join_date} 加入")
     embed.set_thumbnail(url=member.display_avatar)
-    await guild_joined.system_channel.send(embed=embed)
+    # await guild_joined.system_channel.send(embed=embed)
     json_assistant.set_join_date(member.id, join_date)
     new_member = await bot.fetch_user(member.id)
     if guild_joined.id == 857996539262402570:
@@ -381,48 +454,54 @@ async def on_member_join(member):
             title=f"歡迎加入 {member.guild.name} ！",
             description="在正式加入此伺服器前，請告訴我們你的**真名**，以便我們授予你適當的權限！",
             color=0x57c2ea)
-        await new_member.send(embed=embed, view=ModalToView())
+        try:
+            await new_member.send(embed=embed, view=ModalToView())
+        except discord.errors.HTTPException as error:
+            if error.code == 50007:
+                await guild_joined.system_channel.send(f"{member.mention}，由於你的私人訊息已關閉，無法透過機器人進行快速審核。")
+            else:
+                raise error
 
 
-@bot.event
-async def on_member_update(before, after):
-    server_list = []
-    for server in bot.guilds:
-        server_list.append(server)
-    only_server = server_list[0]
-    new_roles_list = {}
-    embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=default_color)
-    if before.roles == after.roles:
-        return
-    normal_role = discord.utils.get(only_server.roles, id=858365679102328872)
-    if normal_role in after.roles:
-        if normal_role not in before.roles:
-            embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0xe4b400)
-            new_roles_list["旁觀者"] = "「貓娘實驗室」中的最基本身分組。\n取得此身分組後，可以存取大多數頻道。"
-    GAMER = discord.utils.get(only_server.roles, id=993094175484559441)
-    if GAMER in after.roles:
-        if GAMER not in before.roles:
-            embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0x7f591b)
-            new_roles_list["GAMER"] = "「貓娘實驗室」中，遊戲玩家們專用的身分組。\n" \
-                                      "你現在可以存取「遊戲討論」的所有頻道！"
-    VIEWER = discord.utils.get(only_server.roles, id=1066721427862077571)
-    if VIEWER in after.roles:
-        if VIEWER not in before.roles:
-            embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0xAD1457)
-            new_roles_list["VIEWER"] = "「貓娘實驗室」中，遊戲觀眾的身分組。\n" \
-                                       "現在起，當有玩家選擇在「遊戲討論」的語音頻道中直播，你將能參與觀看！"
-    one_o_four = discord.utils.get(only_server.roles, id=1060075117822083163)
-    if one_o_four in after.roles:
-        if one_o_four not in before.roles:
-            embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0x3498DB)
-            new_roles_list["104"] = "「貓娘實驗室」中，104班同學們的專用身分組。\n" \
-                                    "你可以加入104班的專屬頻道，跟大家參與討論。"
-        if new_roles_list == {}:
-            return
-    for i in new_roles_list:
-        embed.add_field(name=i, value=new_roles_list[i], inline=False)
-    embed.set_footer(text="如果你認為被意外分配到錯誤的身分組，請聯絡管理員。")
-    await after.send(embed=embed)
+# @bot.event
+# async def on_member_update(before, after):
+#     server_list = []
+#     for server in bot.guilds:
+#         server_list.append(server)
+#     only_server = server_list[0]
+#     new_roles_list = {}
+#     embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=default_color)
+#     if before.roles == after.roles:
+#         return
+#     normal_role = discord.utils.get(only_server.roles, id=858365679102328872)
+#     if normal_role in after.roles:
+#         if normal_role not in before.roles:
+#             embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0xe4b400)
+#             new_roles_list["旁觀者"] = "「貓娘實驗室」中的最基本身分組。\n取得此身分組後，可以存取大多數頻道。"
+#     GAMER = discord.utils.get(only_server.roles, id=993094175484559441)
+#     if GAMER in after.roles:
+#         if GAMER not in before.roles:
+#             embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0x7f591b)
+#             new_roles_list["GAMER"] = "「貓娘實驗室」中，遊戲玩家們專用的身分組。\n" \
+#                                       "你現在可以存取「遊戲討論」的所有頻道！"
+#     VIEWER = discord.utils.get(only_server.roles, id=1066721427862077571)
+#     if VIEWER in after.roles:
+#         if VIEWER not in before.roles:
+#             embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0xAD1457)
+#             new_roles_list["VIEWER"] = "「貓娘實驗室」中，遊戲觀眾的身分組。\n" \
+#                                        "現在起，當有玩家選擇在「遊戲討論」的語音頻道中直播，你將能參與觀看！"
+#     one_o_four = discord.utils.get(only_server.roles, id=1060075117822083163)
+#     if one_o_four in after.roles:
+#         if one_o_four not in before.roles:
+#             embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0x3498DB)
+#             new_roles_list["104"] = "「貓娘實驗室」中，104班同學們的專用身分組。\n" \
+#                                     "你可以加入104班的專屬頻道，跟大家參與討論。"
+#         if new_roles_list == {}:
+#             return
+#     for i in new_roles_list:
+#         embed.add_field(name=i, value=new_roles_list[i], inline=False)
+#     embed.set_footer(text="如果你認為被意外分配到錯誤的身分組，請聯絡管理員。")
+#     await after.send(embed=embed)
 
 
 @bot.event
@@ -1059,6 +1138,11 @@ async def update(ctx,
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
         私人訊息 = True
         await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
+@bot.slash_command(name="test")
+async def test(ctx):
+    await on_member_join(ctx.author)
 
 
 @bot.user_command(name="查看經驗值")
