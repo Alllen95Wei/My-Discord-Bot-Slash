@@ -463,47 +463,6 @@ async def on_member_join(member):
                 raise error
 
 
-# @bot.event
-# async def on_member_update(before, after):
-#     server_list = []
-#     for server in bot.guilds:
-#         server_list.append(server)
-#     only_server = server_list[0]
-#     new_roles_list = {}
-#     embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=default_color)
-#     if before.roles == after.roles:
-#         return
-#     normal_role = discord.utils.get(only_server.roles, id=858365679102328872)
-#     if normal_role in after.roles:
-#         if normal_role not in before.roles:
-#             embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0xe4b400)
-#             new_roles_list["旁觀者"] = "「貓娘實驗室」中的最基本身分組。\n取得此身分組後，可以存取大多數頻道。"
-#     GAMER = discord.utils.get(only_server.roles, id=993094175484559441)
-#     if GAMER in after.roles:
-#         if GAMER not in before.roles:
-#             embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0x7f591b)
-#             new_roles_list["GAMER"] = "「貓娘實驗室」中，遊戲玩家們專用的身分組。\n" \
-#                                       "你現在可以存取「遊戲討論」的所有頻道！"
-#     VIEWER = discord.utils.get(only_server.roles, id=1066721427862077571)
-#     if VIEWER in after.roles:
-#         if VIEWER not in before.roles:
-#             embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0xAD1457)
-#             new_roles_list["VIEWER"] = "「貓娘實驗室」中，遊戲觀眾的身分組。\n" \
-#                                        "現在起，當有玩家選擇在「遊戲討論」的語音頻道中直播，你將能參與觀看！"
-#     one_o_four = discord.utils.get(only_server.roles, id=1060075117822083163)
-#     if one_o_four in after.roles:
-#         if one_o_four not in before.roles:
-#             embed = discord.Embed(title="獲得了新身分組！", description="你獲得了下列新的身分組！", color=0x3498DB)
-#             new_roles_list["104"] = "「貓娘實驗室」中，104班同學們的專用身分組。\n" \
-#                                     "你可以加入104班的專屬頻道，跟大家參與討論。"
-#         if new_roles_list == {}:
-#             return
-#     for i in new_roles_list:
-#         embed.add_field(name=i, value=new_roles_list[i], inline=False)
-#     embed.set_footer(text="如果你認為被意外分配到錯誤的身分組，請聯絡管理員。")
-#     await after.send(embed=embed)
-
-
 @bot.event
 async def on_member_remove(member):
     embed = discord.Embed(title="有人離開了我們...", description=f"{member.name} 離開了 **{member.guild}** ...",
@@ -1140,9 +1099,13 @@ async def update(ctx,
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
-@bot.slash_command(name="test")
+@bot.slash_command(name="test", description="測試用指令。")
 async def test(ctx):
-    await on_member_join(ctx.author)
+    if ctx.author == bot.get_user(657519721138094080):
+        await on_member_join(ctx.author)
+    else:
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+        await ctx.respond(embed=embed)
 
 
 @bot.user_command(name="查看經驗值")
