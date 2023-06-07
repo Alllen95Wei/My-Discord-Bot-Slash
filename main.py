@@ -268,7 +268,8 @@ class GetRealName(discord.ui.Modal):
         embed.add_field(name="帳號名稱", value=f"<@{interaction.user.id}>", inline=False)
         embed.add_field(name="真實姓名", value=self.children[0].value, inline=False)
         server = bot.get_guild(857996539262402570)
-        await bot.get_channel(1114424382622793809).send(embed=embed, view=GiveRole(server.get_member(interaction.user.id)))
+        await bot.get_channel(1114424382622793809).send(embed=embed, view=GiveRole(server.get_member(interaction.user.id
+                                                                                                     )))
 
 
 class ModalToView(discord.ui.View):
@@ -579,6 +580,44 @@ async def qrcode(ctx,
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
+@bot.slash_command(name="daily", description="每日簽到！")
+async def daily(ctx,
+                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+    last_claimed_time = json_assistant.get_last_daily_reward_claimed(ctx.author.id)
+    if last_claimed_time is None:
+        last_claimed_time = 0.0
+    last_claimed_time_str = datetime.datetime.utcfromtimestamp(last_claimed_time).strftime("%Y-%m-%d")
+    if time.strftime("%Y-%m-%d") == last_claimed_time_str:
+        embed = discord.Embed(title="每日簽到", description="你今天已經簽到過了！", color=error_color)
+        embed_list = [embed]
+    else:
+        random_reference = randint(1, 100)
+        if 1 <= random_reference < 95:
+            reward = 10
+            reward_text = "不錯！"
+        elif 95 <= random_reference < 100:
+            reward = 50
+            reward_text = "運氣很好！"
+        else:
+            reward = 100
+            reward_text = "歐氣爆發！"
+        json_assistant.add_exp(ctx.author.id, "text", reward)
+        json_assistant.set_last_daily_reward_claimed(ctx.author.id, time.time())
+        embed = discord.Embed(title="每日簽到", description="簽到成功！", color=default_color)
+        embed.add_field(name=reward_text, value=f"獲得*文字*經驗值`{reward}`點！", inline=False)
+        embed_list = [embed]
+        if json_assistant.level_calc(ctx.author.id, "text"):
+            real_logger.info(f"等級提升：{ctx.author.name} 文字等級"
+                             f"達到 {json_assistant.get_level(ctx.author.id, 'text')} 等")
+            embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{ctx.author.id}> *文字*等級升級到 "
+                                                            f"**{json_assistant.get_level(ctx.author.id, 'text')}"
+                                                            f"** 等！",
+                                  color=default_color)
+            embed.set_thumbnail(url=ctx.author.display_avatar)
+            embed_list.append(embed)
+    await ctx.respond(embeds=embed_list, ephemeral=私人訊息)
+
+
 user_info = bot.create_group(name="user_info", description="使用者的資訊、經驗值等。")
 
 
@@ -673,8 +712,17 @@ async def edit_exp(ctx,
         else:
             embed.add_field(name="➡️減少", value=f"*{abs(經驗值)}*", inline=True)
         embed.add_field(name="編輯後", value=after_exp, inline=True)
-        embed.set_footer(text="編輯後等級提升而未跳出通知為正常現象。下次當機器人自動增加經驗值時，即會跳出升級訊息。")
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
+        embed_list = [embed]
+        if json_assistant.level_calc(使用者.id, 類型):
+            real_logger.info(f"等級提升：{ctx.author.name} 文字等級"
+                             f"達到 {json_assistant.get_level(ctx.author.id, 'text')} 等")
+            embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{ctx.author.id}> *文字*等級升級到 "
+                                                            f"**{json_assistant.get_level(ctx.author.id, 'text')}"
+                                                            f"** 等！",
+                                  color=default_color)
+            embed.set_thumbnail(url=ctx.author.display_avatar)
+            embed_list.append(embed)
+        await ctx.respond(embeds=embed_list, ephemeral=私人訊息)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
         私人訊息 = True

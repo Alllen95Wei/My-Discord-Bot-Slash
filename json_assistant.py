@@ -17,7 +17,8 @@ def get_raw_info(user_id: int):
                       "level":
                           {"voice": 0,
                            "text": 0},
-                      "last_active_time": 0
+                      "last_active_time": 0,
+                      "last_daily_reward_claimed": 0
                       }
         return empty_data
 
@@ -136,6 +137,21 @@ def get_last_active_time(user_id: int):
 def set_last_active_time(user_id: int, time):
     user_info = get_raw_info(user_id)
     user_info["last_active_time"] = time
+    write_raw_info(user_id, user_info)
+
+
+def get_last_daily_reward_claimed(user_id: int):
+    user_info = get_raw_info(user_id)
+    try:
+        time = user_info["last_daily_reward_claimed"]
+    except KeyError:
+        time = None
+    return time
+
+
+def set_last_daily_reward_claimed(user_id: int, time):
+    user_info = get_raw_info(user_id)
+    user_info["last_daily_reward_claimed"] = time
     write_raw_info(user_id, user_info)
 
 
