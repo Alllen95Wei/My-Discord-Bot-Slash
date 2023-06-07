@@ -905,7 +905,6 @@ async def show_anonymous_identity(ctx):
 
 
 @anonymous.command(name="send", description="透過匿名身分傳送訊息。")
-@commands.cooldown(1, 60, commands.BucketType.user)
 async def send_anonymous_msg(ctx,
                              對象: Option(discord.User, "欲傳送匿名訊息的對象", required=True),
                              訊息: Option(str, "想傳送的訊息內容", required=True)):
