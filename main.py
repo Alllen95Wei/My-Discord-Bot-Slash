@@ -268,7 +268,7 @@ class GetRealName(discord.ui.Modal):
         embed.add_field(name="帳號名稱", value=f"<@{interaction.user.id}>", inline=False)
         embed.add_field(name="真實姓名", value=self.children[0].value, inline=False)
         server = bot.get_guild(857996539262402570)
-        await bot.get_channel(1114424382622793809).send(embed=embed, view=GiveRole(server.get_member(interaction.user.id
+        await bot.get_channel(1114444831054376971).send(embed=embed, view=GiveRole(server.get_member(interaction.user.id
                                                                                                      )))
 
 
