@@ -284,13 +284,14 @@ class GiveRole(discord.ui.View):
     def __init__(self, member: discord.Member):
         super().__init__(timeout=None)
         self.server = bot.get_guild(1114203090950836284)
+        self.server_roles = self.server.roles
         self.member = member
 
     # TODO: 修正機器人無法找到身分組的問題
 
     @discord.ui.button(label="高一", style=discord.ButtonStyle.green, emoji="1️⃣", row=0)
     async def grade1(self, button: discord.ui.Button, interaction: discord.Interaction):
-        grade1_role = discord.utils.get(self.server.roles, id=1114212978707923167)
+        grade1_role = self.server.get_role(1114212978707923167)
         await self.member.add_roles(grade1_role)
         await interaction.followup.send(f"已經將 {self.member.mention} 加入 {grade1_role.mention} 身分組！")
         embed = discord.Embed(title="身分組更新！", description=f"你已加入 {grade1_role.name} 身分組。", color=grade1_role.color)
@@ -298,15 +299,16 @@ class GiveRole(discord.ui.View):
 
     @discord.ui.button(label="高二", style=discord.ButtonStyle.green, emoji="2️⃣", row=0)
     async def grade2(self, button: discord.ui.Button, interaction: discord.Interaction):
-        grade2_role = discord.utils.get(self.server.roles, id=1114212714634559518)
-        await self.member.add_roles(grade2_role, reason="由管理員透過機器人分配", atomic=True)
+        grade2_role = self.server.get_role(1114212714634559518)
+        print(type(grade2_role))
+        await self.member.add_roles(grade2_role, reason="由管理員透過機器人分配")
         await interaction.followup.send(f"已經將 {self.member.mention} 加入 {grade2_role.mention} 身分組！")
         embed = discord.Embed(title="身分組更新！", description=f"你已加入 {grade2_role.name} 身分組。", color=grade2_role.color)
         await self.member.send(embed=embed)
 
     @discord.ui.button(label="老人", style=discord.ButtonStyle.green, emoji="🧓", row=0)
     async def senior(self, button: discord.ui.Button, interaction: discord.Interaction):
-        senior_role = discord.utils.get(self.server.roles, id=1114223380535709767)
+        senior_role = discord.utils.get(self.server_roles, id=1114223380535709767)
         await self.member.add_roles(senior_role)
         await interaction.followup.send(f"已經將 {self.member.mention} 加入 {senior_role.mention} 身分組！")
         embed = discord.Embed(title="身分組更新！", description=f"你已加入 {senior_role.name} 身分組。", color=senior_role.color)
@@ -314,7 +316,7 @@ class GiveRole(discord.ui.View):
 
     @discord.ui.button(label="策略組", style=discord.ButtonStyle.blurple, emoji="🧠", row=1)
     async def strategy(self, button: discord.ui.Button, interaction: discord.Interaction):
-        strategy_role = discord.utils.get(self.server.roles, id=1114204480976719982)
+        strategy_role = discord.utils.get(self.server_roles, id=1114204480976719982)
         await self.member.add_roles(strategy_role)
         await interaction.followup.send(f"已經將 {self.member.mention} 加入 {strategy_role.mention} 身分組！")
         embed = discord.Embed(title="身分組更新！", description=f"你已加入 {strategy_role.name} 身分組。", color=strategy_role.color)
@@ -322,7 +324,7 @@ class GiveRole(discord.ui.View):
 
     @discord.ui.button(label="機構組", style=discord.ButtonStyle.blurple, emoji="⚙️", row=1)
     async def mechanism(self, button: discord.ui.Button, interaction: discord.Interaction):
-        mechanism_role = discord.utils.get(self.server.roles, id=1114204794509348947)
+        mechanism_role = discord.utils.get(self.server_roles, id=1114204794509348947)
         await self.member.add_roles(mechanism_role)
         await interaction.followup.send(f"已經將 {self.member.mention} 加入 {mechanism_role.mention} 身分組！")
         embed = discord.Embed(title="身分組更新！", description=f"你已加入 {mechanism_role.name} 身分組。",
@@ -331,7 +333,7 @@ class GiveRole(discord.ui.View):
 
     @discord.ui.button(label="電資組", style=discord.ButtonStyle.blurple, emoji="⚡", row=1)
     async def electric(self, button: discord.ui.Button, interaction: discord.Interaction):
-        electric_role = discord.utils.get(self.server.roles, id=1114205225977384971)
+        electric_role = discord.utils.get(self.server_roles, id=1114205225977384971)
         await self.member.add_roles(electric_role)
         await interaction.followup.send(f"已經將 {self.member.mention} 加入 {electric_role.mention} 身分組！")
         embed = discord.Embed(title="身分組更新！", description=f"你已加入 {electric_role.name} 身分組。", color=electric_role.color)
@@ -339,7 +341,7 @@ class GiveRole(discord.ui.View):
 
     @discord.ui.button(label="管理員(危險！)", style=discord.ButtonStyle.red, emoji="⚠️", row=2)
     async def manager(self, button: discord.ui.Button, interaction: discord.Interaction):
-        manager_role = discord.utils.get(self.server.roles, id=1114205838144454807)
+        manager_role = discord.utils.get(self.server_roles, id=1114205838144454807)
         await self.member.add_roles(manager_role)
         await interaction.followup.send(f"已經將 {self.member.mention} 加入 {manager_role.mention} 身分組！")
         embed = discord.Embed(title="身分組更新！", description=f"你已加入 {manager_role.name} 身分組。", color=manager_role.color)
@@ -432,7 +434,7 @@ async def on_member_join(member):
     join_date = member.joined_at.astimezone(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
     embed.set_footer(text=f"於 {join_date} 加入")
     embed.set_thumbnail(url=member.display_avatar)
-    # await guild_joined.system_channel.send(embed=embed)
+    await guild_joined.system_channel.send(embed=embed)
     json_assistant.set_join_date(member.id, join_date)
     new_member = await bot.fetch_user(member.id)
     if guild_joined.id == 857996539262402570:
@@ -458,7 +460,8 @@ async def on_member_join(member):
             await new_member.send(embed=embed, view=ModalToView())
         except discord.errors.HTTPException as error:
             if error.code == 50007:
-                await guild_joined.system_channel.send(f"{member.mention}，由於你的私人訊息已關閉，無法透過機器人進行快速審核。")
+                await guild_joined.system_channel.send(f"{member.mention}，由於你的私人訊息已關閉，無法透過機器人進行快速審核。\n"
+                                                       f"請私訊管理員你的**真名**，以便我們授予你適當的身分組！")
             else:
                 raise error
 
