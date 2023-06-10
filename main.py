@@ -498,7 +498,7 @@ async def on_ready():
 
 @bot.slash_command(name="help", description="提供指令協助。")
 async def help(ctx,
-               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     embed = discord.Embed(title="指令協助", color=default_color)
     embed.add_field(name="想要知道如何使用本機器人？", value="請參閱在GitHub上的[Wiki]"
                     "(https://github.com/Alllen95Wei/My-Discord-Bot-Slash/wiki/)。")
@@ -507,7 +507,7 @@ async def help(ctx,
 
 @bot.slash_command(name="about", description="提供關於這隻機器人的資訊。")
 async def about(ctx,
-                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     embed = discord.Embed(title="關於", color=default_color)
     embed.set_thumbnail(url=bot.user.display_avatar)
     embed.add_field(name="程式碼與授權", value="本機器人由<@657519721138094080>維護，使用[Py-cord]"
@@ -527,8 +527,8 @@ async def about(ctx,
 
 @bot.slash_command(name="ama", description="就是8號球，給你這個問題的隨機回答。")
 async def ama(ctx,
-              問題: Option(str, "你要問的問題", required=True),
-              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+              問題: Option(str, "你要問的問題", required=True),  # noqa
+              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     ans1 = ("g", "s", "b")
     ans_g = ("看起來不錯喔", "肯定的", "我覺得可行", "絕對OK", "是的", "確定", "200 OK", "100 Continue",
              "Just do it")
@@ -561,7 +561,7 @@ async def ama(ctx,
 async def random(ctx,
                  range_min: Option(name="min", description="最小值", required=False, input_type=int) = 0,
                  range_max: Option(name="max", description="最大值", required=False, input_type=int) = 100,
-                 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     ans = randint(int(range_min), int(range_max))
     embed = discord.Embed(title="隨機", description=f"數字範圍：{range_min}~{range_max}", color=default_color)
     embed.add_field(name="結果", value=f"`{ans}`", inline=False)
@@ -570,8 +570,8 @@ async def random(ctx,
 
 @bot.slash_command(name="qrcode", description="將輸入的文字轉為QR Code。")
 async def qrcode(ctx,
-                 內容: Option(str, "要轉換的文字", required=True),
-                 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                 內容: Option(str, "要轉換的文字", required=True),  # noqa
+                 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     import urllib.parse
     text = urllib.parse.quote(內容)
     url = f"https://chart.apis.google.com/chart?cht=qr&chs=500x500&choe=UTF-8&chld=H|1&chl={text}"
@@ -582,7 +582,7 @@ async def qrcode(ctx,
 
 @bot.slash_command(name="daily", description="每日簽到！")
 async def daily(ctx,
-                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     last_claimed_time = json_assistant.get_last_daily_reward_claimed(ctx.author.id)
     if last_claimed_time is None:
         last_claimed_time = 0.0
@@ -623,10 +623,10 @@ user_info = bot.create_group(name="user_info", description="使用者的資訊�
 
 @user_info.command(name="show", description="顯示使用者的資訊。")
 async def show(ctx,
-               使用者: Option(discord.Member, "要查詢的使用者", required=False) = None,
-               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+               使用者: Option(discord.Member, "要查詢的使用者", required=False) = None,  # noqa
+               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     if 使用者 is None:
-        使用者 = ctx.author
+        使用者 = ctx.author  # noqa
     text_exp = json_assistant.get_exp(使用者.id, "text")
     text_level = json_assistant.get_level(使用者.id, "text")
     voice_exp = json_assistant.get_exp(使用者.id, "voice")
@@ -645,10 +645,10 @@ async def show(ctx,
 
 @user_info.command(name="require", description="查詢距離下次升等還差多少經驗值。")
 async def require(ctx,
-                  使用者: Option(discord.Member, "要查詢的使用者", required=False) = None,
-                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                  使用者: Option(discord.Member, "要查詢的使用者", required=False) = None,  # noqa
+                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     if 使用者 is None:
-        使用者 = ctx.author
+        使用者 = ctx.author  # noqa
     text_lvl = json_assistant.get_level(使用者.id, "text")
     text_require = json_assistant.upgrade_exp_needed(使用者.id, "text")
     text_now = json_assistant.get_exp(使用者.id, "text")
@@ -696,10 +696,10 @@ edit = user_info.create_subgroup(name="edit", description="編輯使用者的資
 
 @user_info.command(name="edit_exp", description="編輯使用者的經驗值。")
 async def edit_exp(ctx,
-                   使用者: Option(discord.Member, "要編輯的使用者", required=True),
-                   類型: Option(str, "要編輯的經驗值類型", required=True, choices=["text", "voice"]),
-                   經驗值: Option(int, "要編輯的經驗值數量，若要扣除則輸入負值", required=True),
-                   私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                   使用者: Option(discord.Member, "要編輯的使用者", required=True),  # noqa
+                   類型: Option(str, "要編輯的經驗值類型", required=True, choices=["text", "voice"]),  # noqa
+                   經驗值: Option(int, "要編輯的經驗值數量，若要扣除則輸入負值", required=True),  # noqa
+                   私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     if ctx.author == bot.get_user(657519721138094080):
         before_exp = json_assistant.get_exp(使用者.id, 類型)
         json_assistant.add_exp(使用者.id, 類型, 經驗值)
@@ -725,16 +725,16 @@ async def edit_exp(ctx,
         await ctx.respond(embeds=embed_list, ephemeral=私人訊息)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True
+        私人訊息 = True  # noqa
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @user_info.command(name="edit_lvl", description="編輯使用者的等級。")
 async def edit_lvl(ctx,
-                   使用者: Option(discord.Member, "要編輯的使用者", required=True),
-                   類型: Option(str, "要編輯的等級類型", required=True, choices=["text", "voice"]),
-                   等級: Option(int, "要編輯的等級數量，若要扣除則輸入負值", required=True),
-                   私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                   使用者: Option(discord.Member, "要編輯的使用者", required=True),  # noqa
+                   類型: Option(str, "要編輯的等級類型", required=True, choices=["text", "voice"]),  # noqa
+                   等級: Option(int, "要編輯的等級數量，若要扣除則輸入負值", required=True),  # noqa
+                   私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     if ctx.author == bot.get_user(657519721138094080):
         before_lvl = json_assistant.get_level(使用者.id, 類型)
         json_assistant.add_level(使用者.id, 類型, 等級)
@@ -751,14 +751,14 @@ async def edit_lvl(ctx,
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True
+        私人訊息 = True  # noqa
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @user_info.command(name="enable", description="開關經驗值計算功能。")
 async def enable(ctx,
-                 啟用: Option(bool, "是否啟用經驗值計算功能", required=False) = None,
-                 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                 啟用: Option(bool, "是否啟用經驗值計算功能", required=False) = None,  # noqa
+                 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     global exp_enabled
     if ctx.author == bot.get_user(657519721138094080):
         if 啟用 is None:
@@ -774,13 +774,13 @@ async def enable(ctx,
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True
+        私人訊息 = True  # noqa: PEP 3131
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="sizecheck", description="檢查\"C:\\MusicBot\\audio_cache\"的大小。")
 async def sizecheck(ctx,
-                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     size = check_folder_size.check_size()
     embed = discord.Embed(title="資料夾大小", description=size, color=default_color)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
@@ -789,8 +789,8 @@ async def sizecheck(ctx,
 @bot.slash_command(name="ytdl", description="將YouTube影片下載為mp3。由於Discord有"
                                             "檔案大小限制，因此有時可能會失敗。")
 async def ytdl(ctx,
-               連結: Option(str, "欲下載的YouTube影片網址", required=True),
-               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+               連結: Option(str, "欲下載的YouTube影片網址", required=True),    # noqa: PEP 3131
+               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     await ctx.defer(ephemeral=私人訊息)
     length = yt_download.get_length(連結)
     if length > 512:
@@ -821,8 +821,8 @@ async def ytdl(ctx,
 @bot.slash_command(name="rc",
                    description="重新連接至語音頻道。可指定頻道，否則將自動檢測音樂機器人及Allen Why在哪個頻道並加入。")
 async def rc(ctx,
-             頻道: Option(discord.VoiceChannel, "指定要加入的頻道", required=False),
-             私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+             頻道: Option(discord.VoiceChannel, "指定要加入的頻道", required=False),  # noqa: PEP 3131
+             私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     if 頻道 is None:
         msg = await check_voice_channel()
         if isinstance(msg, int):
@@ -846,7 +846,7 @@ async def rc(ctx,
 
 @bot.slash_command(name="dc", description="從目前的語音頻道中斷連接。")
 async def dc(ctx,
-             私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+             私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     try:
         await ctx.guild.change_voice_state(channel=None)
         embed = discord.Embed(title="已斷開連接", description="已經從語音頻道中斷連接。", color=default_color)
@@ -860,7 +860,7 @@ async def dc(ctx,
 
 @bot.slash_command(name="dps", description="查詢伺服器電腦的CPU及記憶體使用率。")
 async def dps(ctx,
-              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     embed = discord.Embed(title="伺服器電腦資訊", color=default_color)
     embed.add_field(name="CPU使用率", value=f"{detect_pc_status.get_cpu_usage()}%")
     embed.add_field(name="記憶體使用率", value=f"{detect_pc_status.get_ram_usage_detail()}")
@@ -869,7 +869,7 @@ async def dps(ctx,
 
 @bot.slash_command(name="ping", description="查詢機器人PING值(ms)。")
 async def ping(ctx,
-               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     embed = discord.Embed(title="PONG!✨", color=default_color)
     embed.add_field(name="PING值", value=f"`{round(bot.latency * 1000)}` ms")
     await ctx.respond(embed=embed, ephemeral=私人訊息)
@@ -897,7 +897,7 @@ async def TOS(ctx):
 
 @anonymous.command(name="agree_tos", description="同意匿名訊息服務的使用條款。")
 async def agree_TOS(ctx,
-                    同意: Option(bool, "是否同意匿名訊息服務的使用條款", required=True)):
+                    同意: Option(bool, "是否同意匿名訊息服務的使用條款", required=True)):  # noqa: PEP 3131
     if 同意 is True:
         json_assistant.set_agree_TOS_of_anonymous(ctx.author.id, True)
         real_logger.anonymous(f"{ctx.author} 同意匿名訊息服務的使用條款。")
@@ -915,7 +915,7 @@ async def agree_TOS(ctx,
 
 @anonymous.command(name="register", description="建立新的匿名身分。")
 async def register(ctx,
-                   身分: Option(str, choices=identity_choices, description="選擇想要的動物身分", required=True)):
+                   身分: Option(str, choices=identity_choices, description="選擇想要的動物身分", required=True)):  # noqa: PEP 3131
     try:
         user_identity = json_assistant.get_anonymous_identity(ctx.author.id)
         embed = discord.Embed(title="錯誤", description="你已建立過匿名身分，無法再建立其他匿名身分。", color=error_color)
@@ -954,8 +954,8 @@ async def show_anonymous_identity(ctx):
 
 @anonymous.command(name="send", description="透過匿名身分傳送訊息。")
 async def send_anonymous_msg(ctx,
-                             對象: Option(discord.User, "欲傳送匿名訊息的對象", required=True),
-                             訊息: Option(str, "想傳送的訊息內容", required=True)):
+                             對象: Option(discord.User, "欲傳送匿名訊息的對象", required=True),  # noqa: PEP 3131
+                             訊息: Option(str, "想傳送的訊息內容", required=True)):  # noqa: PEP 3131
     if json_assistant.get_agree_TOS_of_anonymous(ctx.author.id) is False:
         await TOS(ctx)
     else:
@@ -998,7 +998,7 @@ async def send_anonymous_msg(ctx,
 
 @anonymous.command(name="allow", description="允許或拒絕接收匿名訊息。")
 async def allow_anonymous_msg(ctx,
-                              允許: Option(bool, "是否允許接收匿名訊息", required=True)):
+                              允許: Option(bool, "是否允許接收匿名訊息", required=True)):  # noqa: PEP 3131
     if json_assistant.get_agree_TOS_of_anonymous(ctx.author.id) is False:
         await TOS(ctx)
     else:
@@ -1033,8 +1033,8 @@ async def cancel_all_tos(ctx):
 @bot.slash_command(name="chat", description="(測試中)與ChatGPT對話。")
 @commands.cooldown(1, 10, commands.BucketType.user)
 async def chat(ctx,
-               訊息: Option(str, "想要向ChatGPT傳送的訊息", required=True),
-               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+               訊息: Option(str, "想要向ChatGPT傳送的訊息", required=True),  # noqa: PEP 3131
+               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     global last_chat_used_time
     if time.time() - last_chat_used_time >= 5:
         await ctx.defer(ephemeral=私人訊息)
@@ -1050,13 +1050,13 @@ async def chat(ctx,
                         value="由於ChatGPT的時間限制，我們不能在短時間內傳送過多要求，否則可能會無法得到回應。\n"
                               "為避免此問題，我們才設計了此機制，以避免使用者的體驗不佳。",
                         inline=False)
-        私人訊息 = True
+        私人訊息 = True  # noqa: PEP 3131
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="restart", description="重啟機器人。")
 async def restart(ctx,
-                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     if ctx.author == bot.get_user(657519721138094080):
         embed = discord.Embed(title="機器人重啟中", description="機器人正在重啟中。", color=default_color)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
@@ -1065,13 +1065,13 @@ async def restart(ctx,
         upd.restart_running_bot(os.getpid(), system())
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True
+        私人訊息 = True  # noqa: PEP 3131
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="screenshot", description="在機器人伺服器端截圖。")
 async def screenshot(ctx,
-                     私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                     私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     if ctx.author == bot.get_user(657519721138094080):
         try:
             await ctx.defer()
@@ -1086,16 +1086,16 @@ async def screenshot(ctx,
             await ctx.respond(embed=embed, ephemeral=私人訊息)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True
+        私人訊息 = True  # noqa: PEP 3131
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="cmd", description="在伺服器端執行指令並傳回結果。")
 async def cmd(ctx,
-              指令: Option(str, "要執行的指令", required=True),
-              執行模組: Option(str, choices=["subprocess", "os"], description="執行指令的模組",
+              指令: Option(str, "要執行的指令", required=True),  # noqa: PEP 3131
+              執行模組: Option(str, choices=["subprocess", "os"], description="執行指令的模組",  # noqa: PEP 3131
                            required=False) = "subprocess",
-              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+              私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     if ctx.author == bot.get_user(657519721138094080):
         try:
             await ctx.defer(ephemeral=私人訊息)
@@ -1121,14 +1121,14 @@ async def cmd(ctx,
             embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True
+        私人訊息 = True  # noqa: PEP 3131
     try:
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     except discord.errors.HTTPException as HTTPError:
         if "fewer in length" in str(HTTPError):
             txt_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "full_msg.txt")
             with open(txt_file_path, "w") as file:
-                file.write(str(result))
+                file.write(str(result))  # noqa
             await ctx.respond("由於訊息長度過長，因此改以文字檔方式呈現。", file=discord.File(txt_file_path),
                               ephemeral=私人訊息)
             os.remove(txt_file_path)
@@ -1136,7 +1136,7 @@ async def cmd(ctx,
 
 @bot.slash_command(name="update", description="更新機器人。")
 async def update(ctx,
-                 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):
+                 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     if ctx.author == bot.get_user(657519721138094080):
         embed = discord.Embed(title="更新中", description="更新流程啟動。", color=default_color)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
@@ -1145,7 +1145,7 @@ async def update(ctx,
         upd.update(os.getpid(), system())
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True
+        私人訊息 = True  # noqa: PEP 3131
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
