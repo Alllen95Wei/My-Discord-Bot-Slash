@@ -1198,6 +1198,8 @@ async def on_message(message):
         if time_delta < 300:
             return
         if "Direct Message" in str(message.channel):
+            embed = discord.Embed(title="是不是傳錯人了...？", description="很抱歉，目前本機器人不接受私人訊息。", color=error_color)
+            await message.channel.send(embed=embed)
             return
         if not message.author.bot and isinstance(msg_in, str):
             if len(msg_in) <= 15:
