@@ -631,14 +631,19 @@ async def show(ctx,
     text_level = json_assistant.get_level(使用者.id, "text")
     voice_exp = json_assistant.get_exp(使用者.id, "voice")
     voice_level = json_assistant.get_level(使用者.id, "voice")
-    guild = ctx.guild
     embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}的經驗值", color=default_color)
     embed.add_field(name="文字等級", value=f"{text_level}", inline=False)
     embed.add_field(name="文字經驗值", value=f"{text_exp}", inline=False)
     embed.add_field(name="語音等級", value=f"{voice_level}", inline=False)
     embed.add_field(name="語音經驗值", value=f"{voice_exp}", inline=False)
-    date = guild.get_member(使用者.id).joined_at.astimezone(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
-    embed.add_field(name=f"加入 {ctx.guild.name} 時間", value=f"{date}", inline=False)
+    if isinstance(使用者, discord.member.Member):
+        guild = ctx.guild
+        guild_name = guild.name
+        date = guild.get_member(使用者.id).joined_at.astimezone(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
+    elif isinstance(使用者, discord.user.User):
+        guild_name = "Discord"
+        date = 使用者.created_at.astimezone(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
+    embed.add_field(name=f"加入 {guild_name} 時間", value=f"{date}", inline=False)
     embed.set_thumbnail(url=使用者.display_avatar)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
