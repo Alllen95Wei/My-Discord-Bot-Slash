@@ -1180,6 +1180,8 @@ async def on_application_command(ctx):
 
 @bot.event
 async def on_message(message):
+    if message.author == bot.user:
+        return
     msg_in = message.content
     exclude_channel = [1035754607286169631, 1035754607286169631, 891665312028713001]
     if message.channel.id == 891665312028713001:
