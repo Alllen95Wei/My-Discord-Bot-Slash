@@ -592,11 +592,11 @@ async def daily(ctx,
         embed = discord.Embed(title="每日簽到", description="你今天已經簽到過了！", color=error_color)
         embed_list = [embed]
     else:
-        random_reference = randint(1, 100)
-        if 1 <= random_reference < 95:
+        random_reference = randint(1, 200)
+        if 1 <= random_reference < 180:
             reward = 10
             reward_text = "不錯！"
-        elif 95 <= random_reference < 100:
+        elif 180 <= random_reference < 195:
             reward = 50
             reward_text = "運氣很好！"
         else:
