@@ -163,6 +163,7 @@ async def give_voice_exp() -> None:  # 給予語音經驗
                                                                   f" 等！",
                                                       color=default_color)
                                 embed.set_thumbnail(url=member.display_avatar)
+                                embed.set_footer(text="關於經驗值計算系統，請輸入/user_info about")
                                 await member.send(embed=embed)
 
 
@@ -645,6 +646,7 @@ async def show(ctx,
         date = 使用者.created_at.astimezone(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
     embed.add_field(name=f"加入 {guild_name} 時間", value=f"{date}", inline=False)
     embed.set_thumbnail(url=使用者.display_avatar)
+    embed.set_footer(text="關於經驗值計算系統，請輸入/user_info about")
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
@@ -669,7 +671,7 @@ async def require(ctx,
     embed.add_field(name=f"語音等級：{voice_lvl}",
                     value=f"升級需要`{voice_require}`點\n目前：`{voice_now}`點 ({voice_percent}%)",
                     inline=False)
-    embed.set_footer(text="關於升等所需的經驗值，請輸入/user_info about")
+    embed.set_footer(text="關於經驗值計算系統，請輸入/user_info about")
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
@@ -1215,9 +1217,6 @@ async def on_message(message):
             else:
                 json_assistant.add_exp(message.author.id, "text", 15)
                 real_logger.info(f"獲得經驗值：{message.author.name} 文字經驗值 +15 (訊息長度：{len(msg_in)})")
-        elif not message.author.bot and isinstance(msg_in, discord.File):
-            real_logger.info(f"獲得經驗值：{message.author.name} 文字經驗值 +1 (傳送檔案)")
-            json_assistant.add_exp(message.author.id, "text", 1)
         json_assistant.set_last_active_time(message.author.id, time.time())
         if json_assistant.level_calc(message.author.id, "text"):
             real_logger.info(f"等級提升：{message.author.name} 文字等級"
@@ -1227,6 +1226,7 @@ async def on_message(message):
                                                             f"** 等！",
                                   color=default_color)
             embed.set_thumbnail(url=message.author.display_avatar)
+            embed.set_footer(text="關於經驗值計算系統，請輸入/user_info about")
             await message.channel.send(embed=embed)
 
 
