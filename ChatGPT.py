@@ -5,7 +5,7 @@ from os import getenv
 
 load_dotenv("TOKEN.env")
 auth = Auth0(email=str(getenv("email")), password=str(getenv("password")))
-access_token = auth.auth()
+access_token = auth.get_access_token()
 chatbot = Chatbot(config={"access_token": access_token})
 
 
