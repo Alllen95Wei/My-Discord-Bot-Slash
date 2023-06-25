@@ -596,10 +596,10 @@ async def daily(ctx,
         if 1 <= random_reference < 101:
             reward = 10
             reward_text = "不錯！"
-        elif 101 <= random_reference < 180:
+        elif 101 <= random_reference < 181:
             reward = 20
             reward_text = "運氣很好！"
-        elif 180 <= random_reference < 195:
+        elif 181 <= random_reference < 195:
             reward = 50
             reward_text = "歐氣爆發！"
         else:
