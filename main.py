@@ -593,15 +593,18 @@ async def daily(ctx,
         embed_list = [embed]
     else:
         random_reference = randint(1, 200)
-        if 1 <= random_reference < 180:
+        if 1 <= random_reference < 101:
             reward = 10
             reward_text = "不錯！"
+        elif 101 <= random_reference < 180:
+            reward = 20
+            reward_text = "運氣很好！"
         elif 180 <= random_reference < 195:
             reward = 50
-            reward_text = "運氣很好！"
+            reward_text = "歐氣爆發！"
         else:
             reward = 100
-            reward_text = "歐氣爆發！"
+            reward_text = "？？？！！！"
         json_assistant.add_exp(ctx.author.id, "text", reward)
         json_assistant.set_last_daily_reward_claimed(ctx.author.id, time.time())
         embed = discord.Embed(title="每日簽到", description="簽到成功！", color=default_color)
