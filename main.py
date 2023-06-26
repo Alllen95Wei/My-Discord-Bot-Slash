@@ -617,7 +617,7 @@ async def daily(ctx,
         for j in rewards_list:
             # 列出所有點數獎勵出現的次數
             embed.add_field(name=f"{j}點", value=f"{daily_reward_prob_raw_data[str(j)]}次 "
-                                                f"({round(daily_reward_prob_raw_data[str(j)]/sum_of_rewards, 3)*100} %)"
+                                                f"({round(daily_reward_prob_raw_data[str(j)]/sum_of_rewards*100, 1)} %)"
                             , inline=False)
         embed_list = [embed]
         if json_assistant.level_calc(ctx.author.id, "text"):
