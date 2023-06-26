@@ -3,7 +3,7 @@ import os
 import datetime
 
 
-def get_raw_info(user_id: int):
+def get_raw_info(user_id: [int, str]):
     file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", str(user_id) + ".json")
     if os.path.exists(file):
         with open(file, "r") as f:
@@ -245,3 +245,30 @@ def set_agree_TOS_of_anonymous(user_id: int, allow: bool):
     except KeyError:
         raw_data[str(user_id)] = {"agree_TOS": allow}
     write_anonymous_raw_data(raw_data)
+
+
+def get_daily_reward_probability() -> dict:
+    file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", "daily_reward_prob.json")
+    if os.path.exists(file):
+        with open(file, "r") as f:
+            user_info = json.loads(f.read())
+            return user_info
+    else:
+        empty_data = {
+            10: 0,
+            20: 0,
+            50: 0,
+            100: 0
+                      }
+        return empty_data
+
+
+def add_daily_reward_probability(points: int):
+    file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", "daily_reward_prob.json")
+    user_info = get_daily_reward_probability()
+    try:
+        user_info[str(points)] += 1
+    except KeyError:
+        user_info[str(points)] = 1
+    with open(file, "w") as f:
+        json.dump(user_info, f, indent=2)
