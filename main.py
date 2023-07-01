@@ -142,7 +142,6 @@ async def give_voice_exp() -> None:  # 給予語音經驗
     for server in bot.guilds:
         for channel in server.channels:
             if channel.type == discord.ChannelType.voice and channel.id not in exclude_channel:
-                voice_channel_lists.append(channel)
                 members = channel.members
                 active_human_members = []
                 for member in members:  # 將機器人、靜音/拒聽的成員排除
