@@ -413,7 +413,6 @@ async def youtube_start_download(url: str, msg_to_delete=None) -> discord.File:
     file_name = yt_download.get_id(url)
     mp3_file_name = file_name + ".mp3"
     mp3_file_path = os.path.join(base_dir, "ytdl", mp3_file_name)
-    await bot.change_presence(status=discord.Status.idle)
     if os.path.exists(mp3_file_path) or main_dl(url, file_name, mp3_file_name) == "finished":
         if msg_to_delete:
             await msg_to_delete.delete()
