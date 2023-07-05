@@ -556,18 +556,14 @@ async def ama(ctx,
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
-@bot.slash_command(name="random", description="在指定數字範圍隨機取得一數，不指定範圍則設為1~100。")
+@bot.slash_command(name="random", description="在指定數字範圍隨機取得一數。")
 async def random(ctx,
-                 range_min: Option(name="min", description="最小值", required=False, input_type=int) = 0,
-                 range_max: Option(name="max", description="最大值", required=False, input_type=int) = 100,
+                 range_min: Option(name="min", description="最小值", required=True, input_type=int),
+                 range_max: Option(name="max", description="最大值", required=True, input_type=int),
                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
-    if range_max < range_min:
-        embed = discord.Embed(title="錯誤", description="最大值不可小於最小值。", color=error_color)
-        私人訊息 = True
-    else:
-        ans = randint(int(range_min), int(range_max))
-        embed = discord.Embed(title="隨機", description=f"數字範圍：{range_min}~{range_max}", color=default_color)
-        embed.add_field(name="結果", value=f"`{ans}`", inline=False)
+    ans = randint(int(range_min), int(range_max))
+    embed = discord.Embed(title="隨機", description=f"數字範圍：{range_min}~{range_max}", color=default_color)
+    embed.add_field(name="結果", value=f"`{ans}`", inline=False)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
