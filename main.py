@@ -562,10 +562,12 @@ async def random(ctx,
                  range_max: Option(name="max", description="最大值", required=False, input_type=int) = 100,
                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     if range_max < range_min:
-        range_max, range_min = range_min, range_max
-    ans = randint(int(range_min), int(range_max))
-    embed = discord.Embed(title="隨機", description=f"數字範圍：{range_min}~{range_max}", color=default_color)
-    embed.add_field(name="結果", value=f"`{ans}`", inline=False)
+        embed = discord.Embed(title="錯誤", description="最大值不可小於最小值。", color=error_color)
+        私人訊息 = True
+    else:
+        ans = randint(int(range_min), int(range_max))
+        embed = discord.Embed(title="隨機", description=f"數字範圍：{range_min}~{range_max}", color=default_color)
+        embed.add_field(name="結果", value=f"`{ans}`", inline=False)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
