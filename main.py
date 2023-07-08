@@ -585,7 +585,7 @@ async def daily(ctx,
     last_claimed_time = json_assistant.get_last_daily_reward_claimed(ctx.author.id)
     if last_claimed_time is None:
         last_claimed_time = 0.0
-    last_claimed_time_str = datetime.datetime.utcfromtimestamp(last_claimed_time).strftime("%Y-%m-%d")
+    last_claimed_time_str = datetime.datetime.fromtimestamp(last_claimed_time, tz=now_tz).strftime("%Y-%m-%d")
     if time.strftime("%Y-%m-%d") == last_claimed_time_str:
         embed = discord.Embed(title="每日簽到", description="你今天已經簽到過了！", color=error_color)
         embed_list = [embed]
