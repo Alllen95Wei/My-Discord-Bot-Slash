@@ -618,7 +618,6 @@ async def daily(ctx,
             embed.add_field(name=f"{j}點", value=f"{daily_reward_prob_raw_data[str(j)]}次 "
                                                 f"({round(daily_reward_prob_raw_data[str(j)]/sum_of_rewards*100, 1)} %)"
                             , inline=False)
-        embed.add_field(name="(debug)", value=str(random_reference), inline=False)
         embed_list = [embed]
         if json_assistant.level_calc(ctx.author.id, "text"):
             real_logger.info(f"等級提升：{ctx.author.name} 文字等級"
