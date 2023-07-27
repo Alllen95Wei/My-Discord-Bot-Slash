@@ -27,7 +27,7 @@ import detect_pc_status
 import update as upd
 import json_assistant
 from read_RPC import get_RPC_context
-# import ChatGPT
+import ChatGPT
 
 # 機器人
 intents = discord.Intents.all()
@@ -1059,7 +1059,7 @@ async def chat(ctx,
         if time.time() - last_chat_used_time >= 5:
             await ctx.defer(ephemeral=私人訊息)
             last_chat_used_time = time.time()
-            # response = await run_blocking(ChatGPT.chat, 訊息)
+            response = await run_blocking(ChatGPT.chat, 訊息)
             response = "本指令正在等待模組維護中，因此暫時停用。"
             embed = discord.Embed(title="ChatGPT", description="以下是ChatGPT的回應。", color=default_color)
             embed.add_field(name="你的訊息", value=訊息, inline=False)
