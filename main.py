@@ -1054,29 +1054,23 @@ async def cancel_all_tos(ctx):
 async def chat(ctx,
                訊息: Option(str, "想要向ChatGPT傳送的訊息", required=True),  # noqa: PEP 3131
                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
-    if ctx.author.id == 657519721138094080:
-        global last_chat_used_time
-        if time.time() - last_chat_used_time >= 5:
-            await ctx.defer(ephemeral=私人訊息)
-            last_chat_used_time = time.time()
-            response = await run_blocking(ChatGPT.chat, 訊息)
-            response = "本指令正在等待模組維護中，因此暫時停用。"
-            embed = discord.Embed(title="ChatGPT", description="以下是ChatGPT的回應。", color=default_color)
-            embed.add_field(name="你的訊息", value=訊息, inline=False)
-            embed.add_field(name="ChatGPT的回應", value=response, inline=False)
-            embed.set_footer(text="以上回應皆由ChatGPT產生，與本機器人無關。")
-        else:
-            embed = discord.Embed(title="錯誤", description="短時間內已有人使用此指令。請稍後再試。", color=error_color)
-            embed.add_field(name="為什麼我不能跟其他人一起使用此指令？",
-                            value="由於ChatGPT的時間限制，我們不能在短時間內傳送過多要求，否則可能會無法得到回應。\n"
-                                  "為避免此問題，我們才設計了此機制，以避免使用者的體驗不佳。",
-                            inline=False)
-            私人訊息 = True  # noqa: PEP 3131
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
+    global last_chat_used_time
+    if time.time() - last_chat_used_time >= 5:
+        await ctx.defer(ephemeral=私人訊息)
+        last_chat_used_time = time.time()
+        response = await run_blocking(ChatGPT.chat, 訊息)
+        embed = discord.Embed(title="ChatGPT", description="以下是ChatGPT的回應。", color=default_color)
+        embed.add_field(name="你的訊息", value=訊息, inline=False)
+        embed.add_field(name="ChatGPT的回應", value=response, inline=False)
+        embed.set_footer(text="以上回應皆由ChatGPT產生，與本機器人無關。")
     else:
-        embed = discord.Embed(title="維護中", description="由於最近許多使用者回報使用此指令時遇到問題，因此我們已經暫時停用此指令進行維護。",
-                              color=error_color)
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
+        embed = discord.Embed(title="錯誤", description="短時間內已有人使用此指令。請稍後再試。", color=error_color)
+        embed.add_field(name="為什麼我不能跟其他人一起使用此指令？",
+                        value="由於ChatGPT的時間限制，我們不能在短時間內傳送過多要求，否則可能會無法得到回應。\n"
+                              "為避免此問題，我們才設計了此機制，以避免使用者的體驗不佳。",
+                        inline=False)
+        私人訊息 = True  # noqa: PEP 3131
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="restart", description="重啟機器人。")
