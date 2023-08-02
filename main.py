@@ -20,7 +20,6 @@ from colorlog import ColoredFormatter
 import typing
 import functools
 
-import check_folder_size
 from youtube_to_mp3 import main_dl
 import youtube_download as yt_download
 import detect_pc_status
@@ -795,14 +794,6 @@ async def enable(ctx,
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
         私人訊息 = True  # noqa: PEP 3131
         await ctx.respond(embed=embed, ephemeral=私人訊息)
-
-
-@bot.slash_command(name="sizecheck", description="檢查\"C:\\MusicBot\\audio_cache\"的大小。")
-async def sizecheck(ctx,
-                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
-    size = check_folder_size.check_size()
-    embed = discord.Embed(title="資料夾大小", description=size, color=default_color)
-    await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="ytdl", description="將YouTube影片下載為mp3。由於Discord有"
