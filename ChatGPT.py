@@ -12,9 +12,7 @@ chatbot = Chatbot(config={"access_token": access_token})
 def chat(msg: str):
     prev_text = ""
     start_response = True
-    for data in chatbot.ask(
-            msg + "\n請用繁體中文回答。"
-    ):
+    for data in chatbot.ask(msg):
         if start_response:
             print("Bot: ", end="")
             start_response = False
