@@ -493,7 +493,7 @@ async def on_ready():
     real_logger.info(f"PING值：{round(bot.latency * 1000)}ms")
     real_logger.info(f"登入身分：{bot.user.name}#{bot.user.discriminator}")
     await bot.change_presence(activity=normal_activity, status=discord.Status.online)
-    await check_voice_channel()
+    # await check_voice_channel()
     await give_voice_exp.start()
 
 
