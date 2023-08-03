@@ -150,6 +150,9 @@ async def give_voice_exp() -> None:  # 給予語音經驗
                     if exp_enabled:
                         if len(active_human_members) > 1:  # 若語音頻道人數大於1
                             value = 1 + len(active_human_members) / 10
+                            for a in member.activities:
+                                if isinstance(a, discord.Activity):
+                                    value += 0.1
                             json_assistant.add_exp(member.id, "voice", value)
                             real_logger.info(f"獲得經驗值：{member.name} 獲得語音經驗 {value}")
                             if json_assistant.level_calc(member.id, "voice"):
