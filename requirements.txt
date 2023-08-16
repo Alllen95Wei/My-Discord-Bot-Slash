@@ -8,3 +8,4 @@ tzdata
 colorlog
 revChatGPT
 OpenAIAuth
+pynacl
