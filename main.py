@@ -48,7 +48,6 @@ class CreateLogger:
     def __init__(self):
         super().__init__()
         self.c_logger = self.color_logger()
-        self.f_logger = self.file_logger()
         self.a_logger = self.anonymous_logger()
         logging.addLevelName(25, "ANONYMOUS")
 
@@ -68,27 +67,21 @@ class CreateLogger:
             },
         )
 
+        file_formatter = logging.Formatter(
+            fmt="[%(asctime)s] %(levelname)-8s %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S")
+
         logger = logging.getLogger()
         handler = logging.StreamHandler()
         handler.setFormatter(formatter)
         logger.addHandler(handler)
+        f_handler = logging.FileHandler("logs.log", encoding="utf-8")
+        f_handler.setFormatter(formatter)
+        logger.addHandler(f_handler)
         logger.setLevel(logging.DEBUG)
 
         return logger
 
-    @staticmethod
-    def file_logger():
-        formatter = logging.Formatter(
-            fmt="[%(asctime)s] %(levelname)-8s %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S")
-
-        logger = logging.getLogger("file_logger")
-        handler = logging.FileHandler("logs.log", encoding="utf-8")
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-        logger.setLevel(logging.DEBUG)
-
-        return logger
 
     @staticmethod
     def anonymous_logger():
@@ -106,27 +99,21 @@ class CreateLogger:
 
     def debug(self, message: str):
         self.c_logger.debug(message)
-        self.f_logger.debug(message)
 
     def info(self, message: str):
         self.c_logger.info(message)
-        self.f_logger.info(message)
 
     def warning(self, message: str):
         self.c_logger.warning(message)
-        self.f_logger.warning(message)
 
     def error(self, message: str):
         self.c_logger.error(message)
-        self.f_logger.error(message)
 
     def critical(self, message: str):
         self.c_logger.critical(message)
-        self.f_logger.critical(message)
 
     def anonymous(self, message: str):
         self.c_logger.log(25, message)
-        self.f_logger.log(25, message)
         self.a_logger.log(25, message)
 
 
@@ -850,7 +837,7 @@ async def rc(ctx,
             embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
     else:
         try:
-            await 頻道.guild.change_voice_state(channel=頻道, self_mute=True, self_deaf=True)
+            await 頻道.guild.change_voice_state(channel=頻道)
             embed = discord.Embed(title="已加入頻道", description=f"已經加入了 <#{頻道.id}>！", color=default_color)
         except Exception as e:
             embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
@@ -1043,7 +1030,61 @@ async def cancel_all_tos(ctx):
     await ctx.respond(embed=embed, ephemeral=True)
 
 
-@bot.slash_command(name="chat", description="(測試中)與ChatGPT對話。")
+record = bot.create_group(name="record", description="錄音功能")
+connections = {}
+
+
+@record.command(name="start", description="開始錄音語音頻道。")
+async def start_record(ctx):
+    try:
+        await ctx.defer()
+        if ctx.author.voice is None:
+            embed = discord.Embed(title="錯誤", description="你必須先加入語音頻道才能使用此指令。", color=error_color)
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
+        else:
+            vc = await ctx.author.voice.channel.connect()
+            connections.update({ctx.guild.id: vc})
+            vc.start_recording(discord.sinks.MP3Sink(), record_finished, ctx.channel)
+            embed = discord.Embed(title="開始錄音", description="已開始錄音。", color=default_color)
+            embed.add_field(name="頻道", value=f"<#{vc.channel.id}>", inline=False)
+            embed.add_field(name="要求錄音的使用者", value=f"{ctx.author.mention}", inline=False)
+            recorded_users = "".join([f"<@{user_id}>" for user_id, audio in vc.voice_client.sink.audio_data.items()])
+            await ctx.respond(content=recorded_users, embed=embed)
+    except discord.errors.ClientException:
+        embed = discord.Embed(title="錯誤", description="機器人已經在錄音了。", color=error_color)
+        await ctx.respond(embed=embed, ephemeral=True)
+    except Exception as e:
+        embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
+        embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+        await ctx.respond(embed=embed, ephemeral=True)
+
+
+async def record_finished(sink: discord.sinks, ctx):
+    recorded_users = [
+        f"<@{user_id}>"
+        for user_id, audio in sink.audio_data.items()
+    ]
+    await sink.vc.disconnect()
+    files = [discord.File(audio.file, f"{user_id}.{sink.encoding}") for user_id, audio in sink.audio_data.items()]
+    embed = discord.Embed(title="錄音完成", description=f"{ctx.author.mention} 的錄音已完成。", color=default_color)
+    embed.add_field(name="頻道", value=f"<#{sink.vc.channel.id}>", inline=False)
+    await ctx.channel.send(content=f"{' '.join(recorded_users)}", embed=embed, files=files)
+
+
+@record.command(name="stop", description="停止錄音。")
+async def stop_record(ctx):
+    try:
+        ctx.voice_client.stop_recording()
+        embed = discord.Embed(title="停止錄音", description="已停止錄音。\n"
+                                                        "錄音檔將會在**使用「開始錄音」指令的文字頻道**上傳。", color=default_color)
+        embed.add_field(name="頻道", value=f"<#{ctx.voice_client.channel.id}>", inline=False)
+    except AttributeError:
+        embed = discord.Embed(title="錯誤", description="機器人並未在錄音。", color=error_color)
+    await ctx.respond(embed=embed, ephemeral=True)
+
+
+@bot.slash_command(name="chat", description="與ChatGPT對話。")
 @commands.cooldown(1, 10, commands.BucketType.user)
 async def chat(ctx,
                訊息: Option(str, "想要向ChatGPT傳送的訊息", required=True),  # noqa: PEP 3131
@@ -1165,7 +1206,7 @@ async def update(ctx,
 @bot.slash_command(name="test", description="測試用指令。")
 async def test(ctx):
     if ctx.author == bot.get_user(657519721138094080):
-        await on_member_join(ctx.author)
+        await ctx.channel.send("測試成功！", delete_after=5)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
         await ctx.respond(embed=embed)
