@@ -1,9 +1,9 @@
-def main_dl(url, file_name, mp3_path):
+def main_dl(url, file_name, mp3_path, bit_rate=128):
     import youtube_download as yt_dl
     import m4a_to_mp3 as mt3
 
     yt_dl.youtube_download(url, file_name + ".m4a")
-    mt3.webm_to_mp3(file_name, mp3_path)
+    mt3.m4a_to_mp3(file_name, mp3_path, bit_rate)
     return "finished"
 
 

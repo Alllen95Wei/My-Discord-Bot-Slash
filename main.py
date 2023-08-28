@@ -1,4 +1,6 @@
 # coding: utf-8
+import asyncio
+
 import discord
 from discord.ext import commands
 from discord.ext import tasks
@@ -346,9 +348,10 @@ class GiveRole(discord.ui.View):
 
 
 class ConfirmDownload(discord.ui.View):
-    def __init__(self, url: str):
+    def __init__(self, url: str, bit_rate: int = 128):
         super().__init__()
         self.url = url
+        self.bit_rate = bit_rate
 
     @discord.ui.button(style=discord.ButtonStyle.primary, label="確認下載", emoji="✅")
     async def yes_btn(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -358,7 +361,7 @@ class ConfirmDownload(discord.ui.View):
             description="已開始下載，請稍候。",
             color=default_color)
         await interaction.response.edit_message(embed=embed, view=None)
-        result = await run_blocking(youtube_start_download, self.url)
+        result = await run_blocking(youtube_start_download, self.url, self.bit_rate)
         if isinstance(result, discord.File):
             try:
                 await interaction.edit_original_response(embed=None, file=result)
@@ -369,9 +372,9 @@ class ConfirmDownload(discord.ui.View):
                 else:
                     embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
                     embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-                await interaction.edit_original_response(embed=embed)
+                await interaction.response.edit_message(embed=embed)
         elif isinstance(result, discord.Embed):
-            await interaction.edit_original_response(embed=result)
+            await interaction.response.edit_message(embed=result)
 
     @discord.ui.button(style=discord.ButtonStyle.danger, label="取消下載", emoji="❌")
     async def no_btn(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -398,14 +401,11 @@ class AgreeTOS(discord.ui.View):
         await interaction.edit_original_response(embed=embed)
 
 
-async def youtube_start_download(url: str, msg_to_delete=None) -> discord.File:
+def youtube_start_download(url: str, bit_rate: int) -> discord.File:
     file_name = yt_download.get_id(url)
-    mp3_file_name = file_name + ".mp3"
+    mp3_file_name = f"{file_name}_{bit_rate}.mp3"
     mp3_file_path = os.path.join(base_dir, "ytdl", mp3_file_name)
-    if os.path.exists(mp3_file_path) or main_dl(url, file_name, mp3_file_name) == "finished":
-        if msg_to_delete:
-            await msg_to_delete.delete()
-        await bot.change_presence(status=discord.Status.online, activity=normal_activity)
+    if os.path.exists(mp3_file_path) or main_dl(url, file_name, mp3_file_name, bit_rate) == "finished":
         return discord.File(mp3_file_path)
 
 
@@ -789,33 +789,34 @@ async def enable(ctx,
 @bot.slash_command(name="ytdl", description="將YouTube影片下載為mp3。由於Discord有"
                                             "檔案大小限制，因此有時可能會失敗。")
 async def ytdl(ctx,
-               連結: Option(str, "欲下載的YouTube影片網址", required=True),    # noqa: PEP 3131
-               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
-    await ctx.defer(ephemeral=私人訊息)
+               連結: Option(str, "欲下載的YouTube影片網址", required=True),  # noqa: PEP 3131
+               位元率: Option(int, description="下載後，轉換為MP3時所使用的位元率，會影響檔案的大小與品質",  # noqa: PEP 3131
+                             choices=[96, 128, 160, 192, 256, 320], required=False) = 128):
+    await ctx.defer()
     length = yt_download.get_length(連結)
     if length > 512:
         embed = discord.Embed(title="影片長度過長",
                               description=f"影片長度(`{length}`秒)超過512秒，下載後可能無法成功上傳。是否仍要嘗試下載？",
                               color=error_color)
-        confirm_download = ConfirmDownload(url=連結)
-        await ctx.respond(embed=embed, ephemeral=私人訊息, view=confirm_download)
+        confirm_download = ConfirmDownload(url=連結, bit_rate=位元率)
+        await ctx.respond(embed=embed, view=confirm_download)
     else:
         embed = discord.Embed(title="確認下載",
                               description="已開始下載，請稍候。",
                               color=default_color)
         embed.set_footer(text="下載所需時間依影片長度及網路狀況而定。")
-        start_dl_message = await ctx.respond(embed=embed, ephemeral=私人訊息)
+        start_dl_message = await ctx.respond(embed=embed)
         try:
-            await ctx.respond(file=await youtube_start_download(連結, start_dl_message), ephemeral=私人訊息)
+            await start_dl_message.edit(embed=None, file=await run_blocking(youtube_start_download, 連結, 位元率))
         except Exception as e:
             if "Request entity too large" in str(e):
                 embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
+                embed.add_field(name="是否調整過位元率？", value="如果你選擇了其他位元率，可能會導致檔案過大。請試著降低位元率。", inline=False)
                 embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
             else:
                 embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
                 embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-            await start_dl_message.delete()
-            await ctx.respond(embed=embed, ephemeral=私人訊息)
+            await start_dl_message.edit(embed=embed)
 
 
 @bot.slash_command(name="rc",
@@ -1269,7 +1270,7 @@ async def on_message(message):
                                   color=default_color)
             embed.set_thumbnail(url=message.author.display_avatar)
             embed.set_footer(text="關於經驗值計算系統，請輸入/user_info about")
-            await message.channel.send(embed=embed)
+            await message.channel.send(embed=embed, delete_after=5)
 
 
 bot.run(TOKEN)
