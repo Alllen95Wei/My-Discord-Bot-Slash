@@ -1,7 +1,11 @@
-def youtube_download(url, file_name):
-    import yt_dlp as youtube_dl
-    import os
+import yt_dlp as youtube_dl
+import os
+from subprocess import run
+from platform import system
+from shlex import split
 
+
+def youtube_download(url, file_name):
     ydl_opts = {
         'format': 'bestaudio',
         'outtmpl': os.path.join("ytdl", file_name),
@@ -18,10 +22,6 @@ def youtube_download(url, file_name):
 
 
 def get_id(url):
-    from subprocess import run
-    from platform import system
-    from shlex import split
-
     if system() == "Windows":
         cmd = f"yt-dlp --skip-download --print \"%(id)s\" {url}"
     else:
@@ -32,10 +32,6 @@ def get_id(url):
 
 
 def get_length(url):
-    from subprocess import run
-    from platform import system
-    from shlex import split
-
     if system() == "Windows":
         cmd = f"yt-dlp --skip-download --print \"%(duration)s\" {url}"
     else:
