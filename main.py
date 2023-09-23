@@ -1,6 +1,4 @@
 # coding: utf-8
-import asyncio
-
 import OpenAIAuth
 import discord
 from discord.ext import commands
@@ -70,10 +68,6 @@ class CreateLogger:
             },
         )
 
-        file_formatter = logging.Formatter(
-            fmt="[%(asctime)s] %(levelname)-8s %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S")
-
         logger = logging.getLogger()
         handler = logging.StreamHandler()
         handler.setFormatter(formatter)
@@ -84,7 +78,6 @@ class CreateLogger:
         logger.setLevel(logging.DEBUG)
 
         return logger
-
 
     @staticmethod
     def anonymous_logger():
@@ -126,7 +119,6 @@ real_logger = CreateLogger()
 
 @tasks.loop(seconds=10)
 async def give_voice_exp() -> None:  # 給予語音經驗
-    voice_channel_lists = []
     exclude_channel = [888707777659289660, 1076702101964599337]
     for server in bot.guilds:
         for channel in server.channels:
@@ -342,7 +334,7 @@ class GiveRole(discord.ui.View):
 
     @discord.ui.button(label="踢出(危險！)", style=discord.ButtonStyle.red, emoji="⏏️", row=2)
     async def kick(self, button: discord.ui.Button, interaction: discord.Interaction):
-        embed = discord.Embed(title="審核失敗", description=f"由於管理員認為你的真實身分與帳號不符，你即將被踢出伺服器。", color=error_color)
+        embed = discord.Embed(title="審核失敗", description="由於管理員認為你的真實身分與帳號不符，你即將被踢出伺服器。", color=error_color)
         await self.member.send(embed=embed)
         await self.member.kick()
         await interaction.followup.send(f"已經將 {self.member.mention} 踢出伺服器！")
@@ -678,7 +670,7 @@ async def require(ctx,
 
 
 @user_info.command(name="about", description="顯示關於經驗值及等級的計算。")
-async def about(ctx):
+async def exp_about(ctx):
     embed = discord.Embed(title="關於經驗值及等級", description="訊息將分別以2則訊息傳送！", color=default_color)
     await ctx.respond(embed=embed, ephemeral=True)
     embed = discord.Embed(title="關於經驗值", description="經驗值分為**文字**及**語音**，分別以下列方式計算：",
