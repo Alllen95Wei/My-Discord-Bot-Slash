@@ -586,20 +586,6 @@ async def daily(ctx,
         json_assistant.set_last_daily_reward_claimed(ctx.author.id, time.time())
         json_assistant.add_daily_reward_probability(reward)
         embed = discord.Embed(title="每日簽到", description=f"簽到成功！獲得*文字*經驗值`{reward}`點！", color=default_color)
-        daily_reward_prob_raw_data = json_assistant.get_daily_reward_probability()
-        sum_of_rewards = 0
-        rewards_list = []
-        for i in daily_reward_prob_raw_data:
-            rewards_list.append(int(i))
-        rewards_list.sort()
-        # 將所有獎勵次數加總
-        for n in rewards_list:
-            sum_of_rewards += daily_reward_prob_raw_data[str(n)]
-        for j in rewards_list:
-            # 列出所有點數獎勵出現的次數
-            embed.add_field(name=f"{j}點", value=f"{daily_reward_prob_raw_data[str(j)]}次 "
-                                                f"({round(daily_reward_prob_raw_data[str(j)]/sum_of_rewards*100, 1)} %)"
-                            , inline=False)
         embed_list = [embed]
         if json_assistant.level_calc(ctx.author.id, "text"):
             real_logger.info(f"等級提升：{ctx.author.name} 文字等級"
@@ -610,6 +596,20 @@ async def daily(ctx,
                                   color=default_color)
             embed.set_thumbnail(url=ctx.author.display_avatar)
             embed_list.append(embed)
+    daily_reward_prob_raw_data = json_assistant.get_daily_reward_probability()
+    sum_of_rewards = 0
+    rewards_list = []
+    for i in daily_reward_prob_raw_data:
+        rewards_list.append(int(i))
+    rewards_list.sort()
+    # 將所有獎勵次數加總
+    for n in rewards_list:
+        sum_of_rewards += daily_reward_prob_raw_data[str(n)]
+    for j in rewards_list:
+        # 列出所有點數獎勵出現的次數
+        embed_list[0].add_field(name=f"{j}點", value=f"{daily_reward_prob_raw_data[str(j)]}次 "
+                                f"({round(daily_reward_prob_raw_data[str(j)] / sum_of_rewards * 100, 1)} %)",
+                                inline=False)
     await ctx.respond(embeds=embed_list, ephemeral=私人訊息)
 
 
