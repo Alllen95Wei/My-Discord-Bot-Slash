@@ -159,7 +159,6 @@ anonymous_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_
 
 
 def get_anonymous_raw_data() -> dict:
-    global anonymous_file
     with open(anonymous_file, "r") as f:
         data = json.load(f)
     return data
