@@ -12,5 +12,5 @@ def m4a_to_mp3(file_name, mp3_file_path, bit_rate=128):
 
 if __name__ == "__main__":
     f_name = input("貼上要轉換檔案的路徑及名稱(不含附檔名)：")
-    mp3_file_path = "\"" + input("輸入mp3檔輸出的路徑：") + f_name + ".mp3\""
-    m4a_to_mp3(f_name, mp3_file_path)
+    path = "\"" + input("輸入mp3檔輸出的路徑：") + f_name + ".mp3\""
+    m4a_to_mp3(f_name, path)

@@ -1215,6 +1215,7 @@ async def update(ctx,
 @bot.slash_command(name="test", description="測試用指令。")
 async def test(ctx):
     if ctx.author == bot.get_user(657519721138094080):
+        await on_member_join(ctx.author)
         await ctx.channel.send("測試成功！", delete_after=5)
     else:
         embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
