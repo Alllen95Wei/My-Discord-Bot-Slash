@@ -32,14 +32,26 @@ def get_id(url):
 
 
 def get_length(url):
-    if system() == "Windows":
-        cmd = f"yt-dlp --skip-download --print \"%(duration)s\" {url}"
-    else:
-        cmd = f"./yt-dlp --skip-download --print \"%(duration)s\" {url}"
-
-    length = str(run(split(cmd), capture_output=True, text=True).stdout)
-    return int(length.replace("\n", ""))
+    # get video length in seconds
+    ytdl_opts = {
+        "skip_download": True,
+        "quiet": True,
+        "no_warnings": True,
+        "ignoreerrors": True,
+        "nocheckcertificate": True,
+        "restrictfilenames": True,
+        "noplaylist": True,
+        "logtostderr": False,
+        "default_search": "auto",
+        "usenetrc": False,
+        "fixup": "detect_or_warn"
+    }
+    with youtube_dl.YoutubeDL() as ydl:
+        info_dict = ydl.extract_info(url, download=False)
+        duration = info_dict["duration"]
+        return duration
 
 
 if __name__ == "__main__":
-    youtube_download(url=input("請貼上要下載的連結："), file_name=input("請輸入下載後的檔案名稱："))
+    # youtube_download(url=input("請貼上要下載的連結："), file_name=input("請輸入下載後的檔案名稱："))
+    print(get_length(input("請貼上連結：")))
