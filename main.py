@@ -353,6 +353,7 @@ class ConfirmDownload(discord.ui.View):
             title="確認下載",
             description="已開始下載，請稍候。",
             color=default_color)
+        embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
         await interaction.response.edit_message(embed=embed, view=None)
         result = await run_blocking(youtube_start_download, self.url, self.bit_rate)
         if isinstance(result, discord.File):
