@@ -797,7 +797,7 @@ async def ytdl(ctx,
         embed = discord.Embed(title="確認下載",
                               description="已開始下載，請稍候。",
                               color=default_color)
-        embed.set_footer(text="下載所需時間依影片長度及網路狀況而定。")
+        embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
         start_dl_message = await ctx.respond(embed=embed)
         try:
             await start_dl_message.edit(embed=None, file=await run_blocking(youtube_start_download, 連結, 位元率))

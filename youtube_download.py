@@ -7,7 +7,7 @@ from shlex import split
 
 def youtube_download(url, file_name):
     ydl_opts = {
-        'format': 'bestaudio',
+        'format': 'bestaudio/best',
         'outtmpl': os.path.join("ytdl", file_name),
         'restrictfilenames': True,
         'noplaylist': True,
@@ -46,7 +46,7 @@ def get_length(url):
         "usenetrc": False,
         "fixup": "detect_or_warn"
     }
-    with youtube_dl.YoutubeDL() as ydl:
+    with youtube_dl.YoutubeDL(ytdl_opts) as ydl:
         info_dict = ydl.extract_info(url, download=False)
         duration = info_dict["duration"]
         return duration
