@@ -370,7 +370,7 @@ class ConfirmDownload(discord.ui.View):
                 else:
                     embed = discord.Embed(title="錯誤", description="發生未知錯誤。", color=error_color)
                     embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-                await interaction.response.edit_message(embed=embed)
+                await interaction.edit_original_response(embed=embed)
         elif isinstance(result, discord.Embed):
             await interaction.response.edit_message(embed=result)
 
