@@ -24,6 +24,10 @@ async def on_ready():
         for file in os.listdir(ytdl_path):
             os.remove(os.path.join(ytdl_path, file))
             print("刪除檔案：", file)
+        logs_path = os.path.join(os.path.dirname(__file__), "logs")
+        for file in os.listdir(logs_path):
+            os.remove(os.path.join(logs_path, file))
+            print("刪除檔案：", file)
         print("刪除完畢。")
     print("結束工作...")
     kill_running_bot(os.getpid(), system())

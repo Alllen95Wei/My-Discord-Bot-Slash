@@ -72,7 +72,11 @@ class CreateLogger:
         handler = logging.StreamHandler()
         handler.setFormatter(formatter)
         logger.addHandler(handler)
-        f_handler = logging.FileHandler("logs.log", encoding="utf-8")
+        log_path = os.path.join(base_dir, "logs",
+                                f"logs {datetime.datetime.now(tz=now_tz).strftime('%Y.%m.%d %H.%M.%S')}.log")
+        with open(log_path, "w"):
+            pass
+        f_handler = logging.FileHandler(log_path, encoding="utf-8")
         f_handler.setFormatter(formatter)
         logger.addHandler(f_handler)
         logger.setLevel(logging.DEBUG)
