@@ -817,6 +817,28 @@ async def ytdl(ctx,
             await start_dl_message.edit(embed=embed)
 
 
+@bot.slash_command(name="cleanytdl", description="清除ytdl的下載資料夾。")
+async def cleanytdl(ctx,
+                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
+    await ctx.defer()
+    if ctx.author == bot.get_user(657519721138094080):
+        ytdl_folder = os.path.join(base_dir, "ytdl")
+        file_count, folder_size = 0, 0
+        for f in os.listdir(ytdl_folder):
+            file_count += 1
+            folder_size += os.path.getsize(os.path.join(ytdl_folder, f))
+            os.remove(os.path.join(ytdl_folder, f))
+        embed = discord.Embed(title="清除ytdl的下載資料夾", description="已清除ytdl的下載資料夾。", color=default_color)
+        # turn folder_size into human-readable format, MB
+        folder_size = round(folder_size / 1024 / 1024, 2)
+        embed.add_field(name="清除的檔案數量", value=f"{file_count} 個", inline=False)
+        embed.add_field(name="清除的檔案大小", value=f"{folder_size} MB", inline=False)
+    else:
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+        私人訊息 = True  # noqa
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
 @bot.slash_command(name="rc",
                    description="重新連接至語音頻道。可指定頻道，否則將自動檢測音樂機器人及Allen Why在哪個頻道並加入。")
 async def rc(ctx,
