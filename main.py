@@ -1122,8 +1122,8 @@ async def chat(ctx,
                                                 "* 機器人所使用的模組(revChatGPT)發生問題\n"
                                                 "* ChatGPT端更動\n"
                                                 "* 其他原因\n"
-                                                "如果你需要使用ChatGPT，你可以至[官方網站](https://chat.openai.com/)註冊帳戶並使用。"
-                        , inline=False)
+                                                "如果你需要使用ChatGPT，你可以至[官方網站](https://chat.openai.com/)註冊帳戶並使用。",
+                        inline=False)
     else:
         global last_chat_used_time
         if time.time() - last_chat_used_time >= 5:
