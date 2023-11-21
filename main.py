@@ -636,14 +636,16 @@ async def show(ctx,
     embed.add_field(name="文字經驗值", value=f"{text_exp}", inline=False)
     embed.add_field(name="語音等級", value=f"{voice_level}", inline=False)
     embed.add_field(name="語音經驗值", value=f"{voice_exp}", inline=False)
+    date = None
     if isinstance(使用者, discord.member.Member):
         guild = ctx.guild
         guild_name = guild.name
-        date = guild.get_member(使用者.id).joined_at.astimezone(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
+        date = guild.get_member(使用者.id).joined_at.astimezone(tz=now_tz)
     elif isinstance(使用者, discord.user.User):
         guild_name = "Discord"
-        date = 使用者.created_at.astimezone(tz=now_tz).strftime("%Y-%m-%d %H:%M:%S")
-    embed.add_field(name=f"加入 {guild_name} 時間", value=f"{date}", inline=False)
+        date = 使用者.created_at.astimezone(tz=now_tz)
+    date = date.timestamp()
+    embed.add_field(name=f"加入 {guild_name} 時間 (UTC+8)", value=f"<t:{int(date)}>", inline=False)
     embed.set_thumbnail(url=使用者.display_avatar)
     embed.set_footer(text="關於經驗值計算系統，請輸入/user_info about")
     await ctx.respond(embed=embed, ephemeral=私人訊息)
