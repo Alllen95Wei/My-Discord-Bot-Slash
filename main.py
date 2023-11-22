@@ -581,12 +581,18 @@ async def daily(ctx,
         random_reference = randint(1, 200)
         if 1 <= random_reference < 101:  # 50%
             reward = 10
-        elif 101 <= random_reference < 181:  # 40%
+        elif 101 <= random_reference < 141:  # 20%
             reward = 20
-        elif 181 <= random_reference < 196:  # 15%
+        elif 141 <= random_reference < 171:  # 15%
             reward = 50
-        else:  # 5%
+        else:  # 15%
             reward = 100
+        # elif 101 <= random_reference < 181:  # 40%
+        #     reward = 20
+        # elif 181 <= random_reference < 196:  # 15%
+        #     reward = 50
+        # else:  # 5%
+        #     reward = 100
         json_assistant.add_exp(ctx.author.id, "text", reward)
         json_assistant.set_last_daily_reward_claimed(ctx.author.id, time.time())
         json_assistant.add_daily_reward_probability(reward)
