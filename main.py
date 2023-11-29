@@ -598,6 +598,7 @@ async def daily(ctx,
         json_assistant.set_last_daily_reward_claimed(ctx.author.id, time.time())
         json_assistant.add_daily_reward_probability(reward)
         embed = discord.Embed(title="每日簽到", description=f"簽到成功！獲得*文字*經驗值`{reward}`點！", color=default_color)
+        embed.add_field(name="(DEBUG) Random Reference Value", value=f"{random_reference}", inline=False)
         embed_list = [embed]
         if json_assistant.level_calc(ctx.author.id, "text"):
             real_logger.info(f"等級提升：{ctx.author.name} 文字等級"
