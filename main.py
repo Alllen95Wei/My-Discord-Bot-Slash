@@ -1,6 +1,4 @@
 # coding: utf-8
-import asyncio
-
 import OpenAIAuth
 import discord
 from discord.ext import commands
