@@ -1,4 +1,6 @@
 # coding: utf-8
+import asyncio
+
 import OpenAIAuth
 import discord
 from discord.ext import commands
@@ -28,6 +30,7 @@ import update as upd
 import json_assistant
 from read_RPC import get_RPC_context
 import ChatGPT
+from bullshit import bullshit
 
 # 機器人
 intents = discord.Intents.all()
@@ -589,9 +592,9 @@ async def daily(ctx,
             reward = 100
         # elif 101 <= random_reference < 181:  # 40%
         #     reward = 20
-        # elif 181 <= random_reference < 196:  # 15%
+        # elif 181 <= random_reference < 196:  # 7.5%
         #     reward = 50
-        # else:  # 5%
+        # else:  # 2.5%
         #     reward = 100
         json_assistant.add_exp(ctx.author.id, "text", reward)
         json_assistant.set_last_daily_reward_claimed(ctx.author.id, time.time())
@@ -1150,6 +1153,34 @@ async def chat(ctx,
                             inline=False)
             私人訊息 = True  # noqa: PEP 3131
     await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
+@bot.slash_command(name="bullshit", description="唬爛。")
+# @commands.cooldown(1, 60, commands.BucketType.user)
+async def bullshit_cmd(ctx,
+                   關鍵字: Option(str, "想要唬爛的關鍵字", required=True),  # noqa: PEP 3131
+                   字數: Option(int, "想要唬爛的字數(最多1000)", required=False) = 200,  # noqa: PEP 3131
+                   私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
+    await ctx.defer(ephemeral=私人訊息)
+    content = ""
+    if not 0 < 字數 <= 1000:
+        embed = discord.Embed(title="錯誤", description=f"你所指定的字數(`{字數}`字)不在1~1000內。", color=error_color)
+    else:
+        try:
+            result = bullshit(關鍵字, 字數)
+            embed = discord.Embed(title="唬爛", description="以下是唬爛的結果。", color=default_color)
+            embed.add_field(name="關鍵字", value=關鍵字, inline=False)
+            embed.add_field(name="指定字數", value=字數, inline=True)
+            embed.add_field(name="實際字數", value=str(len(result)), inline=True)
+            if len(result) > 1024:
+                embed.add_field(name="內容", value="(字數過長，改使用一般訊息回覆)", inline=False)
+                content = f"```{result}```"
+            else:
+                embed.add_field(name="內容", value=result, inline=False)
+                embed.set_footer(text="以上內容皆由透過「唬爛產生器」API產生，與本機器人無關。")
+        except Exception as e:
+            embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
+    await ctx.respond(embed=embed, content=content, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="restart", description="重啟機器人。")
