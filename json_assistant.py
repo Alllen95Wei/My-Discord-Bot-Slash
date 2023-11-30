@@ -3,24 +3,28 @@ import os
 import datetime
 
 
-def get_raw_info(user_id: [int, str]):
+def get_raw_info(user_id: [int, str], is_dict=True):
     file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", str(user_id) + ".json")
-    if os.path.exists(file):
-        with open(file, "r") as f:
-            user_info = json.loads(f.read())
-            return user_info
+    if is_dict:
+        if os.path.exists(file):
+            with open(file, "r") as f:
+                user_info = json.loads(f.read())
+                return user_info
+        else:
+            empty_data = {"join_date": None,
+                          "exp":
+                              {"voice": 0,
+                               "text": 0},
+                          "level":
+                              {"voice": 0,
+                               "text": 0},
+                          "last_active_time": 0,
+                          "last_daily_reward_claimed": 0
+                          }
+            return empty_data
     else:
-        empty_data = {"join_date": None,
-                      "exp":
-                          {"voice": 0,
-                           "text": 0},
-                      "level":
-                          {"voice": 0,
-                           "text": 0},
-                      "last_active_time": 0,
-                      "last_daily_reward_claimed": 0
-                      }
-        return empty_data
+        with open(file, "r") as f:
+            return f.read()
 
 
 def write_raw_info(user_id: int, data):

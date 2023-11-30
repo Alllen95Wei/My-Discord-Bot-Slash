@@ -707,6 +707,16 @@ async def exp_about(ctx):
     await ctx.channel.send(embed=embed)
 
 
+@user_info.command(name="show_raw_data", description="顯示使用者的JSON原始資料。")
+async def show_raw_data(ctx,
+                        使用者: Option(discord.Member, "要查詢的使用者", required=True),  # noqa
+                        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
+    raw_data = json_assistant.get_raw_info(使用者.id, False)
+    embed = discord.Embed(title="使用者資料", description=f"使用者：{使用者.mention}的原始資料", color=default_color)
+    embed.add_field(name="原始資料", value=f"```{raw_data}```", inline=False)
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+
 edit = user_info.create_subgroup(name="edit", description="編輯使用者的資訊。")
 
 
