@@ -1177,11 +1177,12 @@ async def bullshit_cmd(ctx,
         embed = discord.Embed(title="錯誤", description=f"你所指定的字數(`{字數}`字)不在1~1000內。", color=error_color)
     else:
         try:
-            result = bullshit(關鍵字, 字數).replace(關鍵字, f"`{關鍵字}`" if 顯著標示關鍵字 else 關鍵字)
+            result = bullshit(關鍵字, 字數)
             embed = discord.Embed(title="唬爛", description="以下是唬爛的結果。", color=default_color)
             embed.add_field(name="關鍵字", value=關鍵字, inline=False)
             embed.add_field(name="指定字數", value=字數, inline=True)
             embed.add_field(name="實際字數", value=str(len(result)), inline=True)
+            result = result.replace(關鍵字, f"`{關鍵字}`" if 顯著標示關鍵字 else 關鍵字)
             if len(result) > 1024:
                 embed.add_field(name="內容", value="(字數過長，改使用一般訊息回覆)", inline=False)
                 content = f"```{result}```"
