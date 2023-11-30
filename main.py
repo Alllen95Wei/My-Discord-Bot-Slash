@@ -1159,6 +1159,7 @@ async def chat(ctx,
 async def bullshit_cmd(ctx,
                    關鍵字: Option(str, "想要唬爛的關鍵字", required=True),  # noqa: PEP 3131
                    字數: Option(int, "想要唬爛的字數(最多1000)", required=False) = 200,  # noqa: PEP 3131
+                   顯著標示關鍵字: Option(bool, "是否顯著標示關鍵字", required=False) = True,  # noqa: PEP 3131
                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     await ctx.defer(ephemeral=私人訊息)
     content = ""
@@ -1166,7 +1167,7 @@ async def bullshit_cmd(ctx,
         embed = discord.Embed(title="錯誤", description=f"你所指定的字數(`{字數}`字)不在1~1000內。", color=error_color)
     else:
         try:
-            result = bullshit(關鍵字, 字數)
+            result = bullshit(關鍵字, 字數).replace(關鍵字, f"`{關鍵字}`" if 顯著標示關鍵字 else 關鍵字)
             embed = discord.Embed(title="唬爛", description="以下是唬爛的結果。", color=default_color)
             embed.add_field(name="關鍵字", value=關鍵字, inline=False)
             embed.add_field(name="指定字數", value=字數, inline=True)
