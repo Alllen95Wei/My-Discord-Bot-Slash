@@ -1183,11 +1183,11 @@ async def bullshit_cmd(ctx,
             embed.add_field(name="關鍵字", value=關鍵字, inline=False)
             embed.add_field(name="指定字數", value=字數, inline=True)
             embed.add_field(name="實際字數", value=str(len(result)), inline=True)
-            result = result.replace(關鍵字, f"`{關鍵字}`" if 顯著標示關鍵字 else 關鍵字)
             if len(result) > 1024:
                 embed.add_field(name="內容", value="(字數過長，改使用一般訊息回覆)", inline=False)
                 content = f"```{result}```"
             else:
+                result = result.replace(關鍵字, f"`{關鍵字}`" if 顯著標示關鍵字 else 關鍵字)
                 embed.add_field(name="內容", value=result, inline=False)
                 embed.set_footer(text="以上內容皆由透過「唬爛產生器」API產生，與本機器人無關。")
         except Exception as e:
