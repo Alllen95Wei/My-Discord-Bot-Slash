@@ -576,7 +576,8 @@ async def daily(ctx,
     last_claimed_time_str = datetime.datetime.fromtimestamp(last_claimed_time, tz=now_tz).strftime("%Y-%m-%d")
     now_time_str = datetime.datetime.fromtimestamp(time.time(), tz=now_tz).strftime("%Y-%m-%d")
     if now_time_str == last_claimed_time_str:
-        embed = discord.Embed(title="每日簽到", description="你今天已經簽到過了！", color=error_color)
+        embed = discord.Embed(title="每日簽到", description=f"你今天已經在<t:{int(last_claimed_time)}:t>簽到過了！",
+                              color=error_color)
         embed_list = [embed]
     else:
         random_reference = randint(1, 200)
