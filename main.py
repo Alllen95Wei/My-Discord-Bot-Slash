@@ -469,6 +469,9 @@ async def on_application_command_error(ctx, error):
         embed = discord.Embed(title="指令冷卻中", description=f"這個指令正在冷卻中，請在`{round(error.retry_after)}`秒後再試。",
                               color=error_color)
         await ctx.respond(embed=embed, ephemeral=True)
+    elif isinstance(error, commands.NotOwner):
+        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+        await ctx.respond(embed=embed, ephemeral=True)
     else:
         raise error
 
@@ -722,87 +725,75 @@ edit = user_info.create_subgroup(name="edit", description="編輯使用者的資
 
 
 @user_info.command(name="edit_exp", description="編輯使用者的經驗值。")
+@commands.is_owner()
 async def edit_exp(ctx,
                    使用者: Option(discord.Member, "要編輯的使用者", required=True),  # noqa
                    類型: Option(str, "要編輯的經驗值類型", required=True, choices=["text", "voice"]),  # noqa
                    經驗值: Option(int, "要編輯的經驗值數量，若要扣除則輸入負值", required=True),  # noqa
                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
-    if ctx.author == bot.get_user(657519721138094080):
-        before_exp = json_assistant.get_exp(使用者.id, 類型)
-        json_assistant.add_exp(使用者.id, 類型, 經驗值)
-        after_exp = json_assistant.get_exp(使用者.id, 類型)
-        embed = discord.Embed(title="編輯經驗值", description=f"已編輯{使用者.mention}的**{類型}**經驗值。",
-                              color=default_color)
-        embed.add_field(name="編輯前", value=before_exp, inline=True)
-        if 經驗值 > 0:
-            embed.add_field(name="➡️增加", value=f"*{經驗值}*", inline=True)
-        else:
-            embed.add_field(name="➡️減少", value=f"*{abs(經驗值)}*", inline=True)
-        embed.add_field(name="編輯後", value=after_exp, inline=True)
-        embed_list = [embed]
-        if json_assistant.level_calc(使用者.id, 類型):
-            real_logger.info(f"等級提升：{ctx.author.name} 文字等級"
-                             f"達到 {json_assistant.get_level(ctx.author.id, 'text')} 等")
-            embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{ctx.author.id}> *文字*等級升級到 "
+    before_exp = json_assistant.get_exp(使用者.id, 類型)
+    json_assistant.add_exp(使用者.id, 類型, 經驗值)
+    after_exp = json_assistant.get_exp(使用者.id, 類型)
+    embed = discord.Embed(title="編輯經驗值", description=f"已編輯{使用者.mention}的**{類型}**經驗值。",
+                          color=default_color)
+    embed.add_field(name="編輯前", value=before_exp, inline=True)
+    if 經驗值 > 0:
+        embed.add_field(name="➡️增加", value=f"*{經驗值}*", inline=True)
+    else:
+        embed.add_field(name="➡️減少", value=f"*{abs(經驗值)}*", inline=True)
+    embed.add_field(name="編輯後", value=after_exp, inline=True)
+    embed_list = [embed]
+    if json_assistant.level_calc(使用者.id, 類型):
+        real_logger.info(f"等級提升：{ctx.author.name} 文字等級"
+                         f"達到 {json_assistant.get_level(ctx.author.id, 'text')} 等")
+        embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{ctx.author.id}> *文字*等級升級到 "
                                                             f"**{json_assistant.get_level(ctx.author.id, 'text')}"
                                                             f"** 等！",
-                                  color=default_color)
-            embed.set_thumbnail(url=ctx.author.display_avatar)
-            embed_list.append(embed)
-        await ctx.respond(embeds=embed_list, ephemeral=私人訊息)
-    else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True  # noqa
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
+                              color=default_color)
+        embed.set_thumbnail(url=ctx.author.display_avatar)
+        embed_list.append(embed)
+    await ctx.respond(embeds=embed_list, ephemeral=私人訊息)
 
 
 @user_info.command(name="edit_lvl", description="編輯使用者的等級。")
+@commands.is_owner()
 async def edit_lvl(ctx,
                    使用者: Option(discord.Member, "要編輯的使用者", required=True),  # noqa
                    類型: Option(str, "要編輯的等級類型", required=True, choices=["text", "voice"]),  # noqa
                    等級: Option(int, "要編輯的等級數量，若要扣除則輸入負值", required=True),  # noqa
                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
-    if ctx.author == bot.get_user(657519721138094080):
-        before_lvl = json_assistant.get_level(使用者.id, 類型)
-        json_assistant.add_level(使用者.id, 類型, 等級)
-        after_lvl = json_assistant.get_level(使用者.id, 類型)
-        embed = discord.Embed(title="編輯經驗值", description=f"已編輯{使用者.mention}的**{類型}**等級。",
-                              color=default_color)
-        embed.add_field(name="編輯前", value=before_lvl, inline=True)
-        if 等級 > 0:
-            embed.add_field(name="➡️增加", value=f"*{等級}*", inline=True)
-        else:
-            embed.add_field(name="➡️減少", value=f"{abs(等級)}", inline=True)
-        embed.add_field(name="編輯後", value=after_lvl, inline=True)
-        embed.set_footer(text="編輯後等級提升而未跳出通知為正常現象。下次當機器人自動增加經驗值時，即會跳出升級訊息。")
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
+    before_lvl = json_assistant.get_level(使用者.id, 類型)
+    json_assistant.add_level(使用者.id, 類型, 等級)
+    after_lvl = json_assistant.get_level(使用者.id, 類型)
+    embed = discord.Embed(title="編輯經驗值", description=f"已編輯{使用者.mention}的**{類型}**等級。",
+                          color=default_color)
+    embed.add_field(name="編輯前", value=before_lvl, inline=True)
+    if 等級 > 0:
+        embed.add_field(name="➡️增加", value=f"*{等級}*", inline=True)
     else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True  # noqa
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
+        embed.add_field(name="➡️減少", value=f"{abs(等級)}", inline=True)
+    embed.add_field(name="編輯後", value=after_lvl, inline=True)
+    embed.set_footer(text="編輯後等級提升而未跳出通知為正常現象。下次當機器人自動增加經驗值時，即會跳出升級訊息。")
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @user_info.command(name="enable", description="開關經驗值計算功能。")
+@commands.is_owner()
 async def enable(ctx,
                  啟用: Option(bool, "是否啟用經驗值計算功能", required=False) = None,  # noqa
                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     global exp_enabled
-    if ctx.author == bot.get_user(657519721138094080):
-        if 啟用 is None:
-            embed = discord.Embed(title="經驗值計算狀態", description=str(exp_enabled), color=default_color)
-        else:
-            exp_enabled = 啟用
-            if 啟用:
-                embed = discord.Embed(title="經驗值計算功能已啟用。", color=default_color)
-                await bot.change_presence(activity=normal_activity, status=discord.Status.online)
-            else:
-                embed = discord.Embed(title="經驗值計算功能已停用。", color=default_color)
-                await bot.change_presence(activity=normal_activity, status=discord.Status.do_not_disturb)
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
+    if 啟用 is None:
+        embed = discord.Embed(title="經驗值計算狀態", description=str(exp_enabled), color=default_color)
     else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True  # noqa: PEP 3131
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
+        exp_enabled = 啟用
+        if 啟用:
+            embed = discord.Embed(title="經驗值計算功能已啟用。", color=default_color)
+            await bot.change_presence(activity=normal_activity, status=discord.Status.online)
+        else:
+            embed = discord.Embed(title="經驗值計算功能已停用。", color=default_color)
+            await bot.change_presence(activity=normal_activity, status=discord.Status.do_not_disturb)
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="ytdl", description="將YouTube影片下載為mp3。由於Discord有"
@@ -839,24 +830,21 @@ async def ytdl(ctx,
 
 
 @bot.slash_command(name="cleanytdl", description="清除ytdl的下載資料夾。")
+@commands.is_owner()
 async def cleanytdl(ctx,
                     私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     await ctx.defer()
-    if ctx.author == bot.get_user(657519721138094080):
-        ytdl_folder = os.path.join(base_dir, "ytdl")
-        file_count, folder_size = 0, 0
-        for f in os.listdir(ytdl_folder):
-            file_count += 1
-            folder_size += os.path.getsize(os.path.join(ytdl_folder, f))
-            os.remove(os.path.join(ytdl_folder, f))
-        embed = discord.Embed(title="清除ytdl的下載資料夾", description="已清除ytdl的下載資料夾。", color=default_color)
-        # turn folder_size into human-readable format, MB
-        folder_size = round(folder_size / 1024 / 1024, 2)
-        embed.add_field(name="清除的檔案數量", value=f"{file_count} 個", inline=False)
-        embed.add_field(name="清除的檔案大小", value=f"{folder_size} MB", inline=False)
-    else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True  # noqa
+    ytdl_folder = os.path.join(base_dir, "ytdl")
+    file_count, folder_size = 0, 0
+    for f in os.listdir(ytdl_folder):
+        file_count += 1
+        folder_size += os.path.getsize(os.path.join(ytdl_folder, f))
+        os.remove(os.path.join(ytdl_folder, f))
+    embed = discord.Embed(title="清除ytdl的下載資料夾", description="已清除ytdl的下載資料夾。", color=default_color)
+    # turn folder_size into human-readable format, MB
+    folder_size = round(folder_size / 1024 / 1024, 2)
+    embed.add_field(name="清除的檔案數量", value=f"{file_count} 個", inline=False)
+    embed.add_field(name="清除的檔案大小", value=f"{folder_size} MB", inline=False)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
@@ -1060,15 +1048,13 @@ async def allow_anonymous_msg(ctx,
 
 
 @anonymous.command(name="cancel_all_tos", description="取消所有使用者對服務條款的回應。")
+@commands.is_owner()
 async def cancel_all_tos(ctx):
-    if ctx.author == bot.get_user(657519721138094080):
-        all_anonymous_users = json_assistant.get_anonymous_raw_data().keys()
-        for i in all_anonymous_users:
-            json_assistant.set_agree_TOS_of_anonymous(i, False)
-        real_logger.anonymous(f"{ctx.author} 取消了所有使用者對服務條款的回應。")
-        embed = discord.Embed(title="成功", description="所有使用者對服務條款的回應已被取消。", color=default_color)
-    else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+    all_anonymous_users = json_assistant.get_anonymous_raw_data().keys()
+    for i in all_anonymous_users:
+        json_assistant.set_agree_TOS_of_anonymous(i, False)
+    real_logger.anonymous(f"{ctx.author} 取消了所有使用者對服務條款的回應。")
+    embed = discord.Embed(title="成功", description="所有使用者對服務條款的回應已被取消。", color=default_color)
     await ctx.respond(embed=embed, ephemeral=True)
 
 
@@ -1196,73 +1182,62 @@ async def bullshit_cmd(ctx,
 
 
 @bot.slash_command(name="restart", description="重啟機器人。")
+@commands.is_owner()
 async def restart(ctx,
                   私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
-    if ctx.author == bot.get_user(657519721138094080):
-        embed = discord.Embed(title="機器人重啟中", description="機器人正在重啟中。", color=default_color)
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
-        event = discord.Activity(type=discord.ActivityType.playing, name="重啟中...")
-        await bot.change_presence(status=discord.Status.idle, activity=event)
-        upd.restart_running_bot(os.getpid(), system())
-    else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True  # noqa: PEP 3131
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
+    embed = discord.Embed(title="機器人重啟中", description="機器人正在重啟中。", color=default_color)
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
+    event = discord.Activity(type=discord.ActivityType.playing, name="重啟中...")
+    await bot.change_presence(status=discord.Status.idle, activity=event)
+    upd.restart_running_bot(os.getpid(), system())
 
 
 @bot.slash_command(name="screenshot", description="在機器人伺服器端截圖。")
+@commands.is_owner()
 async def screenshot(ctx,
                      私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
-    if ctx.author == bot.get_user(657519721138094080):
-        try:
-            await ctx.defer()
-            # 截圖
-            img = ImageGrab.grab()
-            img.save("screenshot.png")
-            file = discord.File("screenshot.png")
-            embed = discord.Embed(title="截圖", color=default_color)
-            await ctx.respond(embed=embed, file=file, ephemeral=私人訊息)
-        except Exception as e:
-            embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
-            await ctx.respond(embed=embed, ephemeral=私人訊息)
-    else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True  # noqa: PEP 3131
+    try:
+        await ctx.defer()
+        # 截圖
+        img = ImageGrab.grab()
+        img.save("screenshot.png")
+        file = discord.File("screenshot.png")
+        embed = discord.Embed(title="截圖", color=default_color)
+        await ctx.respond(embed=embed, file=file, ephemeral=私人訊息)
+    except Exception as e:
+        embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="cmd", description="在伺服器端執行指令並傳回結果。")
+@commands.is_owner()
 async def cmd(ctx,
               指令: Option(str, "要執行的指令", required=True),  # noqa: PEP 3131
               執行模組: Option(str, choices=["subprocess", "os"], description="執行指令的模組",  # noqa: PEP 3131
                            required=False) = "subprocess",
               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
-    if ctx.author == bot.get_user(657519721138094080):
-        try:
-            await ctx.defer(ephemeral=私人訊息)
-            command = split(指令)
-            if command[0] == "cmd":
-                embed = discord.Embed(title="錯誤", description="基於安全原因，你不能執行這個指令。", color=error_color)
-                await ctx.respond(embed=embed, ephemeral=私人訊息)
-                return
-            if 執行模組 == "subprocess":
-                result = str(run(command, capture_output=True, text=True).stdout)
-            else:
-                result = str(os.popen(指令).read())
-            if result != "":
-                embed = discord.Embed(title="執行結果", description=f"```{result}```", color=default_color)
-            else:
-                embed = discord.Embed(title="執行結果", description="終端未傳回回應。", color=default_color)
-        except WindowsError as e:
-            if e.winerror == 2:
-                embed = discord.Embed(title="錯誤", description="找不到指令。請嘗試更換執行模組。", color=error_color)
-            else:
-                embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
-        except Exception as e:
+    try:
+        await ctx.defer(ephemeral=私人訊息)
+        command = split(指令)
+        if command[0] == "cmd":
+            embed = discord.Embed(title="錯誤", description="基於安全原因，你不能執行這個指令。", color=error_color)
+            await ctx.respond(embed=embed, ephemeral=私人訊息)
+            return
+        if 執行模組 == "subprocess":
+            result = str(run(command, capture_output=True, text=True).stdout)
+        else:
+            result = str(os.popen(指令).read())
+        if result != "":
+            embed = discord.Embed(title="執行結果", description=f"```{result}```", color=default_color)
+        else:
+            embed = discord.Embed(title="執行結果", description="終端未傳回回應。", color=default_color)
+    except WindowsError as e:
+        if e.winerror == 2:
+            embed = discord.Embed(title="錯誤", description="找不到指令。請嘗試更換執行模組。", color=error_color)
+        else:
             embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
-    else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True  # noqa: PEP 3131
+    except Exception as e:
+        embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
     try:
         await ctx.respond(embed=embed, ephemeral=私人訊息)
     except discord.errors.HTTPException as HTTPError:
@@ -1276,28 +1251,21 @@ async def cmd(ctx,
 
 
 @bot.slash_command(name="update", description="更新機器人。")
+@commands.is_owner()
 async def update(ctx,
                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
-    if ctx.author == bot.get_user(657519721138094080):
-        embed = discord.Embed(title="更新中", description="更新流程啟動。", color=default_color)
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
-        event = discord.Activity(type=discord.ActivityType.playing, name="更新中...")
-        await bot.change_presence(status=discord.Status.idle, activity=event)
-        upd.update(os.getpid(), system())
-    else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        私人訊息 = True  # noqa: PEP 3131
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
+    embed = discord.Embed(title="更新中", description="更新流程啟動。", color=default_color)
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
+    event = discord.Activity(type=discord.ActivityType.playing, name="更新中...")
+    await bot.change_presence(status=discord.Status.idle, activity=event)
+    upd.update(os.getpid(), system())
 
 
 @bot.slash_command(name="test", description="測試用指令。")
+@commands.is_owner()
 async def test(ctx):
-    if ctx.author == bot.get_user(657519721138094080):
-        await on_member_join(ctx.author)
-        await ctx.channel.send("測試成功！", delete_after=5)
-    else:
-        embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
-        await ctx.respond(embed=embed)
+    await on_member_join(ctx.author)
+    await ctx.channel.send("測試成功！", delete_after=5)
 
 
 @bot.user_command(name="查看經驗值")
