@@ -572,6 +572,7 @@ async def qrcode(ctx,
 
 @bot.slash_command(name="daily", description="每日簽到！")
 async def daily(ctx,
+                贈與使用者: Option(discord.User, "要贈與每日獎勵的對象", required=False) = None,  # noqa
                 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
     last_claimed_time = json_assistant.get_last_daily_reward_claimed(ctx.author.id)
     if last_claimed_time is None:
@@ -598,21 +599,26 @@ async def daily(ctx,
         #     reward = 50
         # else:  # 2.5%
         #     reward = 100
-        json_assistant.add_exp(ctx.author.id, "text", reward)
+        if 贈與使用者:
+            json_assistant.add_exp(贈與使用者.id, "text", reward)
+            embed = discord.Embed(title="每日簽到", description=f"簽到成功！{贈與使用者.mention}獲得*文字*經驗值`{reward}`點！",
+                                  color=default_color)
+        else:
+            json_assistant.add_exp(ctx.author.id, "text", reward)
+            embed = discord.Embed(title="每日簽到", description=f"簽到成功！獲得*文字*經驗值`{reward}`點！",
+                                  color=default_color)
         json_assistant.set_last_daily_reward_claimed(ctx.author.id, time.time())
         json_assistant.add_daily_reward_probability(reward)
-        embed = discord.Embed(title="每日簽到", description=f"簽到成功！獲得*文字*經驗值`{reward}`點！", color=default_color)
         embed.add_field(name="(DEBUG) Random Reference Value", value=f"{random_reference}", inline=False)
-        embed_list = [embed]
         if json_assistant.level_calc(ctx.author.id, "text"):
             real_logger.info(f"等級提升：{ctx.author.name} 文字等級"
                              f"達到 {json_assistant.get_level(ctx.author.id, 'text')} 等")
-            embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{ctx.author.id}> *文字*等級升級到 "
-                                                            f"**{json_assistant.get_level(ctx.author.id, 'text')}"
-                                                            f"** 等！",
-                                  color=default_color)
-            embed.set_thumbnail(url=ctx.author.display_avatar)
-            embed_list.append(embed)
+            lvl_up_embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{ctx.author.id}> *文字*等級升級到 "
+                                                                   f"**{json_assistant.get_level(ctx.author.id, 'text')}"
+                                                                   f"** 等！",
+                                         color=default_color)
+            lvl_up_embed.set_thumbnail(url=ctx.author.display_avatar)
+            await ctx.respond(embed=lvl_up_embed)
     daily_reward_prob_raw_data = json_assistant.get_daily_reward_probability()
     sum_of_rewards = 0
     rewards_list = []
@@ -624,10 +630,10 @@ async def daily(ctx,
         sum_of_rewards += daily_reward_prob_raw_data[str(n)]
     for j in rewards_list:
         # 列出所有點數獎勵出現的次數
-        embed_list[0].add_field(name=f"{j}點", value=f"{daily_reward_prob_raw_data[str(j)]}次 "
+        embed.add_field(name=f"{j}點", value=f"{daily_reward_prob_raw_data[str(j)]}次 "
                                 f"({round(daily_reward_prob_raw_data[str(j)] / sum_of_rewards * 100, 1)} %)",
                                 inline=False)
-    await ctx.respond(embeds=embed_list, ephemeral=私人訊息)
+    await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 user_info = bot.create_group(name="user_info", description="使用者的資訊、經驗值等。")
@@ -747,8 +753,8 @@ async def edit_exp(ctx,
         real_logger.info(f"等級提升：{ctx.author.name} 文字等級"
                          f"達到 {json_assistant.get_level(ctx.author.id, 'text')} 等")
         embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{ctx.author.id}> *文字*等級升級到 "
-                                                            f"**{json_assistant.get_level(ctx.author.id, 'text')}"
-                                                            f"** 等！",
+                                                        f"**{json_assistant.get_level(ctx.author.id, 'text')}"
+                                                        f"** 等！",
                               color=default_color)
         embed.set_thumbnail(url=ctx.author.display_avatar)
         embed_list.append(embed)
