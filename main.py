@@ -587,7 +587,7 @@ async def daily(ctx,
         if 1 <= random_reference < 101:  # 50%
             reward = 10
         elif 101 <= random_reference < 141:  # 20%
-            reward = 20 
+            reward = 20
         elif 141 <= random_reference < 171:  # 15%
             reward = 50
         else:  # 15%

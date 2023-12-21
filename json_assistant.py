@@ -169,7 +169,6 @@ def get_anonymous_raw_data() -> dict:
 
 
 def write_anonymous_raw_data(data):
-    global anonymous_file
     with open(anonymous_file, "w") as f:
         json.dump(data, f, indent=2)
 
