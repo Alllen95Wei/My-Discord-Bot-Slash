@@ -582,13 +582,12 @@ async def daily(ctx,
     if now_time_str == last_claimed_time_str:
         embed = discord.Embed(title="每日簽到", description=f"你今天已經在<t:{int(last_claimed_time)}:t>簽到過了！",
                               color=error_color)
-        embed_list = [embed]
     else:
         random_reference = randint(1, 200)
         if 1 <= random_reference < 101:  # 50%
             reward = 10
         elif 101 <= random_reference < 141:  # 20%
-            reward = 20
+            reward = 20 
         elif 141 <= random_reference < 171:  # 15%
             reward = 50
         else:  # 15%
@@ -600,24 +599,24 @@ async def daily(ctx,
         # else:  # 2.5%
         #     reward = 100
         if 贈與使用者:
-            json_assistant.add_exp(贈與使用者.id, "text", reward)
-            embed = discord.Embed(title="每日簽到", description=f"簽到成功！{贈與使用者.mention}獲得*文字*經驗值`{reward}`點！",
-                                  color=default_color)
+            receiver = 贈與使用者
         else:
-            json_assistant.add_exp(ctx.author.id, "text", reward)
-            embed = discord.Embed(title="每日簽到", description=f"簽到成功！獲得*文字*經驗值`{reward}`點！",
-                                  color=default_color)
+            receiver = ctx.author
+        json_assistant.add_exp(receiver.id, "text", reward)
+        embed = discord.Embed(title="每日簽到",
+                              description=f"簽到成功！{receiver.mention}獲得*文字*經驗值`{reward}`點！",
+                              color=default_color)
         json_assistant.set_last_daily_reward_claimed(ctx.author.id, time.time())
         json_assistant.add_daily_reward_probability(reward)
         embed.add_field(name="(DEBUG) Random Reference Value", value=f"{random_reference}", inline=False)
-        if json_assistant.level_calc(ctx.author.id, "text"):
-            real_logger.info(f"等級提升：{ctx.author.name} 文字等級"
-                             f"達到 {json_assistant.get_level(ctx.author.id, 'text')} 等")
-            lvl_up_embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{ctx.author.id}> *文字*等級升級到 "
-                                                                   f"**{json_assistant.get_level(ctx.author.id, 'text')}"
+        if json_assistant.level_calc(receiver.id, "text"):
+            real_logger.info(f"等級提升：{receiver.name} 文字等級"
+                             f"達到 {json_assistant.get_level(receiver.id, 'text')} 等")
+            lvl_up_embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{receiver.id}> *文字*等級升級到 "
+                                                                   f"**{json_assistant.get_level(receiver.id, 'text')}"
                                                                    f"** 等！",
                                          color=default_color)
-            lvl_up_embed.set_thumbnail(url=ctx.author.display_avatar)
+            lvl_up_embed.set_thumbnail(url=receiver.display_avatar)
             await ctx.respond(embed=lvl_up_embed)
     daily_reward_prob_raw_data = json_assistant.get_daily_reward_probability()
     sum_of_rewards = 0
@@ -631,8 +630,8 @@ async def daily(ctx,
     for j in rewards_list:
         # 列出所有點數獎勵出現的次數
         embed.add_field(name=f"{j}點", value=f"{daily_reward_prob_raw_data[str(j)]}次 "
-                                f"({round(daily_reward_prob_raw_data[str(j)] / sum_of_rewards * 100, 1)} %)",
-                                inline=False)
+                             f"({round(daily_reward_prob_raw_data[str(j)] / sum_of_rewards * 100, 1)} %)",
+                        inline=False)
     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
