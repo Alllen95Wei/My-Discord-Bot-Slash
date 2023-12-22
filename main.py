@@ -186,6 +186,23 @@ async def check_voice_channel():
                         return None
 
 
+def get_year_process():
+    year_to_sec = 31449600
+    jun_1st = datetime.datetime.timestamp(
+                datetime.datetime.strptime("2023/01/01", "%Y/%m/%d").replace(tzinfo=now_tz))
+    year_process_sec = time.time() - jun_1st
+    year_process = round((year_process_sec / year_to_sec) * 100, 2)
+    return year_process
+
+
+@tasks.loop(minutes=5)
+async def set_presence_as_year_process():
+    year_process = get_year_process()
+    current_year = datetime.datetime.strftime(datetime.datetime.now(tz=now_tz), "%Y")
+    activity = discord.Activity(name=f"{current_year}年進度：{year_process} % 完成！", type=discord.ActivityType.watching)
+    await bot.change_presence(activity=activity, status=discord.Status.online)
+
+
 # def get_tmp_role():  # credit: 鄭詠鴻
 #     btn = discord.ui.Button(style=discord.ButtonStyle.primary, label="取得臨時身分組", emoji="✨")
 #
@@ -481,7 +498,8 @@ async def on_ready():
     real_logger.info("機器人準備完成！")
     real_logger.info(f"PING值：{round(bot.latency * 1000)}ms")
     real_logger.info(f"登入身分：{bot.user.name}#{bot.user.discriminator}")
-    await bot.change_presence(activity=normal_activity, status=discord.Status.online)
+    await set_presence_as_year_process.start()
+    # await bot.change_presence(activity=normal_activity, status=discord.Status.online)
     # await check_voice_channel()
     await give_voice_exp.start()
 
