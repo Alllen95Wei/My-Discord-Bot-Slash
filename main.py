@@ -1279,11 +1279,8 @@ async def cmd(ctx,
             embed = discord.Embed(title="執行結果", description=f"```{result}```", color=default_color)
         else:
             embed = discord.Embed(title="執行結果", description="終端未傳回回應。", color=default_color)
-    except WindowsError as e:
-        if e.winerror == 2:
-            embed = discord.Embed(title="錯誤", description="找不到指令。請嘗試更換執行模組。", color=error_color)
-        else:
-            embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
+    except FileNotFoundError as e:
+        embed = discord.Embed(title="錯誤", description="找不到指令。請嘗試更換執行模組。", color=error_color)
     except Exception as e:
         embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
     try:
