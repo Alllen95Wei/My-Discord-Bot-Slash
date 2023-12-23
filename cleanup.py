@@ -30,7 +30,7 @@ async def on_ready():
             print("刪除檔案：", file)
         print("刪除完畢。")
     print("結束工作...")
-    kill_running_bot(os.getpid(), system())
+    exit()
 
 load_dotenv("TOKEN.env")
 TOKEN = os.getenv("TOKEN")

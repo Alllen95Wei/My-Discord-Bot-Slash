@@ -1,5 +1,4 @@
 # coding: utf-8
-import OpenAIAuth
 import discord
 from discord.ext import commands
 from discord.ext import tasks
@@ -27,7 +26,6 @@ import detect_pc_status
 import update as upd
 import json_assistant
 from read_RPC import get_RPC_context
-import ChatGPT
 from bullshit import bullshit
 
 # 機器人
@@ -1161,44 +1159,44 @@ async def stop_record(ctx):
         embed = discord.Embed(title="錯誤", description="機器人並未在錄音。", color=error_color)
     await ctx.respond(embed=embed, ephemeral=True)
 
-try:
-    chatbot = ChatGPT.ChatBot()
-except OpenAIAuth.Error:
-    chatbot = None
-    real_logger.error("revChatGPT初始化失敗，停用chat指令。")
+# try:
+#     chatbot = ChatGPT.ChatBot()
+# except OpenAIAuth.Error:
+#     chatbot = None
+#     real_logger.error("revChatGPT初始化失敗，停用chat指令。")
 
 
-@bot.slash_command(name="chat", description="與ChatGPT對話。")
-@commands.cooldown(1, 10, commands.BucketType.user)
-async def chat(ctx,
-               訊息: Option(str, "想要向ChatGPT傳送的訊息", required=True),  # noqa: PEP 3131
-               私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
-    if chatbot is None:
-        embed = discord.Embed(title="錯誤", description="ChatGPT初始化時發生錯誤，因此機器人已暫時性停用此指令。", color=error_color)
-        embed.add_field(name="為何會出現此錯誤？", value="可能是：\n"
-                                                "* 機器人所使用的模組(revChatGPT)發生問題\n"
-                                                "* ChatGPT端更動\n"
-                                                "* 其他原因\n"
-                                                "如果你需要使用ChatGPT，你可以至[官方網站](https://chat.openai.com/)註冊帳戶並使用。",
-                        inline=False)
-    else:
-        global last_chat_used_time
-        if time.time() - last_chat_used_time >= 5:
-            await ctx.defer(ephemeral=私人訊息)
-            last_chat_used_time = time.time()
-            response = await run_blocking(chatbot.chat, 訊息)
-            embed = discord.Embed(title="ChatGPT", description="以下是ChatGPT的回應。", color=default_color)
-            embed.add_field(name="你的訊息", value=訊息, inline=False)
-            embed.add_field(name="ChatGPT的回應", value=response, inline=False)
-            embed.set_footer(text="以上回應皆由ChatGPT產生，與本機器人無關。")
-        else:
-            embed = discord.Embed(title="錯誤", description="短時間內已有人使用此指令。請稍後再試。", color=error_color)
-            embed.add_field(name="為什麼我不能跟其他人一起使用此指令？",
-                            value="由於ChatGPT的時間限制，我們不能在短時間內傳送過多要求，否則可能會無法得到回應。\n"
-                                  "為避免此問題，我們才設計了此機制，以避免使用者的體驗不佳。",
-                            inline=False)
-            私人訊息 = True  # noqa: PEP 3131
-    await ctx.respond(embed=embed, ephemeral=私人訊息)
+# @bot.slash_command(name="chat", description="與ChatGPT對話。")
+# @commands.cooldown(1, 10, commands.BucketType.user)
+# async def chat(ctx,
+#                訊息: Option(str, "想要向ChatGPT傳送的訊息", required=True),  # noqa: PEP 3131
+#                私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
+#     if chatbot is None:
+#         embed = discord.Embed(title="錯誤", description="ChatGPT初始化時發生錯誤，因此機器人已暫時性停用此指令。", color=error_color)
+#         embed.add_field(name="為何會出現此錯誤？", value="可能是：\n"
+#                                                 "* 機器人所使用的模組(revChatGPT)發生問題\n"
+#                                                 "* ChatGPT端更動\n"
+#                                                 "* 其他原因\n"
+#                                                 "如果你需要使用ChatGPT，你可以至[官方網站](https://chat.openai.com/)註冊帳戶並使用。",
+#                         inline=False)
+#     else:
+#         global last_chat_used_time
+#         if time.time() - last_chat_used_time >= 5:
+#             await ctx.defer(ephemeral=私人訊息)
+#             last_chat_used_time = time.time()
+#             response = await run_blocking(chatbot.chat, 訊息)
+#             embed = discord.Embed(title="ChatGPT", description="以下是ChatGPT的回應。", color=default_color)
+#             embed.add_field(name="你的訊息", value=訊息, inline=False)
+#             embed.add_field(name="ChatGPT的回應", value=response, inline=False)
+#             embed.set_footer(text="以上回應皆由ChatGPT產生，與本機器人無關。")
+#         else:
+#             embed = discord.Embed(title="錯誤", description="短時間內已有人使用此指令。請稍後再試。", color=error_color)
+#             embed.add_field(name="為什麼我不能跟其他人一起使用此指令？",
+#                             value="由於ChatGPT的時間限制，我們不能在短時間內傳送過多要求，否則可能會無法得到回應。\n"
+#                                   "為避免此問題，我們才設計了此機制，以避免使用者的體驗不佳。",
+#                             inline=False)
+#             私人訊息 = True  # noqa: PEP 3131
+#     await ctx.respond(embed=embed, ephemeral=私人訊息)
 
 
 @bot.slash_command(name="bullshit", description="唬爛。")
