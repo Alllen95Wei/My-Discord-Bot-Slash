@@ -1312,7 +1312,7 @@ async def update(ctx,
 @bot.slash_command(name="test", description="測試用指令。")
 @commands.is_owner()
 async def test(ctx):
-    await on_member_join(ctx.author)
+    await daily(ctx, ctx.author, 私人訊息=True)
     await ctx.channel.send("測試成功！", delete_after=5)
 
 
