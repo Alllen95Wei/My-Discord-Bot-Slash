@@ -186,8 +186,9 @@ async def check_voice_channel():
 
 def get_year_process():
     year_to_sec = 31449600
+    current_year = datetime.datetime.strftime(datetime.datetime.now(tz=now_tz), "%Y")
     jun_1st = datetime.datetime.timestamp(
-                datetime.datetime.strptime("2023/01/01", "%Y/%m/%d").replace(tzinfo=now_tz))
+                datetime.datetime.strptime(f"{current_year}/01/01", "%Y/%m/%d").replace(tzinfo=now_tz))
     year_process_sec = time.time() - jun_1st
     year_process = round((year_process_sec / year_to_sec) * 100, 2)
     return year_process
