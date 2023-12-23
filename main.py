@@ -232,7 +232,7 @@ async def set_presence_as_year_process():
 
 
 class GetTmpRole(discord.ui.View):
-    @discord.ui.button(label="取得臨時身分組", style=discord.ButtonStyle.primary, emoji="✨")
+    @discord.ui.button(label="取得臨時身分組", style=discord.ButtonStyle.blurple, emoji="✨")
     async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
         real_logger.debug(f"{interaction.user.name} 按下了「取得臨時身分組」按鈕")
         server = bot.get_guild(857996539262402570)
@@ -257,6 +257,26 @@ class GetTmpRole(discord.ui.View):
             await interaction.response.send_message(embed=embed)
 
 
+class GiftInTurn(discord.ui.View):
+    def __init__(self, giver: [discord.User, discord.Member]):
+        super().__init__(timeout=3600)
+        self.giver = giver
+
+    @discord.ui.button(label="回送10點作為感謝(不會扣除你的經驗值！)", style=discord.ButtonStyle.blurple, emoji="🎁")
+    async def gift_btn(self, button: discord.ui.Button, interaction: discord.Interaction):
+        button.disabled = True
+        json_assistant.add_exp(self.giver.id, "text", 10)
+        embed = discord.Embed(title="已送出回禮！", description=f"你已贈送{self.giver.mention}**10點文字經驗值**作為回禮！"
+                              , color=default_color)
+        await interaction.response.edit_message(embed=embed, view=self)
+        giver_embed = discord.Embed(title="收到回禮！", description=f"{interaction.user.mention}送你**10點文字經驗值**作為回禮！"
+                                    , color=default_color)
+        try:
+            await self.giver.send(embed=giver_embed)
+        except discord.errors.Forbidden:
+            real_logger.warning(f"無法傳送回禮通知給 {self.giver.name}#{self.giver.discriminator}，因為該用戶已關閉私人訊息。")
+
+
 class GetRealName(discord.ui.Modal):
     def __init__(self) -> None:
         super().__init__(title="審核", timeout=None)
@@ -278,7 +298,7 @@ class GetRealName(discord.ui.Modal):
                                                                                                      )))
 
 
-class ModalToView(discord.ui.View):
+class VerificationModalToView(discord.ui.View):
     def __init__(self):
         super().__init__()
 
@@ -293,8 +313,6 @@ class GiveRole(discord.ui.View):
         self.server = bot.get_guild(1114203090950836284)
         self.server_roles = self.server.roles
         self.member = member
-
-    # TODO: 修正機器人無法找到身分組的問題
 
     @discord.ui.button(label="高一", style=discord.ButtonStyle.green, emoji="1️⃣", row=0)
     async def grade1(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -368,7 +386,7 @@ class ConfirmDownload(discord.ui.View):
         self.url = url
         self.bit_rate = bit_rate
 
-    @discord.ui.button(style=discord.ButtonStyle.primary, label="確認下載", emoji="✅")
+    @discord.ui.button(style=discord.ButtonStyle.blurple, label="確認下載", emoji="✅")
     async def yes_btn(self, button: discord.ui.Button, interaction: discord.Interaction):
         button.disabled = True
         embed = discord.Embed(
@@ -407,7 +425,7 @@ class AgreeTOS(discord.ui.View):
         super().__init__()
         self.user_id = user_id
 
-    @discord.ui.button(style=discord.ButtonStyle.primary, label="同意", emoji="✅")
+    @discord.ui.button(style=discord.ButtonStyle.blurple, label="同意", emoji="✅")
     async def agree_btn_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         button.disabled = True
         await interaction.response.edit_message(view=None)
@@ -462,7 +480,7 @@ async def on_member_join(member):
             description="在正式加入此伺服器前，請告訴我們你的**真名**，以便我們授予你適當的權限！",
             color=0x57c2ea)
         try:
-            await new_member.send(embed=embed, view=ModalToView())
+            await new_member.send(embed=embed, view=VerificationModalToView())
         except discord.errors.HTTPException as error:
             if error.code == 50007:
                 await guild_joined.system_channel.send(f"{member.mention}，由於你的私人訊息已關閉，無法透過機器人進行快速審核。\n"
@@ -616,8 +634,17 @@ async def daily(ctx,
         #     reward = 50
         # else:  # 2.5%
         #     reward = 100
-        if 贈與使用者:
+        if 贈與使用者 and 贈與使用者.id != ctx.author.id:
             receiver = 贈與使用者
+            try:
+                receiver_embed = discord.Embed(title="🎁收到贈禮！",
+                                               description=f"你收到來自{ctx.author.mention}的**`{reward}`點文字經驗值**贈禮！",
+                                               color=default_color)
+                receiver_embed.add_field(name="回禮", value="你可以在1小時內點擊下方按鈕，即可回送10點文字經驗值給對方作為回禮。",
+                                         inline=False)
+                await receiver.send(embed=receiver_embed, view=GiftInTurn(ctx.author))
+            except discord.errors.Forbidden:
+                real_logger.warning(f"無法傳送贈禮通知給 {receiver.name}#{receiver.discriminator}，因為該用戶已關閉私人訊息。")
         else:
             receiver = ctx.author
         json_assistant.add_exp(receiver.id, "text", reward)
