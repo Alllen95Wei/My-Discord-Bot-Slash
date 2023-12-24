@@ -265,10 +265,11 @@ class GiftInTurn(discord.ui.View):
     async def gift_btn(self, button: discord.ui.Button, interaction: discord.Interaction):
         button.disabled = True
         json_assistant.add_exp(self.giver.id, "text", 10)
+        real_logger.info(f"{self.giver.name}#{self.giver.discriminator} 獲得回禮。")
         embed = discord.Embed(title="已送出回禮！", description=f"你已贈送{self.giver.mention}**10點文字經驗值**作為回禮！"
                               , color=default_color)
         await interaction.response.edit_message(embed=embed, view=self)
-        giver_embed = discord.Embed(title="收到回禮！", description=f"{interaction.user.mention}送你**10點文字經驗值**作為回禮！"
+        giver_embed = discord.Embed(title="🎁收到回禮！", description=f"{interaction.user.mention}送你**10點文字經驗值**作為回禮！"
                                     , color=default_color)
         try:
             await self.giver.send(embed=giver_embed)
@@ -635,6 +636,8 @@ async def daily(ctx,
         #     reward = 100
         if 贈與使用者 and 贈與使用者.id != ctx.author.id:
             receiver = 贈與使用者
+            real_logger.info(f"{ctx.author.name}#{ctx.author.discriminator} 贈送 {receiver.name}#{receiver.discriminator}"
+                             f" {reward} 點文字經驗值。")
             try:
                 receiver_embed = discord.Embed(title="🎁收到贈禮！",
                                                description=f"你收到來自{ctx.author.mention}的**`{reward}`點文字經驗值**贈禮！",
