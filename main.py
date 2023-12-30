@@ -185,8 +185,14 @@ async def check_voice_channel():
 
 
 def get_year_process():
-    year_to_sec = 31449600
-    current_year = datetime.datetime.strftime(datetime.datetime.now(tz=now_tz), "%Y")
+    # 若今年為閏年則將year_to_sec改為31622400，否則設為31536000
+    current_year = datetime.datetime.now(tz=now_tz).year
+    if current_year % 400 == 0:
+        year_to_sec = 31622400
+    elif current_year % 4 == 0 and current_year % 100 != 0:
+        year_to_sec = 31622400
+    else:
+        year_to_sec = 31536000
     jun_1st = datetime.datetime.timestamp(
                 datetime.datetime.strptime(f"{current_year}/01/01", "%Y/%m/%d").replace(tzinfo=now_tz))
     year_process_sec = time.time() - jun_1st
@@ -197,7 +203,7 @@ def get_year_process():
 @tasks.loop(minutes=5)
 async def set_presence_as_year_process():
     year_process = get_year_process()
-    current_year = datetime.datetime.strftime(datetime.datetime.now(tz=now_tz), "%Y")
+    current_year = datetime.datetime.now(tz=now_tz).year
     activity = discord.Activity(name=f"{current_year}年進度：{year_process} % 完成！", type=discord.ActivityType.watching)
     await bot.change_presence(activity=activity, status=discord.Status.online)
 
