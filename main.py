@@ -197,7 +197,7 @@ def get_year_process():
     jun_1st = datetime.datetime.timestamp(
                 datetime.datetime.strptime(f"{current_year}/01/01", "%Y/%m/%d").replace(tzinfo=now_tz))
     year_process_sec = time.time() - jun_1st
-    year_process = floor((year_process_sec / year_to_sec) * 1000) / 10
+    year_process = floor((year_process_sec / year_to_sec) * 10000) / 100
     return year_process
 
 
