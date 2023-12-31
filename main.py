@@ -19,6 +19,7 @@ import logging
 from colorlog import ColoredFormatter
 import typing
 import functools
+from math import floor
 
 from youtube_to_mp3 import main_dl
 import youtube_download as yt_download
@@ -196,16 +197,17 @@ def get_year_process():
     jun_1st = datetime.datetime.timestamp(
                 datetime.datetime.strptime(f"{current_year}/01/01", "%Y/%m/%d").replace(tzinfo=now_tz))
     year_process_sec = time.time() - jun_1st
-    year_process = round((year_process_sec / year_to_sec) * 100, 2)
+    year_process = floor((year_process_sec / year_to_sec) * 1000) / 10
     return year_process
 
 
-@tasks.loop(minutes=5)
+@tasks.loop(seconds=1)
 async def set_presence_as_year_process():
     year_process = get_year_process()
     current_year = datetime.datetime.now(tz=now_tz).year
-    activity = discord.Activity(name=f"{current_year}年進度：{year_process} % 完成！", type=discord.ActivityType.watching)
-    await bot.change_presence(activity=activity, status=discord.Status.online)
+    if datetime.datetime.now(tz=now_tz).second == 0:
+        activity = discord.Activity(name=f"{current_year}年進度：{year_process} % 完成！", type=discord.ActivityType.watching)
+        await bot.change_presence(activity=activity, status=discord.Status.online)
 
 
 # def get_tmp_role():  # credit: 鄭詠鴻
