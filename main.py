@@ -805,11 +805,11 @@ async def edit_exp(ctx,
     if json_assistant.level_calc(使用者.id, 類型):
         real_logger.info(f"等級提升：{ctx.author.name} 文字等級"
                          f"達到 {json_assistant.get_level(ctx.author.id, 'text')} 等")
-        embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{ctx.author.id}> *文字*等級升級到 "
+        embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{使用者.id}> *文字*等級升級到 "
                                                         f"**{json_assistant.get_level(ctx.author.id, 'text')}"
                                                         f"** 等！",
                               color=default_color)
-        embed.set_thumbnail(url=ctx.author.display_avatar)
+        embed.set_thumbnail(url=使用者.display_avatar)
         embed_list.append(embed)
     await ctx.respond(embeds=embed_list, ephemeral=私人訊息)
 
