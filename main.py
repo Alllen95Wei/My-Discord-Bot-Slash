@@ -661,7 +661,6 @@ async def daily(ctx,
                               color=default_color)
         json_assistant.set_last_daily_reward_claimed(ctx.author.id, time.time())
         json_assistant.add_daily_reward_probability(reward)
-        embed.add_field(name="(DEBUG) Random Reference Value", value=f"{random_reference}", inline=False)
         if json_assistant.level_calc(receiver.id, "text"):
             real_logger.info(f"等級提升：{receiver.name} 文字等級"
                              f"達到 {json_assistant.get_level(receiver.id, 'text')} 等")
