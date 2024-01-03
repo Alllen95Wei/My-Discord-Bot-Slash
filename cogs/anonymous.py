@@ -193,5 +193,5 @@ class Anonymous(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(Anonymous(bot, bot.real_logger))
+    bot.add_cog(Anonymous(bot, bot.logger))
     bot.logger.info("\"Anonymous\"已被載入。")
