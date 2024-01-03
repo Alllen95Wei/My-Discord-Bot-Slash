@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from discord import Option
 import os
 import zoneinfo
 from pathlib import Path

@@ -1,28 +1,16 @@
 # coding: utf-8
 import discord
 from discord.ext import commands
-from discord.ext import tasks
-from discord import Option
 import os
-import time
-import datetime
-import zoneinfo
 from dotenv import load_dotenv
 
 import logger
-from read_RPC import get_RPC_context
 
 # 機器人
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents, help_command=None)
 # 常用物件、變數
 base_dir = os.path.abspath(os.path.dirname(__file__))
-default_color = 0x5FE1EA
-error_color = 0xF1411C
-exp_enabled = True
-last_chat_used_time = 0
-now_tz = zoneinfo.ZoneInfo("Asia/Taipei")
-normal_activity = discord.Activity(name=get_RPC_context(), type=discord.ActivityType.playing)
 # 載入TOKEN
 load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
 TOKEN = str(os.getenv("TOKEN"))
@@ -168,28 +156,28 @@ async def check_voice_channel():
                         return None
 
 
-def get_year_process():
-    # 若今年為閏年則將year_to_sec改為31622400，否則設為31536000
-    current_year = datetime.datetime.now(tz=now_tz).year
-    if current_year % 400 == 0:
-        year_to_sec = 31622400
-    elif current_year % 4 == 0 and current_year % 100 != 0:
-        year_to_sec = 31622400
-    else:
-        year_to_sec = 31536000
-    jun_1st = datetime.datetime.timestamp(
-                datetime.datetime.strptime(f"{current_year}/01/01", "%Y/%m/%d").replace(tzinfo=now_tz))
-    year_process_sec = time.time() - jun_1st
-    year_process = round((year_process_sec / year_to_sec) * 100, 2)
-    return year_process
+# def get_year_process():
+#     # 若今年為閏年則將year_to_sec改為31622400，否則設為31536000
+#     current_year = datetime.datetime.now(tz=now_tz).year
+#     if current_year % 400 == 0:
+#         year_to_sec = 31622400
+#     elif current_year % 4 == 0 and current_year % 100 != 0:
+#         year_to_sec = 31622400
+#     else:
+#         year_to_sec = 31536000
+#     jun_1st = datetime.datetime.timestamp(
+#                 datetime.datetime.strptime(f"{current_year}/01/01", "%Y/%m/%d").replace(tzinfo=now_tz))
+#     year_process_sec = time.time() - jun_1st
+#     year_process = round((year_process_sec / year_to_sec) * 100, 2)
+#     return year_process
 
 
-@tasks.loop(minutes=5)
-async def set_presence_as_year_process():
-    year_process = get_year_process()
-    current_year = datetime.datetime.now(tz=now_tz).year
-    activity = discord.Activity(name=f"{current_year}年進度：{year_process} % 完成！", type=discord.ActivityType.watching)
-    await bot.change_presence(activity=activity, status=discord.Status.online)
+# @tasks.loop(minutes=5)
+# async def set_presence_as_year_process():
+#     year_process = get_year_process()
+#     current_year = datetime.datetime.now(tz=now_tz).year
+#     activity = discord.Activity(name=f"{current_year}年進度：{year_process} % 完成！", type=discord.ActivityType.watching)
+#     await bot.change_presence(activity=activity, status=discord.Status.online)
 
 
 # def get_tmp_role():  # credit: 鄭詠鴻
