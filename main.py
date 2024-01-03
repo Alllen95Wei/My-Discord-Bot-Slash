@@ -76,8 +76,11 @@ class CreateLogger:
                                 f"logs {datetime.datetime.now(tz=now_tz).strftime('%Y.%m.%d %H.%M.%S')}.log")
         with open(log_path, "w"):
             pass
+        f_formatter = logging.Formatter(
+            fmt="[%(asctime)s] %(levelname)-10s %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S")
         f_handler = logging.FileHandler(log_path, encoding="utf-8")
-        f_handler.setFormatter(formatter)
+        f_handler.setFormatter(f_formatter)
         logger.addHandler(f_handler)
         logger.setLevel(logging.DEBUG)
 
@@ -1214,29 +1217,26 @@ async def stop_record(ctx):
 # @commands.cooldown(1, 60, commands.BucketType.user)
 async def bullshit_cmd(ctx,
                    關鍵字: Option(str, "想要唬爛的關鍵字", required=True),  # noqa: PEP 3131
-                   字數: Option(int, "想要唬爛的字數(最多1000)", required=False) = 200,  # noqa: PEP 3131
+                   字數: Option(int, "想要唬爛的字數(最多1000)", min_value=1, max_value=1000, required=False) = 200,  # noqa: PEP 3131
                    顯著標示關鍵字: Option(bool, "是否顯著標示關鍵字", required=False) = True,  # noqa: PEP 3131
                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
     await ctx.defer(ephemeral=私人訊息)
     content = ""
-    if not 0 < 字數 <= 1000:
-        embed = discord.Embed(title="錯誤", description=f"你所指定的字數(`{字數}`字)不在1~1000內。", color=error_color)
-    else:
-        try:
-            result = bullshit(關鍵字, 字數)
-            embed = discord.Embed(title="唬爛", description="以下是唬爛的結果。", color=default_color)
-            embed.add_field(name="關鍵字", value=關鍵字, inline=False)
-            embed.add_field(name="指定字數", value=字數, inline=True)
-            embed.add_field(name="實際字數", value=str(len(result)), inline=True)
-            if len(result) > 1024:
-                embed.add_field(name="內容", value="(字數過長，改使用一般訊息回覆)", inline=False)
-                content = f"```{result}```"
-            else:
-                result = result.replace(關鍵字, f"`{關鍵字}`" if 顯著標示關鍵字 else 關鍵字)
-                embed.add_field(name="內容", value=result, inline=False)
-                embed.set_footer(text="以上內容皆由透過「唬爛產生器」API產生，與本機器人無關。")
-        except Exception as e:
-            embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
+    try:
+        result = bullshit(關鍵字, 字數)
+        embed = discord.Embed(title="唬爛", description="以下是唬爛的結果。", color=default_color)
+        embed.add_field(name="關鍵字", value=關鍵字, inline=False)
+        embed.add_field(name="指定字數", value=字數, inline=True)
+        embed.add_field(name="實際字數", value=str(len(result)), inline=True)
+        if len(result) > 1024:
+            embed.add_field(name="內容", value="(字數過長，改使用一般訊息回覆)", inline=False)
+            content = f"```{result}```"
+        else:
+            result = result.replace(關鍵字, f"`{關鍵字}`" if 顯著標示關鍵字 else 關鍵字)
+            embed.add_field(name="內容", value=result, inline=False)
+            embed.set_footer(text="以上內容皆由透過「唬爛產生器」API產生，與本機器人無關。")
+    except Exception as e:
+        embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
     await ctx.respond(embed=embed, content=content, ephemeral=私人訊息)
 
 
@@ -1320,7 +1320,7 @@ async def update(ctx,
 @bot.slash_command(name="test", description="測試用指令。")
 @commands.is_owner()
 async def test(ctx):
-    await daily(ctx, ctx.author, 私人訊息=True)
+    # await daily(ctx, ctx.author, 私人訊息=True)
     await ctx.channel.send("測試成功！", delete_after=5)
 
 
