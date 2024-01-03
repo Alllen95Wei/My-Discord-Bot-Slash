@@ -17,6 +17,7 @@ from math import floor
 import logger
 import json_assistant
 import detect_pc_status
+from read_RPC import get_RPC_context
 from youtube_to_mp3 import main_dl
 import youtube_download as yt_download
 from bullshit import bullshit
@@ -549,7 +550,8 @@ class Events(commands.Cog):
         self.real_logger.info(f"PING值：{round(self.bot.latency * 1000)}ms")
         self.real_logger.info(f"登入身分：{self.bot.user.name}#{self.bot.user.discriminator}")
         await self.set_presence_as_year_process.start()
-        # await bot.change_presence(activity=normal_activity, status=discord.Status.online)
+        normal_activity = discord.Activity(name=get_RPC_context(), type=discord.ActivityType.playing)
+        await self.bot.change_presence(activity=normal_activity, status=discord.Status.online)
         # await check_voice_channel()
         await self.give_voice_exp.start()
 
