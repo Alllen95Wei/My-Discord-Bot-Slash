@@ -1301,7 +1301,7 @@ async def test(ctx):
 async def reload(ctx):
     extension_list = list(bot.extensions)
     response_context = "已經重新載入以下extension：\n"
-    embed = discord.Embed(title="重新載入")
+    embed = discord.Embed(title="重新載入", color=0x5FE1EA)
     for extension in extension_list:
         bot.reload_extension(extension)
         response_context += extension + "\n"
