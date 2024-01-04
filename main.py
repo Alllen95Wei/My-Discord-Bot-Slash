@@ -1299,7 +1299,7 @@ async def test(ctx):
 @bot.slash_command(name="reload", description="重新載入所有extension以套用最新變更。(請先使用「/update」)")
 @commands.is_owner()
 async def reload(ctx):
-    extension_list = bot.extensions
+    extension_list = list(bot.extensions)
     response_context = "已經重新載入以下extension：\n"
     embed = discord.Embed(title="重新載入")
     for extension in extension_list:
