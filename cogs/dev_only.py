@@ -100,6 +100,11 @@ class DevOnly(commands.Cog):
         # upd.update(os.getpid(), system())
         upd.get_update_files()
 
+    @discord.slash_command(name="nothing", description="This command does nothing.")
+    @commands.is_owner()
+    async def nth(self, ctx):
+        await ctx.respond(content="Nothing happened.", ephemeral=True)
+
 
 def setup(bot):
     bot.add_cog(DevOnly(bot, bot.logger))
