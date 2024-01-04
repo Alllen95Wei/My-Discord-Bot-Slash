@@ -1304,7 +1304,7 @@ async def reload(ctx):
     embed = discord.Embed(title="重新載入")
     for extension in extension_list:
         bot.reload_extension(extension)
-        response_context += extension
+        response_context += extension + "\n"
     embed.description = response_context
     await ctx.respond(embed=embed)
 
