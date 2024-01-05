@@ -103,7 +103,7 @@ class DevOnly(commands.Cog):
         # upd.update(os.getpid(), system())
         upd.get_update_files()
         new_commit = repo.head.object.hexsha[:7]
-        embed = discord.Embed(title="更新資訊", description=f"`{old_commit}` ➡️ `{new_commit}`")
+        embed = discord.Embed(title="更新資訊", description=f"`{old_commit}` ➡️ `{new_commit}`", color=default_color)
         await ctx.respond(embed=embed)
 
     @discord.slash_command(name="nothing", description="This command does nothing.")
