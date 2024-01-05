@@ -125,7 +125,7 @@ class Basics(commands.Cog):
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
     @discord.slash_command(name="help", description="提供指令協助。")
-    async def help(self, ctx,
+    async def help_cmd(self, ctx,
                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
         embed = discord.Embed(title="指令協助", color=default_color)
         embed.add_field(name="想要知道如何使用本機器人？", value="請參閱在GitHub上的[Wiki]"
