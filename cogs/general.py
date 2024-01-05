@@ -112,7 +112,6 @@ class Basics(commands.Cog):
             file_name = yt_download.get_id(url)
             mp3_file_name = f"{file_name}_{bit_rate}.mp3"
             mp3_file_path = os.path.join(parent_dir, "ytdl", mp3_file_name)
-            print(parent_dir)
             if os.path.exists(mp3_file_path) or main_dl(url, file_name, mp3_file_name, bit_rate) == "finished":
                 return discord.File(mp3_file_path)
 
