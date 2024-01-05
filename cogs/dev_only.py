@@ -7,6 +7,7 @@ from pathlib import Path
 from platform import system
 from shlex import split
 from subprocess import run
+import git
 
 import logger
 import update as upd
@@ -95,10 +96,15 @@ class DevOnly(commands.Cog):
                      私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
         embed = discord.Embed(title="更新中", description="更新流程啟動。", color=default_color)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
+        repo = git.Repo(search_parent_directories=True)
+        old_commit = repo.head.object.hexsha[:7]
         # event = discord.Activity(type=discord.ActivityType.playing, name="更新中...")
         # await self.bot.change_presence(status=discord.Status.idle, activity=event)
         # upd.update(os.getpid(), system())
         upd.get_update_files()
+        new_commit = repo.head.object.hexsha[:7]
+        embed = discord.Embed(title="更新資訊", description=f"`{old_commit}` ➡️ `{new_commit}`")
+        await ctx.respond(embed=embed)
 
     @discord.slash_command(name="nothing", description="This command does nothing.")
     @commands.is_owner()
