@@ -1296,19 +1296,6 @@ async def test(ctx):
     await ctx.respond("測試完成。(Nothing happened)", ephemeral=True)
 
 
-@bot.slash_command(name="reload", description="重新載入所有extension以套用最新變更。(請先使用「/update」)")
-@commands.is_owner()
-async def reload(ctx):
-    extension_list = list(bot.extensions)
-    response_context = "已經重新載入以下extension：\n"
-    embed = discord.Embed(title="重新載入", color=0x5FE1EA)
-    for extension in extension_list:
-        bot.reload_extension(extension)
-        response_context += extension + "\n"
-    embed.description = response_context
-    await ctx.respond(embed=embed)
-
-
 # @bot.user_command(name="查看經驗值")
 # async def user_info_show_user(ctx, user: discord.Member):
 #     await show(ctx, user, 私人訊息=True)

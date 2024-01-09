@@ -111,6 +111,18 @@ class DevOnly(commands.Cog):
     async def nth(self, ctx):
         await ctx.respond(content="Nothing happened.", ephemeral=True)
 
+    @discord.slash_command(name="reload", description="重新載入所有extension以套用最新變更。(請先使用「/update」)")
+    @commands.is_owner()
+    async def reload(self, ctx):
+        extension_list = list(self.bot.extensions)
+        response_context = "已經重新載入以下extension：\n"
+        embed = discord.Embed(title="重新載入", color=0x5FE1EA)
+        for extension in extension_list:
+            self.bot.reload_extension(extension)
+            response_context += extension + "\n"
+        embed.description = response_context
+        await ctx.respond(embed=embed)
+
 
 def setup(bot):
     bot.add_cog(DevOnly(bot, bot.logger))
