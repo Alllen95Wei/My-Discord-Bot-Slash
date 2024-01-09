@@ -32,6 +32,7 @@ class DevOnly(commands.Cog):
 
         @discord.ui.button(label="現在重新載入更新！", style=discord.ButtonStyle.green, emoji="🔄")
         async def update_btn(self, button: discord.Button, interaction: discord.Interaction):
+            await interaction.response.defer()
             extension_list = list(self.bot.extensions)
             response_context = "已經重新載入以下extension：\n"
             embed = discord.Embed(title="重新載入", color=0x5FE1EA)
