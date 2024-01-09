@@ -352,10 +352,6 @@ class Basics(commands.Cog):
                     embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
                 await start_dl_message.edit(embed=embed)
 
-    @discord.slash_command(name="nothing", description="This command does nothing.")
-    async def nth(self, ctx):
-        await ctx.respond("Nothing happened.")
-
 
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot, real_logger: logger.CreateLogger):
