@@ -106,10 +106,10 @@ class DevOnly(commands.Cog):
         embed = discord.Embed(title="更新資訊", description=f"`{old_commit}` ➡️ `{new_commit}`", color=default_color)
         await ctx.respond(embed=embed)
 
-    @discord.slash_command(name="nothing", description="This command does nothing.")
-    @commands.is_owner()
-    async def nth(self, ctx):
-        await ctx.respond(content="Nothing happened.", ephemeral=True)
+    # @discord.slash_command(name="nothing", description="This command does nothing.")
+    # @commands.is_owner()
+    # async def nth(self, ctx):
+    #     await ctx.respond(content="Nothing happened.", ephemeral=True)
 
     @discord.slash_command(name="reload", description="重新載入所有extension以套用最新變更。(請先使用「/update」)")
     @commands.is_owner()
