@@ -33,14 +33,18 @@ class DevOnly(commands.Cog):
         @discord.ui.button(label="現在重新載入更新！", style=discord.ButtonStyle.green, emoji="🔄")
         async def update_btn(self, button: discord.Button, interaction: discord.Interaction):
             await interaction.response.defer()
-            extension_list = list(self.bot.extensions)
-            response_context = "已經重新載入以下extension：\n"
-            embed = discord.Embed(title="重新載入", color=0x5FE1EA)
-            for extension in extension_list:
-                self.bot.reload_extension(extension)
-                response_context += extension + "\n"
-            embed.description = response_context
-            await interaction.followup.send(embed=embed)
+            if self.bot.is_owner(interaction.user):
+                extension_list = list(self.bot.extensions)
+                response_context = "已經重新載入以下extension：\n"
+                embed = discord.Embed(title="重新載入", color=0x5FE1EA)
+                for extension in extension_list:
+                    self.bot.reload_extension(extension)
+                    response_context += extension + "\n"
+                embed.description = response_context
+                await interaction.followup.send(embed=embed)
+            else:
+                embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+                await interaction.followup.send(embed=embed, ephemeral=True)
 
     @discord.slash_command(name="cleanytdl", description="清除ytdl的下載資料夾。")
     @commands.is_owner()
