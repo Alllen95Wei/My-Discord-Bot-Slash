@@ -2,11 +2,8 @@ py-cord
 yt-dlp
 python-dotenv
 psutil
-gitpython
-Pillow
+gitpython>=3.1.41
 tzdata
 colorlog
-revChatGPT
-OpenAIAuth
 pynacl
 requests
