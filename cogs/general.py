@@ -315,6 +315,7 @@ class Basics(commands.Cog):
             embed.add_field(name=f"{j}點", value=f"{daily_reward_prob_raw_data[str(j)]}次 "
                             f"({round(daily_reward_prob_raw_data[str(j)] / sum_of_rewards * 100, 1)} %)",
                             inline=False)
+        embed.set_footer(text="你知道可以把每日獎勵送給其他人嗎？下次試著在使用指令前，填入「贈與使用者」的參數試試！")
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
     @discord.slash_command(name="ytdl",
