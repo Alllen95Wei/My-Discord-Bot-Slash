@@ -76,6 +76,7 @@ class Basics(commands.Cog):
 
         @discord.ui.button(style=discord.ButtonStyle.blurple, label="確認下載", emoji="✅")
         async def yes_btn(self, button: discord.ui.Button, interaction: discord.Interaction):
+            await interaction.response.defer()
             button.disabled = True
             embed = discord.Embed(
                 title="確認下載",
