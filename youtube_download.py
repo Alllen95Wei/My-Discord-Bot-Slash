@@ -22,13 +22,23 @@ def youtube_download(url, file_name):
 
 
 def get_id(url):
-    if system() == "Windows":
-        cmd = f"yt-dlp --skip-download --print \"%(id)s\" {url}"
-    else:
-        cmd = f"./yt-dlp --skip-download --print \"%(id)s\" {url}"
-
-    vid = str(run(split(cmd), capture_output=True, text=True).stdout)
-    return vid.replace("\n", "")
+    ytdl_opts = {
+        "skip_download": True,
+        "quiet": True,
+        "no_warnings": True,
+        "ignoreerrors": True,
+        "nocheckcertificate": True,
+        "restrictfilenames": True,
+        "noplaylist": True,
+        "logtostderr": False,
+        "default_search": "auto",
+        "usenetrc": False,
+        "fixup": "detect_or_warn"
+    }
+    with youtube_dl.YoutubeDL(ytdl_opts) as ydl:
+        info_dict = ydl.extract_info(url, download=False)
+        vid = info_dict["id"]
+        return vid
 
 
 def get_length(url):
@@ -52,6 +62,32 @@ def get_length(url):
         return duration
 
 
+def get_thumbnail(url):
+    # get thumbnail url
+    vid = get_id(url)
+    return f"https://i.ytimg.com/vi/{vid}/maxresdefault.jpg"
+
+
+def get_full_info(url):
+    # get video length in seconds
+    ytdl_opts = {
+        "skip_download": True,
+        "quiet": True,
+        "no_warnings": True,
+        "ignoreerrors": True,
+        "nocheckcertificate": True,
+        "restrictfilenames": True,
+        "noplaylist": True,
+        "logtostderr": False,
+        "default_search": "auto",
+        "usenetrc": False,
+        "fixup": "detect_or_warn"
+    }
+    with youtube_dl.YoutubeDL(ytdl_opts) as ydl:
+        info_dict = ydl.extract_info(url, download=False)
+        return info_dict
+
+
 if __name__ == "__main__":
     # youtube_download(url=input("請貼上要下載的連結："), file_name=input("請輸入下載後的檔案名稱："))
-    print(get_length(input("請貼上連結：")))
+    print(get_full_info(input("請貼上連結：")))
