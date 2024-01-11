@@ -1,8 +1,5 @@
 import yt_dlp as youtube_dl
 import os
-from subprocess import run
-from platform import system
-from shlex import split
 
 
 def youtube_download(url, file_name):
@@ -66,6 +63,27 @@ def get_thumbnail(url):
     # get thumbnail url
     vid = get_id(url)
     return f"https://i.ytimg.com/vi/{vid}/maxresdefault.jpg"
+
+
+def get_title(url):
+    # get video title
+    ytdl_opts = {
+        "skip_download": True,
+        "quiet": True,
+        "no_warnings": True,
+        "ignoreerrors": True,
+        "nocheckcertificate": True,
+        "restrictfilenames": True,
+        "noplaylist": True,
+        "logtostderr": False,
+        "default_search": "auto",
+        "usenetrc": False,
+        "fixup": "detect_or_warn"
+    }
+    with youtube_dl.YoutubeDL(ytdl_opts) as ydl:
+        info_dict = ydl.extract_info(url, download=False)
+        title = info_dict["title"]
+        return title
 
 
 def get_full_info(url):

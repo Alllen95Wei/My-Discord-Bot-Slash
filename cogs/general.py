@@ -67,10 +67,11 @@ class Basics(commands.Cog):
                     f"無法傳送回禮通知給 {self.giver.name}#{self.giver.discriminator}，因為該用戶已關閉私人訊息。")
 
     class ConfirmDownload(discord.ui.View):
-        def __init__(self, outer_instance, url: str, bit_rate: int = 128):
+        def __init__(self, outer_instance, url: str, length, bit_rate: int = 128):
             super().__init__()
             self.outer_instance = outer_instance
             self.url = url
+            self.length = length
             self.bit_rate = bit_rate
 
         @discord.ui.button(style=discord.ButtonStyle.blurple, label="確認下載", emoji="✅")
@@ -80,6 +81,9 @@ class Basics(commands.Cog):
                 title="確認下載",
                 description="已開始下載，請稍候。",
                 color=default_color)
+            embed.add_field(name="影片名稱", value=yt_download.get_title(self.url), inline=False)
+            embed.add_field(name="影片長度", value=f"`{self.length}`秒", inline=False)
+            embed.set_image(url=yt_download.get_thumbnail(self.url))
             embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
             await interaction.response.edit_message(embed=embed, view=None)
             result = await Basics.run_blocking(self.outer_instance, self.youtube_start_download, self.url,
@@ -330,18 +334,23 @@ class Basics(commands.Cog):
             embed = discord.Embed(title="影片長度過長",
                                   description=f"影片長度(`{length}`秒)超過512秒，下載後可能無法成功上傳。是否仍要嘗試下載？",
                                   color=error_color)
-            confirm_download = self.ConfirmDownload(outer_instance=self, url=連結, bit_rate=位元率)
+            embed.add_field(name="影片名稱", value=yt_download.get_title(連結), inline=False)
+            embed.add_field(name="影片長度", value=f"`{length}`秒", inline=False)
+            embed.set_image(url=yt_download.get_thumbnail(連結))
+            confirm_download = self.ConfirmDownload(outer_instance=self, url=連結, length=length, bit_rate=位元率)
             await ctx.respond(embed=embed, view=confirm_download)
         else:
             embed = discord.Embed(title="確認下載",
                                   description="已開始下載，請稍候。",
                                   color=default_color)
+            embed.add_field(name="影片名稱", value=yt_download.get_title(連結), inline=False)
+            embed.add_field(name="影片長度", value=f"`{length}`秒", inline=False)
+            embed.set_image(url=yt_download.get_thumbnail(連結))
             embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
             start_dl_message = await ctx.respond(embed=embed)
             try:
-                await start_dl_message.edit(embed=None, file=await self.run_blocking(self.bot, self.ConfirmDownload.
-                                                                                     youtube_start_download, 連結,
-                                                                                     位元率))
+                await start_dl_message.edit(file=await self.run_blocking(self.bot, self.ConfirmDownload.
+                                                                         youtube_start_download, 連結, 位元率))
             except Exception as e:
                 if "Request entity too large" in str(e):
                     embed = discord.Embed(title="錯誤", description="檔案過大，無法上傳。", color=error_color)
