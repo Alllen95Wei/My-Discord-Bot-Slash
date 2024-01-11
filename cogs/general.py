@@ -84,7 +84,7 @@ class Basics(commands.Cog):
                 color=default_color)
             embed.add_field(name="影片名稱", value=yt_download.get_title(self.url), inline=False)
             embed.add_field(name="影片長度", value=f"`{self.length}`秒", inline=False)
-            embed.set_image(url=yt_download.get_thumbnail(self.url))
+            embed.set_image(url=yt_download.get_thumbnail(yt_download.get_thumbnail(self.url)))
             embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
             await interaction.response.edit_message(embed=embed, view=None)
             result = await Basics.run_blocking(self.outer_instance, self.youtube_start_download, self.url,
