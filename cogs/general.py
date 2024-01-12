@@ -322,10 +322,10 @@ class Basics(commands.Cog):
         embed.set_footer(text="你知道可以把每日獎勵送給其他人嗎？下次試著在使用指令前，填入「贈與使用者」的參數試試！")
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
-    @discord.slash_command(name="ytdl",
-                           description="將YouTube影片下載為mp3。由於Discord有檔案大小限制，因此有時可能會失敗。")
-    async def ytdl(self, ctx,
-                   連結: Option(str, "欲下載的YouTube影片網址", required=True),  # noqa: PEP 3131
+    @discord.slash_command(name="musicdl",
+                           description="將影片下載為mp3。由於Discord有檔案大小限制，因此有時可能會失敗。")
+    async def dl(self, ctx,
+                   連結: Option(str, "欲下載的影片網址", required=True),  # noqa: PEP 3131
                    位元率: Option(int, description="下載後，轉換為MP3時所使用的位元率，會影響檔案的大小與品質",  # noqa: PEP 3131
                                   choices=[96, 128, 160, 192, 256, 320], required=False) = 128):
         await ctx.defer()
