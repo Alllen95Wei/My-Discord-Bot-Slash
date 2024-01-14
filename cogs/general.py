@@ -116,7 +116,8 @@ class Basics(commands.Cog):
             file_name = video_instance.get_id() + "_" + str(bit_rate)
             mp3_file_name = f"{file_name}.mp3"
             mp3_file_path = os.path.join(parent_dir, "ytdl", mp3_file_name)
-            if os.path.exists(mp3_file_path) or main_dl(video_instance, file_name, mp3_file_path) == "finished":
+            if (os.path.exists(mp3_file_path) or
+                    main_dl(video_instance, file_name, mp3_file_path, bit_rate) == "finished"):
                 return discord.File(mp3_file_path)
 
     # Slash Cmds
