@@ -338,7 +338,7 @@ class Basics(commands.Cog):
             embed.add_field(name="影片名稱", value=f"[{m_video.get_title()}]({連結})", inline=False)
             embed.add_field(name="影片長度", value=f"`{length}`秒", inline=False)
             embed.set_image(url=m_video.get_thumbnail())
-            confirm_download = self.ConfirmDownload(outer_instance=self, video_instance=m_video)
+            confirm_download = self.ConfirmDownload(outer_instance=self, video_instance=m_video, bit_rate=位元率)
             await ctx.respond(embed=embed, view=confirm_download)
         else:
             embed = discord.Embed(title="確認下載",
