@@ -44,7 +44,7 @@ class Basics(commands.Cog):
 
     class GiftInTurn(discord.ui.View):
         def __init__(self, giver: [discord.User, discord.Member], real_logger: logger.CreateLogger):
-            super().__init__(timeout=3600)
+            super().__init__(timeout=3600*3)
             self.giver = giver
             self.real_logger = real_logger
 
@@ -53,7 +53,7 @@ class Basics(commands.Cog):
             button.disabled = True
             json_assistant.add_exp(self.giver.id, "text", 10)
             self.real_logger.info(f"{self.giver.name}#{self.giver.discriminator} 獲得回禮。")
-            embed = discord.Embed(title="已送出回禮！",
+            embed = discord.Embed(title="🎁已送出回禮！",
                                   description=f"你已贈送{self.giver.mention}**10點文字經驗值**作為回禮！",
                                   color=default_color)
             await interaction.response.edit_message(embed=embed, view=self)
@@ -258,21 +258,15 @@ class Basics(commands.Cog):
                                   color=error_color)
         else:
             random_reference = randint(1, 200)
-            if 1 <= random_reference < 101:  # 50%
-                reward = 10
-            # elif 101 <= random_reference < 141:  # 20%
-            #     reward = 20
-            # elif 141 <= random_reference < 171:  # 15%
-            #     reward = 50
-            # else:  # 15%
-            #     reward = 100
-            elif 101 <= random_reference < 181:  # 40%
-                reward = 20
-            elif 181 <= random_reference < 196:  # 7.5%
-                reward = 50
-            else:  # 2.5%
-                reward = 100
-            if 贈與使用者 and 贈與使用者.id != ctx.author.id:
+            if 贈與使用者 and 贈與使用者.id != ctx.author.id:  # 贈禮
+                if 1 <= random_reference < 91:  # 45%
+                    reward = 10
+                elif 91 <= random_reference < 161:  # 35%
+                    reward = 20
+                elif 161 <= random_reference < 191:  # 15%
+                    reward = 50
+                else:  # 5%
+                    reward = 100
                 receiver = 贈與使用者
                 self.real_logger.info(
                     f"{ctx.author.name}#{ctx.author.discriminator} 贈送 {receiver.name}#{receiver.discriminator}"
@@ -282,14 +276,29 @@ class Basics(commands.Cog):
                                                    description=f"你收到來自{ctx.author.mention}的**`{reward}`點文字經驗值**贈禮！",
                                                    color=default_color)
                     receiver_embed.add_field(name="回禮",
-                                             value="你可以在1小時內點擊下方按鈕，即可回送10點文字經驗值給對方作為回禮。",
+                                             value="你可以在3小時內點擊下方按鈕，即可回送10點文字經驗值給對方作為回禮。\n"
+                                                   "放心，贈送回禮不會扣除你的經驗值！",
                                              inline=False)
                     await receiver.send(embed=receiver_embed, view=self.GiftInTurn(ctx.author, self.real_logger))
                 except discord.errors.Forbidden:
                     self.real_logger.warning(
                         f"無法傳送贈禮通知給 {receiver.name}#{receiver.discriminator}，因為該用戶已關閉私人訊息。")
-            else:
+            else:  # 本人領取
                 receiver = ctx.author
+                if 1 <= random_reference < 101:  # 50%
+                    reward = 10
+                # elif 101 <= random_reference < 141:  # 20%
+                #     reward = 20
+                # elif 141 <= random_reference < 171:  # 15%
+                #     reward = 50
+                # else:  # 15%
+                #     reward = 100
+                elif 101 <= random_reference < 181:  # 40%
+                    reward = 20
+                elif 181 <= random_reference < 196:  # 7.5%
+                    reward = 50
+                else:  # 2.5%
+                    reward = 100
             json_assistant.add_exp(receiver.id, "text", reward)
             embed = discord.Embed(title="每日簽到",
                                   description=f"簽到成功！{receiver.mention}獲得*文字*經驗值`{reward}`點！",
@@ -300,7 +309,7 @@ class Basics(commands.Cog):
                 self.real_logger.info(f"等級提升：{receiver.name} 文字等級"
                                       f"達到 {json_assistant.get_level(receiver.id, 'text')} 等")
                 lvl_up_embed = discord.Embed(title="等級提升",
-                                             description=f":tada:恭喜 <@{receiver.id}> *文字*等級升級到 "
+                                             description=f":tada:恭喜 {receiver.mention} *文字*等級升級到 "
                                                          f"**{json_assistant.get_level(receiver.id, 'text')}"
                                                          f"** 等！",
                                              color=default_color)
