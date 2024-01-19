@@ -39,7 +39,7 @@ def write_raw_info(user_id: int, data):
 def get_exp(user_id: int, exp_type):
     user_info = get_raw_info(user_id)
     if exp_type in ["voice", "text"]:
-        return round(user_info["exp"][exp_type]*10)/10
+        return round(user_info["exp"][exp_type] * 10) / 10
     else:
         raise ValueError("exp_type must be either \"voice\" or \"text\"")
 
