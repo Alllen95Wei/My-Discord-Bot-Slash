@@ -1356,6 +1356,6 @@ async def test(ctx):
 #             await message.channel.send(embed=embed, delete_after=5)
 
 
-bot.load_extensions("cogs.general", "cogs.exp_sys", "cogs.anonymous", "cogs.dev_only")
+bot.load_extensions("cogs.general", "cogs.exp_sys", "cogs.anonymous", "cogs.dev_only", "cogs.announcement")
 
 bot.run(TOKEN)

@@ -277,3 +277,35 @@ def add_daily_reward_probability(points: int):
         user_info[str(points)] = 1
     with open(file, "w") as f:
         json.dump(user_info, f, indent=2)
+
+
+announcement_file = os.path.join(base_dir, "user_data", "announcement_receivers.json")
+
+
+def get_announcement_receivers() -> dict:
+    if os.path.exists(announcement_file):
+        with open(announcement_file, "r") as f:
+            return json.loads(f.read())
+    else:
+        return {}
+
+
+def write_announcement_receivers(data: dict):
+    with open(announcement_file, "w") as f:
+        json.dump(data, f, indent=2)
+
+
+def edit_announcement_receiver(user_id: int, announcement_types: list):
+    announcement_data = get_announcement_receivers()
+    for a_type in announcement_types:
+        if a_type not in ["一般公告", "緊急公告", "更新通知", "雜七雜八"]:
+            raise ValueError("announcement_type must be \"一般公告\", \"緊急公告\", \"更新通知\", \"雜七雜八\""
+                             f"({a_type} was given)")
+    if not announcement_types:
+        try:
+            del announcement_data[str(user_id)]
+        except KeyError:
+            pass
+    else:
+        announcement_data[str(user_id)] = announcement_types
+    write_announcement_receivers(announcement_data)
