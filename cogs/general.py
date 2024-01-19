@@ -279,10 +279,18 @@ class Basics(commands.Cog):
                                              value="你可以在3小時內點擊下方按鈕，即可回送10點文字經驗值給對方作為回禮。\n"
                                                    "放心，贈送回禮不會扣除你的經驗值！",
                                              inline=False)
+                    receiver_embed.set_footer(text="贈禮加成！現在起，領取每日獎勵時指定「贈與使用者」，對方將更有機會獲得高點數獎勵！")
                     await receiver.send(embed=receiver_embed, view=self.GiftInTurn(ctx.author, self.real_logger))
-                except discord.errors.Forbidden:
+                except discord.errors.Forbidden or discord.errors.HTTPException:
+                    # TODO:處理on_application_command_error會捕捉錯誤，而不會運行至此的問題
                     self.real_logger.warning(
                         f"無法傳送贈禮通知給 {receiver.name}#{receiver.discriminator}，因為該用戶已關閉私人訊息。")
+                    embed = discord.Embed(title="錯誤", description="糟糕！對方似乎已關閉「允許陌生人傳送陌生訊息」功能，你的贈禮無法送達！",
+                                          color=default_color)
+                    embed.add_field(name="疑難排解", value="請參考[這則文章]"
+                                                       "(https://support.discord.com/hc/zh-tw/articles/7924992471191-"
+                                                       "%E8%A8%8A%E6%81%AF%E8%AB%8B%E6%B1%82)來解決此問題後重試。")
+                    await ctx.respond(embed=embed, ephemeral=True)
             else:  # 本人領取
                 receiver = ctx.author
                 if 1 <= random_reference < 101:  # 50%
@@ -329,7 +337,7 @@ class Basics(commands.Cog):
             embed.add_field(name=f"{j}點", value=f"{daily_reward_prob_raw_data[str(j)]}次 "
                             f"({round(daily_reward_prob_raw_data[str(j)] / sum_of_rewards * 100, 1)} %)",
                             inline=False)
-        embed.set_footer(text="你知道可以把每日獎勵送給其他人嗎？下次試著在使用指令前，填入「贈與使用者」的參數試試！")
+        embed.set_footer(text="贈禮加成！現在起，領取每日獎勵時指定「贈與使用者」，對方將更有機會獲得高點數獎勵！")
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
     @discord.slash_command(name="musicdl",
