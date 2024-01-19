@@ -1,10 +1,13 @@
+# coding=utf-8
 import json
 import os
 import datetime
 
+base_dir = os.path.abspath(os.path.dirname(__file__))
+
 
 def get_raw_info(user_id: [int, str], is_dict=True):
-    file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", str(user_id) + ".json")
+    file = os.path.join(base_dir, "user_data", str(user_id) + ".json")
     if is_dict:
         if os.path.exists(file):
             with open(file, "r") as f:
@@ -28,7 +31,7 @@ def get_raw_info(user_id: [int, str], is_dict=True):
 
 
 def write_raw_info(user_id: int, data):
-    file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", str(user_id) + ".json")
+    file = os.path.join(base_dir, "user_data", str(user_id) + ".json")
     with open(file, "w") as f:
         json.dump(data, f, indent=2)
 
@@ -159,7 +162,7 @@ def set_last_daily_reward_claimed(user_id: int, time):
     write_raw_info(user_id, user_info)
 
 
-anonymous_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", "anonymous.json")
+anonymous_file = os.path.join(base_dir, "user_data", "anonymous.json")
 
 
 def get_anonymous_raw_data() -> dict:
@@ -250,7 +253,7 @@ def set_agree_TOS_of_anonymous(user_id: int, allow: bool):
 
 
 def get_daily_reward_probability() -> dict:
-    file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", "daily_reward_prob.json")
+    file = os.path.join(base_dir, "user_data", "daily_reward_prob.json")
     if os.path.exists(file):
         with open(file, "r") as f:
             user_info = json.loads(f.read())
@@ -261,12 +264,12 @@ def get_daily_reward_probability() -> dict:
             20: 0,
             50: 0,
             100: 0
-                      }
+        }
         return empty_data
 
 
 def add_daily_reward_probability(points: int):
-    file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "user_data", "daily_reward_prob.json")
+    file = os.path.join(base_dir, "user_data", "daily_reward_prob.json")
     user_info = get_daily_reward_probability()
     try:
         user_info[str(points)] += 1
