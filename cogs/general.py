@@ -51,7 +51,7 @@ class Basics(commands.Cog):
         @discord.ui.button(label="回送10點作為感謝(不會扣除你的經驗值！)", style=discord.ButtonStyle.blurple, emoji="🎁")
         async def gift_btn(self, button: discord.ui.Button, interaction: discord.Interaction):
             button.disabled = True
-            json_assistant.add_exp(self.giver.id, "text", 10)
+            json_assistant.User(self.giver.id).add_exp("text", 10)
             self.real_logger.info(f"{self.giver.name}#{self.giver.discriminator} 獲得回禮。")
             embed = discord.Embed(title="🎁已送出回禮！",
                                   description=f"你已贈送{self.giver.mention}**10點文字經驗值**作為回禮！",
@@ -248,7 +248,7 @@ class Basics(commands.Cog):
     async def daily(self, ctx,
                     贈與使用者: Option(discord.User, "要贈與每日獎勵的對象", required=False) = None,  # noqa
                     私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
-        last_claimed_time = json_assistant.get_last_daily_reward_claimed(ctx.author.id)
+        last_claimed_time = json_assistant.User(ctx.author.id).get_last_daily_reward_claimed()
         if last_claimed_time is None:
             last_claimed_time = 0.0
         last_claimed_time_str = datetime.datetime.fromtimestamp(last_claimed_time, tz=now_tz).strftime("%Y-%m-%d")
@@ -307,19 +307,18 @@ class Basics(commands.Cog):
                     reward = 50
                 else:  # 2.5%
                     reward = 100
-            json_assistant.add_exp(receiver.id, "text", reward)
+            receiver_obj = json_assistant.User(receiver.id)
+            receiver_obj.add_exp("text", reward)
             embed = discord.Embed(title="每日簽到",
                                   description=f"簽到成功！{receiver.mention}獲得*文字*經驗值`{reward}`點！",
                                   color=default_color)
-            json_assistant.set_last_daily_reward_claimed(ctx.author.id, time.time())
+            receiver_obj.set_last_daily_reward_claimed(time.time())
             json_assistant.add_daily_reward_probability(reward)
-            if json_assistant.level_calc(receiver.id, "text"):
-                self.real_logger.info(f"等級提升：{receiver.name} 文字等級"
-                                      f"達到 {json_assistant.get_level(receiver.id, 'text')} 等")
+            if receiver_obj.level_calc("text"):
+                self.real_logger.info(f"等級提升：{receiver.name} 文字等級達到 {receiver_obj.get_level('text')} 等")
                 lvl_up_embed = discord.Embed(title="等級提升",
                                              description=f":tada:恭喜 {receiver.mention} *文字*等級升級到 "
-                                                         f"**{json_assistant.get_level(receiver.id, 'text')}"
-                                                         f"** 等！",
+                                                         f"**{receiver_obj.get_level('text')}** 等！",
                                              color=default_color)
                 lvl_up_embed.set_thumbnail(url=receiver.display_avatar)
                 await ctx.respond(embed=lvl_up_embed)
@@ -493,14 +492,15 @@ class Events(commands.Cog):
                             for a in member.activities:
                                 if isinstance(a, discord.Activity):
                                     value += 0.1
-                            json_assistant.add_exp(member.id, "voice", value)
+                            member_obj = json_assistant.User(member.id)
+                            member_obj.add_exp("voice", value)
                             self.real_logger.info(f"獲得經驗值：{member.name} 獲得語音經驗 {value}")
-                            if json_assistant.level_calc(member.id, "voice"):
+                            if member_obj.level_calc("voice"):
                                 self.real_logger.info(f"等級提升：{member.name} 語音等級"
-                                                      f"達到 {json_assistant.get_level(member.id, 'voice')} 等")
+                                                      f"達到 {member_obj.get_level('voice')} 等")
                                 embed = discord.Embed(title="等級提升",
                                                       description=f":tada:恭喜 <@{member.id}> *語音*等級升級到 "
-                                                                  f"**{json_assistant.get_level(member.id, 'voice')}**"
+                                                                  f"**{member_obj.get_level('voice')}**"
                                                                   f" 等！",
                                                       color=default_color)
                                 embed.set_thumbnail(url=member.display_avatar)
@@ -516,7 +516,7 @@ class Events(commands.Cog):
         embed.set_footer(text=f"於 {join_date} 加入")
         embed.set_thumbnail(url=member.display_avatar)
         await guild_joined.system_channel.send(embed=embed)
-        json_assistant.set_join_date(member.id, join_date)
+        json_assistant.User(member.id).set_join_date(join_date)
         new_member = await self.bot.fetch_user(member.id)
         if guild_joined.id == 857996539262402570:
             embed = discord.Embed(
@@ -600,7 +600,8 @@ class Events(commands.Cog):
                 return
         if message.channel.id in exclude_channel:
             return
-        time_delta = time.time() - json_assistant.get_last_active_time(message.author.id)
+        memeber_obj = json_assistant.User(message.author.id)
+        time_delta = time.time() - memeber_obj.get_last_active_time()
         if time_delta < 300:
             return
         if "Direct Message" in str(message.channel):
@@ -612,18 +613,17 @@ class Events(commands.Cog):
             if len(msg_in) <= 15:
                 self.real_logger.info(
                     f"獲得經驗值：{message.author.name} 文字經驗值 +{len(msg_in)} (訊息長度：{len(msg_in)})")
-                json_assistant.add_exp(message.author.id, "text", len(msg_in))
+                memeber_obj.add_exp("text", len(msg_in))
             else:
-                json_assistant.add_exp(message.author.id, "text", 15)
+                memeber_obj.add_exp("text", 15)
                 self.real_logger.info(f"獲得經驗值：{message.author.name} 文字經驗值 +15 (訊息長度：{len(msg_in)})")
-        json_assistant.set_last_active_time(message.author.id, time.time())
-        if json_assistant.level_calc(message.author.id, "text"):
+        memeber_obj.set_last_active_time(time.time())
+        if memeber_obj.level_calc("text"):
             self.real_logger.info(f"等級提升：{message.author.name} 文字等級"
-                                  f"達到 {json_assistant.get_level(message.author.id, 'text')} 等")
+                                  f"達到 {memeber_obj.get_level('text')} 等")
             embed = discord.Embed(title="等級提升",
                                   description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
-                                              f"**{json_assistant.get_level(message.author.id, 'text')}"
-                                              f"** 等！",
+                                              f"**{memeber_obj.get_level('text')}** 等！",
                                   color=default_color)
             embed.set_thumbnail(url=message.author.display_avatar)
             embed.set_footer(text="關於經驗值計算系統，請輸入/user_info about")

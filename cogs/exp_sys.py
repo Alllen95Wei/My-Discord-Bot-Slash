@@ -29,10 +29,11 @@ class UserInfo(commands.Cog):
                    私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
         if 使用者 is None:
             使用者 = ctx.author  # noqa
-        text_exp = json_assistant.get_exp(使用者.id, "text")
-        text_level = json_assistant.get_level(使用者.id, "text")
-        voice_exp = json_assistant.get_exp(使用者.id, "voice")
-        voice_level = json_assistant.get_level(使用者.id, "voice")
+        user_obj = json_assistant.User(使用者.id)
+        text_exp = user_obj.get_exp("text")
+        text_level = user_obj.get_level("text")
+        voice_exp = user_obj.get_exp("voice")
+        voice_level = user_obj.get_level("voice")
         embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}的經驗值", color=default_color)
         embed.add_field(name="文字等級", value=f"{text_level}", inline=False)
         embed.add_field(name="文字經驗值", value=f"{text_exp}", inline=False)
@@ -62,13 +63,14 @@ class UserInfo(commands.Cog):
                       私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
         if 使用者 is None:
             使用者 = ctx.author  # noqa
-        text_lvl = json_assistant.get_level(使用者.id, "text")
-        text_require = json_assistant.upgrade_exp_needed(使用者.id, "text")
-        text_now = json_assistant.get_exp(使用者.id, "text")
+        user_obj = json_assistant.User(使用者.id)
+        text_lvl = user_obj.get_level("text")
+        text_require = user_obj.upgrade_exp_needed("text")
+        text_now = user_obj.get_exp("text")
         text_percent = (round(text_now / text_require * 1000)) / 10
-        voice_lvl = json_assistant.get_level(使用者.id, "voice")
-        voice_require = json_assistant.upgrade_exp_needed(使用者.id, "voice")
-        voice_now = json_assistant.get_exp(使用者.id, "voice")
+        voice_lvl = user_obj.get_level("voice")
+        voice_require = user_obj.upgrade_exp_needed("voice")
+        voice_now = user_obj.get_exp("voice")
         voice_percent = (round(voice_now / voice_require * 1000)) / 10
         embed = discord.Embed(title="經驗值", description=f"使用者：{使用者.mention}距離升級還差...",
                               color=default_color)
@@ -111,7 +113,7 @@ class UserInfo(commands.Cog):
     async def show_raw_data(self, ctx,
                             使用者: Option(discord.Member, "要查詢的使用者", required=True),  # noqa
                             私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
-        raw_data = json_assistant.get_raw_info(使用者.id, False)
+        raw_data = json_assistant.User(使用者.id).get_raw_info(False)
         embed = discord.Embed(title="使用者資料", description=f"使用者：{使用者.mention}的原始資料", color=default_color)
         embed.add_field(name="原始資料", value=f"```{raw_data}```", inline=False)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
@@ -123,9 +125,10 @@ class UserInfo(commands.Cog):
                        類型: Option(str, "要編輯的經驗值類型", required=True, choices=["text", "voice"]),  # noqa
                        經驗值: Option(int, "要編輯的經驗值數量，若要扣除則輸入負值", required=True),  # noqa
                        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
-        before_exp = json_assistant.get_exp(使用者.id, 類型)
-        json_assistant.add_exp(使用者.id, 類型, 經驗值)
-        after_exp = json_assistant.get_exp(使用者.id, 類型)
+        user_obj = json_assistant.User(使用者.id)
+        before_exp = user_obj.get_exp(類型)
+        user_obj.add_exp(類型, 經驗值)
+        after_exp = user_obj.get_exp(類型)
         embed = discord.Embed(title="編輯經驗值", description=f"已編輯{使用者.mention}的**{類型}**經驗值。",
                               color=default_color)
         embed.add_field(name="編輯前", value=before_exp, inline=True)
@@ -135,11 +138,11 @@ class UserInfo(commands.Cog):
             embed.add_field(name="➡️減少", value=f"*{abs(經驗值)}*", inline=True)
         embed.add_field(name="編輯後", value=after_exp, inline=True)
         await ctx.respond(embed=embed, ephemeral=私人訊息)
-        if json_assistant.level_calc(使用者.id, 類型):
+        if user_obj.level_calc(類型):
             self.real_logger.info(f"等級提升：{ctx.author.name} 文字等級"
-                                  f"達到 {json_assistant.get_level(ctx.author.id, 'text')} 等")
+                                  f"達到 {user_obj.get_level('text')} 等")
             upgrade_embed = discord.Embed(title="等級提升", description=f":tada:恭喜 <@{ctx.author.id}> *文字*等級升級到 "
-                                          f"**{json_assistant.get_level(ctx.author.id, 'text')}** 等！",
+                                          f"**{user_obj.get_level('text')}** 等！",
                                           color=default_color)
             upgrade_embed.set_thumbnail(url=ctx.author.display_avatar)
             await ctx.respond(embed=upgrade_embed, ephemeral=私人訊息)
@@ -151,9 +154,10 @@ class UserInfo(commands.Cog):
                        類型: Option(str, "要編輯的等級類型", required=True, choices=["text", "voice"]),  # noqa
                        等級: Option(int, "要編輯的等級數量，若要扣除則輸入負值", required=True),  # noqa
                        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
-        before_lvl = json_assistant.get_level(使用者.id, 類型)
-        json_assistant.add_level(使用者.id, 類型, 等級)
-        after_lvl = json_assistant.get_level(使用者.id, 類型)
+        user_obj = json_assistant.User(使用者.id)
+        before_lvl = user_obj.get_level(類型)
+        user_obj.add_level(類型, 等級)
+        after_lvl = user_obj.get_level(類型)
         embed = discord.Embed(title="編輯經驗值", description=f"已編輯{使用者.mention}的**{類型}**等級。",
                               color=default_color)
         embed.add_field(name="編輯前", value=before_lvl, inline=True)

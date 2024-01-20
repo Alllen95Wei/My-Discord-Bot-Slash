@@ -6,160 +6,149 @@ import datetime
 base_dir = os.path.abspath(os.path.dirname(__file__))
 
 
-def get_raw_info(user_id: [int, str], is_dict=True):
-    file = os.path.join(base_dir, "user_data", str(user_id) + ".json")
-    if is_dict:
-        if os.path.exists(file):
+class User:
+    def __init__(self, user_id: [int, str]):
+        self.user_id = user_id
+
+    def get_raw_info(self, is_dict=True):
+        file = os.path.join(base_dir, "user_data", str(self.user_id) + ".json")
+        if is_dict:
+            if os.path.exists(file):
+                with open(file, "r") as f:
+                    user_info = json.loads(f.read())
+                    return user_info
+            else:
+                empty_data = {"join_date": None,
+                              "exp":
+                                  {"voice": 0,
+                                   "text": 0},
+                              "level":
+                                  {"voice": 0,
+                                   "text": 0},
+                              "last_active_time": 0,
+                              "last_daily_reward_claimed": 0
+                              }
+                return empty_data
+        else:
             with open(file, "r") as f:
-                user_info = json.loads(f.read())
-                return user_info
+                return f.read()
+
+    def write_raw_info(self, data):
+        file = os.path.join(base_dir, "user_data", str(self.user_id) + ".json")
+        with open(file, "w") as f:
+            json.dump(data, f, indent=2)
+
+    def get_exp(self, exp_type):
+        user_info = self.get_raw_info()
+        if exp_type in ["voice", "text"]:
+            return round(user_info["exp"][exp_type] * 10) / 10
         else:
-            empty_data = {"join_date": None,
-                          "exp":
-                              {"voice": 0,
-                               "text": 0},
-                          "level":
-                              {"voice": 0,
-                               "text": 0},
-                          "last_active_time": 0,
-                          "last_daily_reward_claimed": 0
-                          }
-            return empty_data
-    else:
-        with open(file, "r") as f:
-            return f.read()
+            raise ValueError("exp_type must be either \"voice\" or \"text\"")
 
-
-def write_raw_info(user_id: int, data):
-    file = os.path.join(base_dir, "user_data", str(user_id) + ".json")
-    with open(file, "w") as f:
-        json.dump(data, f, indent=2)
-
-
-def get_exp(user_id: int, exp_type):
-    user_info = get_raw_info(user_id)
-    if exp_type in ["voice", "text"]:
-        return round(user_info["exp"][exp_type] * 10) / 10
-    else:
-        raise ValueError("exp_type must be either \"voice\" or \"text\"")
-
-
-def add_exp(user_id: int, exp_type, amount):
-    user_info = get_raw_info(user_id)
-    if exp_type in ["voice", "text"]:
-        user_info["exp"][exp_type] += amount
-        write_raw_info(user_id, user_info)
-    else:
-        raise ValueError("exp_type must be either \"voice\" or \"text\"")
-
-
-def set_join_date(user_id: int, date):
-    user_info = get_raw_info(user_id)
-    user_info["join_date"] = date
-    write_raw_info(user_id, user_info)
-
-
-def get_join_date(user_id: int):
-    user_info = get_raw_info(user_id)
-    return user_info["join_date"]
-
-
-def get_join_date_in_str(user_id: int):
-    raw_date = get_join_date(user_id)
-    if raw_date is not None:
-        if len(str(raw_date[4])) == 1:
-            min_reformat = "0" + str(raw_date[4])
+    def add_exp(self, exp_type, amount):
+        user_info = self.get_raw_info(self.user_id)
+        if exp_type in ["voice", "text"]:
+            user_info["exp"][exp_type] += amount
+            self.write_raw_info(user_info)
         else:
-            min_reformat = raw_date[4]
-        if len(str(raw_date[5])) == 1:
-            sec_reformat = "0" + str(raw_date[5])
+            raise ValueError("exp_type must be either \"voice\" or \"text\"")
+
+    def set_join_date(self, date):
+        user_info = self.get_raw_info()
+        user_info["join_date"] = date
+        self.write_raw_info(user_info)
+
+    def get_join_date(self):
+        user_info = self.get_raw_info()
+        return user_info["join_date"]
+
+    def get_join_date_in_str(self):
+        raw_date = self.get_join_date()
+        if raw_date is not None:
+            if len(str(raw_date[4])) == 1:
+                min_reformat = "0" + str(raw_date[4])
+            else:
+                min_reformat = raw_date[4]
+            if len(str(raw_date[5])) == 1:
+                sec_reformat = "0" + str(raw_date[5])
+            else:
+                sec_reformat = raw_date[5]
+            str_date = f"{raw_date[0]}/{raw_date[1]}/{raw_date[2]} {raw_date[3]}:{min_reformat}:{sec_reformat}"
+            return str_date
         else:
-            sec_reformat = raw_date[5]
-        str_date = f"{raw_date[0]}/{raw_date[1]}/{raw_date[2]} {raw_date[3]}:{min_reformat}:{sec_reformat}"
-        return str_date
-    else:
-        return None
+            return None
 
-
-def joined_time(user_id: int):
-    raw_date = get_join_date(user_id)
-    if raw_date is not None:
-        join_date = datetime.datetime(year=raw_date[0], month=raw_date[1], day=raw_date[2],
-                                      hour=raw_date[3], minute=raw_date[4], second=raw_date[5])
-        now = datetime.datetime.now()
-        time_diff = now - join_date
-        time_diff = f"{time_diff.days} 天， {time_diff.seconds // 3600} 小時， " \
-                    f"{(time_diff.seconds // 60) % 60} 分鐘， {time_diff.seconds % 60} 秒"
-        return time_diff
-    else:
-        return None
-
-
-def get_level(user_id: int, level_type):
-    if level_type in ["voice", "text"]:
-        user_info = get_raw_info(user_id)
-        return user_info["level"][level_type]
-    else:
-        raise ValueError("level_type must be either \"voice\" or \"text\"")
-
-
-def add_level(user_id: int, level_type, level):
-    user_info = get_raw_info(user_id)
-    user_info["level"][level_type] += level
-    write_raw_info(user_id, user_info)
-
-
-def upgrade_exp_needed(user_id: int, level_type):
-    if level_type in ["voice", "text"]:
-        current_level = get_level(user_id, level_type)
-        if level_type == "text":
-            exp_needed = 80 + (25 * current_level)
+    def joined_time(self):
+        raw_date = self.get_join_date()
+        if raw_date is not None:
+            join_date = datetime.datetime(year=raw_date[0], month=raw_date[1], day=raw_date[2],
+                                          hour=raw_date[3], minute=raw_date[4], second=raw_date[5])
+            now = datetime.datetime.now()
+            time_diff = now - join_date
+            time_diff = f"{time_diff.days} 天， {time_diff.seconds // 3600} 小時， " \
+                        f"{(time_diff.seconds // 60) % 60} 分鐘， {time_diff.seconds % 60} 秒"
+            return time_diff
         else:
-            exp_needed = 50 + (30 * current_level)
-        return exp_needed
-    else:
-        raise ValueError("level_type must be either \"voice\" or \"text\"")
+            return None
 
-
-def level_calc(user_id: int, level_type):
-    if level_type in ["voice", "text"]:
-        exp = get_exp(user_id, level_type)
-        exp_needed = upgrade_exp_needed(user_id, level_type)
-        if exp >= exp_needed:
-            add_level(user_id, level_type, 1)
-            add_exp(user_id, level_type, -exp_needed)
-            return True
+    def get_level(self, level_type: str):
+        if level_type in ["voice", "text"]:
+            user_info = self.get_raw_info()
+            return user_info["level"][level_type]
         else:
-            return False
-    else:
-        raise ValueError("level_type must be either \"voice\" or \"text\"")
+            raise ValueError("level_type must be either \"voice\" or \"text\"")
 
+    def add_level(self, level_type, level):
+        user_info = self.get_raw_info()
+        user_info["level"][level_type] += level
+        self.write_raw_info(user_info)
 
-def get_last_active_time(user_id: int):
-    user_info = get_raw_info(user_id)
-    time = user_info["last_active_time"]
-    return time
+    def upgrade_exp_needed(self, level_type):
+        if level_type in ["voice", "text"]:
+            current_level = self.get_level(level_type)
+            if level_type == "text":
+                exp_needed = 80 + (25 * current_level)
+            else:
+                exp_needed = 50 + (30 * current_level)
+            return exp_needed
+        else:
+            raise ValueError("level_type must be either \"voice\" or \"text\"")
 
+    def level_calc(self, level_type):
+        if level_type in ["voice", "text"]:
+            exp = self.get_exp(level_type)
+            exp_needed = self.upgrade_exp_needed(level_type)
+            if exp >= exp_needed:
+                self.add_level(level_type, 1)
+                self.add_exp(level_type, -exp_needed)
+                return True
+            else:
+                return False
+        else:
+            raise ValueError("level_type must be either \"voice\" or \"text\"")
 
-def set_last_active_time(user_id: int, time):
-    user_info = get_raw_info(user_id)
-    user_info["last_active_time"] = time
-    write_raw_info(user_id, user_info)
+    def get_last_active_time(self):
+        user_info = self.get_raw_info()
+        time = user_info["last_active_time"]
+        return time
 
+    def set_last_active_time(self, time):
+        user_info = self.get_raw_info()
+        user_info["last_active_time"] = time
+        self.write_raw_info(user_info)
 
-def get_last_daily_reward_claimed(user_id: int):
-    user_info = get_raw_info(user_id)
-    try:
-        time = user_info["last_daily_reward_claimed"]
-    except KeyError:
-        time = None
-    return time
+    def get_last_daily_reward_claimed(self):
+        user_info = self.get_raw_info()
+        try:
+            time = user_info["last_daily_reward_claimed"]
+        except KeyError:
+            time = None
+        return time
 
-
-def set_last_daily_reward_claimed(user_id: int, time):
-    user_info = get_raw_info(user_id)
-    user_info["last_daily_reward_claimed"] = time
-    write_raw_info(user_id, user_info)
+    def set_last_daily_reward_claimed(self, time):
+        user_info = self.get_raw_info()
+        user_info["last_daily_reward_claimed"] = time
+        self.write_raw_info(user_info)
 
 
 anonymous_file = os.path.join(base_dir, "user_data", "anonymous.json")
