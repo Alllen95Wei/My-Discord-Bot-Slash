@@ -12,6 +12,7 @@ import json_assistant
 
 error_color = 0xF1411C
 default_color = 0x5FE1EA
+announcement_color = 0x20BA49
 now_tz = zoneinfo.ZoneInfo("Asia/Taipei")
 base_dir = os.path.abspath(os.path.dirname(__file__))
 parent_dir = str(Path(__file__).parent.parent.absolute())
@@ -42,7 +43,7 @@ class Announcement(commands.Cog):
             announcement_content = (self.children[1].value +
                                     f"\n\n*\\- {self.bot.get_user(self.bot.owner_id).display_name}*")  # 加上署名
             announcement_embed = Embed(title=title_types[self.announcement_type],
-                                       description=announcement_content, color=default_color)
+                                       description=announcement_content, color=announcement_color)
             announcement_embed.set_footer(text=f"由於你訂閱了「{self.announcement_type}」類別，因此收到了這則訊息。")
             receiver_data = json_assistant.get_announcement_receivers()
             successful_users, failed_users, unsubscribed_users = "", "", ""
