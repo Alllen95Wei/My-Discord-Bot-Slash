@@ -312,7 +312,7 @@ class Basics(commands.Cog):
             embed = discord.Embed(title="每日簽到",
                                   description=f"簽到成功！{receiver.mention}獲得*文字*經驗值`{reward}`點！",
                                   color=default_color)
-            receiver_obj.set_last_daily_reward_claimed(time.time())
+            json_assistant.User(ctx.author.id).set_last_daily_reward_claimed(time.time())
             json_assistant.add_daily_reward_probability(reward)
             if receiver_obj.level_calc("text"):
                 self.real_logger.info(f"等級提升：{receiver.name} 文字等級達到 {receiver_obj.get_level('text')} 等")
