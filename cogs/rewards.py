@@ -30,11 +30,11 @@ class Rewards(commands.Cog):
             self.bot = outer_instance.bot
             self.real_logger = outer_instance.real_logger
 
-            self.add_item(ui.InputText(style=InputTextStyle.short, label="標題"))
+            self.add_item(ui.InputText(style=InputTextStyle.short, label="標題", placeholder="輸入代碼標題"))
             self.add_item(ui.InputText(style=InputTextStyle.long, label="說明", required=False,
                                        placeholder="支援markdown"))
             self.add_item(ui.InputText(style=InputTextStyle.short, label="獎勵內容(文字/語音)", value="0/0"))
-            self.add_item(ui.InputText(style=InputTextStyle.short, label="限制數量", required=False))
+            self.add_item(ui.InputText(style=InputTextStyle.short, label="限制數量", placeholder="輸入獎勵數量", required=False))
             self.add_item(ui.InputText(style=InputTextStyle.short, label="限制時間 (格式：YYYY/MM/DD HH：MM，24小時制)",
                                        min_length=16, max_length=16, required=False))
 
@@ -92,6 +92,7 @@ class Rewards(commands.Cog):
             receiver.add_exp("text", reward_obj.get_rewards()["text"])
             receiver.add_exp("voice", reward_obj.get_rewards()["voice"])
             reward_obj.add_claimed_user(interaction.user.id)
+            self.real_logger.info(f"{interaction.user} 領取了代碼 {self.reward_id} 的獎勵。")
             embed = Embed(title="兌換成功", description=f"你已成功兌換代碼`{self.reward_id}`！", color=default_color)
             embed.add_field(name="文字經驗值", value=reward_obj.get_rewards()["text"], inline=False)
             embed.add_field(name="語音經驗值", value=reward_obj.get_rewards()["voice"], inline=False)
