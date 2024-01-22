@@ -586,7 +586,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author == self.bot.user:
+        if message.author.id == self.bot.user.id:
             return
         msg_in = message.content
         exclude_channel = [1035754607286169631, 1035754607286169631, 891665312028713001]
