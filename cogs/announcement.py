@@ -1,6 +1,6 @@
 # coding=utf-8
 import discord
-from discord import ui, Interaction, Embed, SelectOption, Option
+from discord import ui, Interaction, Embed, SelectOption, Option, InputTextStyle
 from discord.ext import commands
 import os
 import zoneinfo
@@ -30,8 +30,8 @@ class Announcement(commands.Cog):
             self.bot = outer_instance.bot
             self.real_logger = outer_instance.real_logger
 
-            self.add_item(ui.InputText(style=discord.InputTextStyle.short, label="類型", value=announcement_type))
-            self.add_item(ui.InputText(style=discord.InputTextStyle.long, label="公告內文",
+            self.add_item(ui.InputText(style=InputTextStyle.short, label="類型", value=announcement_type))
+            self.add_item(ui.InputText(style=InputTextStyle.long, label="公告內文",
                                        placeholder="請輸入公告內容(支援markdown)"))
 
         async def callback(self, interaction: Interaction):
