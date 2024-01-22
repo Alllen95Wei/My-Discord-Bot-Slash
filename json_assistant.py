@@ -2,6 +2,8 @@
 import json
 import os
 import datetime
+from string import hexdigits
+from random import choice
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -298,3 +300,112 @@ def edit_announcement_receiver(user_id: int, announcement_types: list):
     else:
         announcement_data[str(user_id)] = announcement_types
     write_announcement_receivers(announcement_data)
+
+
+class RewardData:
+    def __init__(self, reward_id: str):
+        self.reward_id = reward_id
+
+    @staticmethod
+    def create_new_reward():
+        while True:
+            random_char_list = [choice(hexdigits) for i in range(8)]
+            random_char = "".join(random_char_list).upper()
+            file = os.path.join(base_dir, "reward_data", random_char + ".json")
+            if not os.path.exists(file):
+                break
+        empty_data = RewardData(random_char).get_raw_info()
+        RewardData(random_char).write_raw_info(empty_data)
+        return random_char
+
+    def delete(self):
+        file = os.path.join(base_dir, "reward_data", self.reward_id + ".json")
+        if os.path.exists(file):
+            os.remove(file)
+        else:
+            raise FileNotFoundError("Reward not found.")
+
+    @staticmethod
+    def get_all_reward_id() -> list:
+        file = os.path.join(base_dir, "reward_data")
+        return [i.split(".")[0] for i in os.listdir(file)]
+
+    def get_raw_info(self, is_dict=True):
+        file = os.path.join(base_dir, "reward_data", str(self.reward_id) + ".json")
+        if is_dict:
+            if os.path.exists(file):
+                with open(file, "r") as f:
+                    user_info = json.loads(f.read())
+                    return user_info
+            else:
+                empty_data = {"title": "",
+                              "description": "",
+                              "reward": {"text": 0, "voice": 0},
+                              "limit": {"claimed": [], "amount": None, "time": 0}
+                              }
+                return empty_data
+        else:
+            with open(file, "r") as f:
+                return f.read()
+
+    def write_raw_info(self, data):
+        file = os.path.join(base_dir, "reward_data", str(self.reward_id) + ".json")
+        with open(file, "w") as f:
+            json.dump(data, f, indent=2)
+
+    def get_title(self):
+        data = self.get_raw_info()
+        return data["title"]
+
+    def set_title(self, title: str):
+        data = self.get_raw_info()
+        data["title"] = title
+        self.write_raw_info(data)
+
+    def get_description(self):
+        data = self.get_raw_info()
+        return data["description"]
+
+    def set_description(self, description: str):
+        data = self.get_raw_info()
+        data["description"] = description
+        self.write_raw_info(data)
+
+    def get_rewards(self):
+        data = self.get_raw_info()
+        return data["reward"]
+
+    def set_reward(self, reward_type: str, amount: int):
+        data = self.get_raw_info()
+        if reward_type in ["text", "voice"]:
+            data["reward"][reward_type] = amount
+            self.write_raw_info(data)
+        else:
+            raise ValueError("reward_type must be either \"text\" or \"voice\"")
+
+    def get_amount(self) -> int | None:
+        date = self.get_raw_info()
+        return date["limit"]["amount"]
+
+    def set_amount(self, amount: int):
+        data = self.get_raw_info()
+        data["limit"]["amount"] = amount
+        self.write_raw_info(data)
+
+    def get_claimed_users(self) -> list:
+        data = self.get_raw_info()
+        return data["limit"]["claimed"]
+
+    def add_claimed_user(self, user_id: int):
+        data = self.get_raw_info()
+        data["limit"]["claimed"].append(user_id)
+        self.write_raw_info(data)
+
+    def get_time_limit(self):
+        data = self.get_raw_info()
+        return data["limit"]["time"]
+
+    def set_time_limit(self, time: int | None):
+        data = self.get_raw_info()
+        data["limit"]["time"] = time
+        self.write_raw_info(data)
