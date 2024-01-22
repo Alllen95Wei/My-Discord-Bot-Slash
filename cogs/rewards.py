@@ -96,8 +96,7 @@ class Rewards(commands.Cog):
             embed.add_field(name="文字經驗值", value=reward_obj.get_rewards()["text"], inline=False)
             embed.add_field(name="語音經驗值", value=reward_obj.get_rewards()["voice"], inline=False)
             button.disabled = True
-            await interaction.response.edit_message(view=self)
-            await interaction.followup.send(embed=embed, ephemeral=True)
+            await interaction.edit_original_response(embed=embed, view=self)
 
     reward = discord.SlashCommandGroup(name="reward", description="與兌換代碼相關的指令。")
 
