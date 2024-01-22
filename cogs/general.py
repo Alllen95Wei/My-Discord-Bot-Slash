@@ -581,7 +581,8 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_application_command(self, ctx):
-        self.real_logger.info(f"{ctx.author} 執行了斜線指令 \"{ctx.command.name}\"")
+        cmd = f"{ctx.command.parent.name} {ctx.command.name}" if ctx.command.parent else ctx.command.name
+        self.real_logger.info(f"{ctx.author} 執行了斜線指令 \"{cmd}\"")
 
     @commands.Cog.listener()
     async def on_message(self, message):
