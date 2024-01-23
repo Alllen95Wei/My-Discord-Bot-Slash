@@ -25,24 +25,42 @@ class Rewards(commands.Cog):
         self.real_logger = real_logger
 
     class CreateAward(ui.Modal):
-        def __init__(self, outer_instance):
-            super().__init__(title="建立兌換代碼")
+        def __init__(self, outer_instance, reward_id: str = ""):
+            super().__init__(title="建立兌換代碼" if reward_id == "" else "編輯兌換代碼")
+            self.reward_id = reward_id
+            if reward_id == "":
+                prefill_data = ["", "", "0/0", "", ""]
+            else:
+                reward_obj = json_assistant.RewardData(reward_id)
+                prefill_data = [reward_obj.get_title(),
+                                reward_obj.get_description(),
+                                f"{reward_obj.get_rewards()['text']}/{reward_obj.get_rewards()['voice']}",
+                                reward_obj.get_amount(),
+                                datetime.datetime.fromtimestamp(reward_obj.get_time_limit(), tz=now_tz)
+                                .strftime("%Y/%m/%d %H：%M") if reward_obj.get_time_limit() != 0 else ""]
             self.bot = outer_instance.bot
             self.real_logger = outer_instance.real_logger
 
-            self.add_item(ui.InputText(style=InputTextStyle.short, label="標題", placeholder="輸入代碼標題"))
+            self.add_item(ui.InputText(style=InputTextStyle.short, label="標題", placeholder="輸入代碼標題",
+                                       value=prefill_data[0]))
             self.add_item(ui.InputText(style=InputTextStyle.long, label="說明", required=False,
-                                       placeholder="支援markdown"))
-            self.add_item(ui.InputText(style=InputTextStyle.short, label="獎勵內容(文字/語音)", value="0/0"))
-            self.add_item(ui.InputText(style=InputTextStyle.short, label="限制數量", placeholder="輸入獎勵數量", required=False))
+                                       placeholder="支援markdown", value=prefill_data[1]))
+            self.add_item(ui.InputText(style=InputTextStyle.short, label="獎勵內容 (文字/語音)", value=prefill_data[2]))
+            self.add_item(ui.InputText(style=InputTextStyle.short, label="限制數量", placeholder="輸入獎勵數量", required=False,
+                                       value=prefill_data[3]))
             self.add_item(ui.InputText(style=InputTextStyle.short, label="限制時間 (格式：YYYY/MM/DD HH：MM，24小時制)",
-                                       min_length=16, max_length=16, required=False))
+                                       min_length=16, max_length=16, required=False, value=prefill_data[4]))
 
         async def callback(self, interaction: Interaction):
             await interaction.response.defer()
             reward_id = json_assistant.RewardData.create_new_reward()
             reward_obj = json_assistant.RewardData(reward_id)
-            embed = Embed(title="產生兌換代碼", description=f"成功產生兌換代碼！\n本次的代碼為：`{reward_id}`", color=default_color)
+            if self.reward_id == "":
+                embed = Embed(title="產生兌換代碼", description=f"成功產生兌換代碼！\n本次的代碼為：`{reward_id}`",
+                              color=default_color)
+            else:
+                embed = Embed(title="編輯兌換代碼", description=f"已編輯兌換代碼。\n本次的代碼為：`{reward_id}`",
+                              color=default_color)
             embed.add_field(name="標題", value=self.children[0].value, inline=False)
             embed.add_field(name="說明", value=self.children[1].value, inline=False) if self.children[1].value else None
             reward_details = self.children[2].value.split("/")
@@ -106,6 +124,16 @@ class Rewards(commands.Cog):
     async def create(self, ctx):
         await ctx.send_modal(self.CreateAward(self))
 
+    @reward.command(name="edit", description="(開發者限定)編輯兌換代碼。")
+    @commands.is_owner()
+    async def edit(self, ctx,
+                   代碼: Option(str, "輸入欲編輯的代碼資料", min_length=8, max_length=8)):  # noqa
+        if 代碼 in json_assistant.RewardData.get_all_reward_id():
+            await ctx.send_modal(self.CreateAward(self, 代碼))
+        else:
+            embed = Embed(title="錯誤", description=f"你輸入的代碼 `{代碼}` 不存在！", color=error_color)
+            await ctx.respond(embed=embed, ephemeral=True)
+
     @reward.command(name="redeem", description="兌換代碼。")
     async def redeem(self, ctx,
                      代碼: Option(str, "輸入欲兌換的代碼", min_length=8, max_length=8)):  # noqa
@@ -123,8 +151,8 @@ class Rewards(commands.Cog):
                 embed.add_field(name="標題", value=reward_obj.get_title(), inline=False)
                 embed.add_field(name="說明", value=reward_obj.get_description(), inline=False) \
                     if reward_obj.get_description() else None
-                embed.add_field(name="獎勵內容(文字)", value=str(reward_obj.get_rewards()["text"]), inline=False)
-                embed.add_field(name="獎勵內容(語音)", value=str(reward_obj.get_rewards()["voice"]), inline=False)
+                embed.add_field(name="獎勵內容 (文字)", value=str(reward_obj.get_rewards()["text"]), inline=False)
+                embed.add_field(name="獎勵內容 (語音)", value=str(reward_obj.get_rewards()["voice"]), inline=False)
                 btn = self.RedeemConfirmation(self, 代碼)
         else:
             embed = Embed(title="錯誤", description=f"你輸入的代碼`{代碼}`不存在。", color=error_color)
