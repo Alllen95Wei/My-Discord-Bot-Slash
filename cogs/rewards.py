@@ -134,6 +134,34 @@ class Rewards(commands.Cog):
             embed = Embed(title="錯誤", description=f"你輸入的代碼 `{代碼}` 不存在！", color=error_color)
             await ctx.respond(embed=embed, ephemeral=True)
 
+    @reward.command(name="show", description="(開發者限定)查看代碼狀態、資訊。")
+    @commands.is_owner()
+    async def show(self, ctx,
+                   代碼: Option(str, "輸入欲編輯的代碼資料", min_length=8, max_length=8)):  # noqa
+        if 代碼 in json_assistant.RewardData.get_all_reward_id():
+            reward_obj = json_assistant.RewardData(代碼)
+            embed = Embed(title=f"代碼`{代碼}`的資訊", description=f"`{代碼}`的資訊如下：", color=default_color)
+            embed.add_field(name="標題", value=reward_obj.get_title(), inline=False)
+            embed.add_field(name="說明", value=reward_obj.get_description(), inline=False) \
+                if reward_obj.get_description() else None
+            reward_details = reward_obj.get_rewards()
+            embed.add_field(name="獎勵內容 (文字)", value=reward_details["text"], inline=False)
+            embed.add_field(name="獎勵內容 (語音)", value=reward_details["voice"], inline=False)
+            embed.add_field(name="限制數量",
+                            value=str(reward_obj.get_amount()) if reward_obj.get_amount() != 0 else "無限制",
+                            inline=False)
+            claimed_users_str = ""
+            if len(reward_obj.get_claimed_users()) != 0:
+                for i in reward_obj.get_claimed_users():
+                    claimed_users_str += f"<@{i}>\n"
+            else:
+                claimed_users_str = "(尚未有人領取)"
+            embed.add_field(name=f"已領取名單 (共{len(reward_obj.get_claimed_users())}人)",
+                            value=claimed_users_str, inline=False)
+        else:
+            embed = Embed(title="錯誤", description=f"你輸入的代碼 `{代碼}` 不存在！", color=error_color)
+        await ctx.respond(embed=embed, ephemeral=True)
+
     @reward.command(name="redeem", description="兌換代碼。")
     async def redeem(self, ctx,
                      代碼: Option(str, "輸入欲兌換的代碼", min_length=8, max_length=8)):  # noqa
