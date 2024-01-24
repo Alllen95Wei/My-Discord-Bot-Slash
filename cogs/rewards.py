@@ -37,7 +37,7 @@ class Rewards(commands.Cog):
                                 f"{reward_obj.get_rewards()['text']}/{reward_obj.get_rewards()['voice']}",
                                 reward_obj.get_amount(),
                                 datetime.datetime.fromtimestamp(reward_obj.get_time_limit(), tz=now_tz)
-                                .strftime("%Y/%m/%d %H：%M") if reward_obj.get_time_limit() != 0 else ""]
+                                .strftime("%Y/%m/%d %H:%M") if reward_obj.get_time_limit() != 0 else ""]
             self.bot = outer_instance.bot
             self.real_logger = outer_instance.real_logger
 
@@ -48,7 +48,7 @@ class Rewards(commands.Cog):
             self.add_item(ui.InputText(style=InputTextStyle.short, label="獎勵內容 (文字/語音)", value=prefill_data[2]))
             self.add_item(ui.InputText(style=InputTextStyle.short, label="限制數量", placeholder="輸入獎勵數量", required=False,
                                        value=prefill_data[3]))
-            self.add_item(ui.InputText(style=InputTextStyle.short, label="限制時間 (格式：YYYY/MM/DD HH：MM，24小時制)",
+            self.add_item(ui.InputText(style=InputTextStyle.short, label="限制時間 (格式：YYYY/MM/DD HH:MM，24小時制)",
                                        min_length=16, max_length=16, required=False, value=prefill_data[4]))
 
         async def callback(self, interaction: Interaction):
@@ -75,7 +75,7 @@ class Rewards(commands.Cog):
             if self.children[4].value:
                 try:
                     unix_end_time = datetime.datetime.timestamp(
-                        datetime.datetime.strptime(self.children[4].value, "%Y/%m/%d %H：%M").replace(tzinfo=now_tz))
+                        datetime.datetime.strptime(self.children[4].value, "%Y/%m/%d %H:%M").replace(tzinfo=now_tz))
                     if unix_end_time < time.time():
                         embed = discord.Embed(title="錯誤",
                                               description=f"輸入的時間(<t:{int(unix_end_time)}:F>)已經過去！請重新輸入。",
