@@ -119,7 +119,7 @@ class Basics(commands.Cog):
             if (os.path.exists(mp3_file_path) or
                     main_dl(video_instance, file_name, mp3_file_path, bit_rate) == "finished"):
                 return discord.File(mp3_file_path)
-
+    # test GPG
     # Slash Cmds
 
     @discord.slash_command(name="ping", description="查詢機器人PING值(ms)。")
