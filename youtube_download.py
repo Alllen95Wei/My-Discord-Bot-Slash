@@ -1,3 +1,4 @@
+# coding=utf-8
 import yt_dlp as youtube_dl
 import os
 
