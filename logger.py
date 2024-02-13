@@ -16,6 +16,7 @@ class CreateLogger:
         self.c_logger = self.color_logger()
         self.a_logger = self.anonymous_logger()
         logging.addLevelName(25, "ANONYMOUS")
+        logging.addLevelName(35, "BUGFLAG")
 
     @staticmethod
     def color_logger():
@@ -28,6 +29,7 @@ class CreateLogger:
                 "INFO": "green",
                 "ANONYMOUS": "purple",
                 "WARNING": "yellow",
+                "BUGFLAG": "cyan",
                 "ERROR": "red",
                 "CRITICAL": "red",
             },
@@ -82,3 +84,6 @@ class CreateLogger:
     def anonymous(self, message: str):
         self.c_logger.log(25, message)
         self.a_logger.log(25, message)
+
+    def bugflag(self, message: str):
+        self.c_logger.log(35, message)

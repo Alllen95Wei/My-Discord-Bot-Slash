@@ -209,6 +209,17 @@ class Basics(commands.Cog):
         embed.set_footer(text=f"©Allen Why, {year} | 版本：commit {sha[:7]}")
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
+    @discord.slash_command(name="bugflag", description="機器人發生錯誤，或運作不如預期？使用此指令立即標記！")
+    async def bugflag(self, ctx):
+        self.real_logger.bugflag(f"{ctx.author} 標記了錯誤。")
+        self.real_logger.bugflag(f"頻道ID：{ctx.channel.id} ({ctx.channel})")
+        dev_embed = discord.Embed(title="bugflag", description=f"{ctx.author.mention} 標記了錯誤。", color=default_color)
+        dev_embed.add_field(name="時間", value=f"<t:{int(time.time())}:F>", inline=False)
+        dev_embed.add_field(name="頻道", value=f"<#{ctx.channel.id}>", inline=False)
+        await self.bot.get_user(657519721138094080).send(embed=dev_embed)
+        embed = discord.Embed(title="已標記！", description="機器人已標記了錯誤，同時通知開發者！", color=default_color)
+        await ctx.respond(embed=embed)
+
     @discord.slash_command(name="dps", description="查詢伺服器電腦的CPU及記憶體使用率。")
     async def dps(
         self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa
