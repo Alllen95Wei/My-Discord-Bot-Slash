@@ -361,7 +361,7 @@ class Basics(commands.Cog):
             embed = discord.Embed(title="確認下載",
                                   description="已開始下載，請稍候。",
                                   color=default_color)
-            embed.add_field(name="影片名稱", value=m_video.get_title(), inline=False)
+            embed.add_field(name="影片名稱", value=f"[{m_video.get_title()}]({連結})", inline=False)
             embed.add_field(name="影片長度", value=f"`{length}`秒", inline=False)
             embed.set_image(url=m_video.get_thumbnail())
             embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
