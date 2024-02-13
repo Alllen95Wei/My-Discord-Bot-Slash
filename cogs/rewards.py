@@ -262,7 +262,7 @@ class Rewards(commands.Cog):
         btn = None
         if 代碼 in json_assistant.RewardData.get_all_reward_id():
             reward_obj = json_assistant.RewardData(代碼)
-            if reward_obj.get_time_limit() < time.time():
+            if reward_obj.get_time_limit() != 0 and reward_obj.get_time_limit() < time.time():
                 embed = Embed(
                     title="錯誤：代碼過期", description=f"你輸入的代碼`{代碼}`已經過期。", color=error_color
                 )
