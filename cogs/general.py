@@ -113,7 +113,7 @@ class Basics(commands.Cog):
             )
             embed.set_image(url=self.m_video.get_thumbnail())
             embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
-            await interaction.response.edit_message(embed=embed, view=None)
+            await interaction.edit_original_response(embed=embed, view=None)
             result = await Basics.run_blocking(
                 self.outer_instance,
                 self.youtube_start_download,
