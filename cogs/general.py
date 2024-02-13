@@ -395,42 +395,23 @@ class Basics(commands.Cog):
                     f"{ctx.author.name}#{ctx.author.discriminator} 贈送 {receiver.name}#{receiver.discriminator}"
                     f" {reward} 點文字經驗值。"
                 )
-                try:
-                    receiver_embed = discord.Embed(
-                        title="🎁收到贈禮！",
-                        description=f"你收到來自{ctx.author.mention}的**`{reward}`點文字經驗值**贈禮！",
-                        color=default_color,
-                    )
-                    receiver_embed.add_field(
-                        name="回禮",
-                        value="你可以在3小時內點擊下方按鈕，即可回送10點文字經驗值給對方作為回禮。\n"
-                        "放心，贈送回禮不會扣除你的經驗值！",
-                        inline=False,
-                    )
-                    receiver_embed.set_footer(
-                        text="贈禮加成！現在起，領取每日獎勵時指定「贈與使用者」，對方將更有機會獲得高點數獎勵！"
-                    )
-                    await receiver.send(
-                        embed=receiver_embed,
-                        view=self.GiftInTurn(ctx.author, self.real_logger),
-                    )
-                except discord.errors.Forbidden or discord.errors.HTTPException:
-                    # TODO:處理on_application_command_error會捕捉錯誤，而不會運行至此的問題
-                    self.real_logger.warning(
-                        f"無法傳送贈禮通知給 {receiver.name}#{receiver.discriminator}，因為該用戶已關閉私人訊息。"
-                    )
-                    embed = discord.Embed(
-                        title="錯誤",
-                        description="糟糕！對方似乎已關閉「允許陌生人傳送陌生訊息」功能，你的贈禮無法送達！",
-                        color=default_color,
-                    )
-                    embed.add_field(
-                        name="疑難排解",
-                        value="請參考[這則文章]"
-                        "(https://support.discord.com/hc/zh-tw/articles/7924992471191-"
-                        "%E8%A8%8A%E6%81%AF%E8%AB%8B%E6%B1%82)來解決此問題後重試。",
-                    )
-                    await ctx.respond(embed=embed, ephemeral=True)
+                receiver_embed = discord.Embed(
+                    title="🎁收到贈禮！",
+                    description=f"你收到來自{ctx.author.mention}的**`{reward}`點文字經驗值**贈禮！",
+                    color=default_color,
+                )
+                receiver_embed.add_field(
+                    name="回禮",
+                    value="你可以在3小時內點擊下方按鈕，即可回送10點文字經驗值給對方作為回禮。\n" "放心，贈送回禮不會扣除你的經驗值！",
+                    inline=False,
+                )
+                receiver_embed.set_footer(
+                    text="贈禮加成！現在起，領取每日獎勵時指定「贈與使用者」，對方將更有機會獲得高點數獎勵！"
+                )
+                await receiver.send(
+                    embed=receiver_embed,
+                    view=self.GiftInTurn(ctx.author, self.real_logger),
+                )
             else:  # 本人領取
                 receiver = ctx.author
                 if 1 <= random_reference < 101:  # 50%
@@ -571,7 +552,7 @@ class Basics(commands.Cog):
                     embed.add_field(
                         name="是否加入了後設資料？",
                         value="後設資料可能增加了檔案的大小。請試著將`加入後設資料`參數改為`False`。",
-                        inline=False
+                        inline=False,
                     )
                     embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
                 else:
@@ -831,6 +812,22 @@ class Events(commands.Cog):
         elif isinstance(error, commands.NotOwner):
             embed = discord.Embed(
                 title="錯誤", description="你沒有權限使用此指令。", color=error_color
+            )
+            await ctx.respond(embed=embed, ephemeral=True)
+        elif isinstance(error, discord.errors.Forbidden) or isinstance(
+            error, discord.errors.HTTPException
+        ):
+            self.real_logger.warning(f"無法傳送贈禮通知給對方，因為該用戶已關閉私人訊息。")
+            embed = discord.Embed(
+                title="錯誤",
+                description="糟糕！對方似乎已關閉「允許陌生人傳送陌生訊息」功能，你的贈禮無法送達！",
+                color=default_color,
+            )
+            embed.add_field(
+                name="疑難排解",
+                value="請參考[這則文章]"
+                "(https://support.discord.com/hc/zh-tw/articles/7924992471191-"
+                "%E8%A8%8A%E6%81%AF%E8%AB%8B%E6%B1%82)來解決此問題後重試。",
             )
             await ctx.respond(embed=embed, ephemeral=True)
         else:
