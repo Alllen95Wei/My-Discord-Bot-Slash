@@ -59,6 +59,11 @@ class Video:
         title = info_dict["title"]
         return title
 
+    def get_uploader(self):
+        info_dict = self.full_info
+        uploader = info_dict["uploader"]
+        return uploader
+
     @staticmethod
     def get_full_info(url):
         # get full info
@@ -69,4 +74,4 @@ class Video:
 
 if __name__ == "__main__":
     # youtube_download(url=input("請貼上要下載的連結："), file_name=input("請輸入下載後的檔案名稱："))
-    m_video = Video(url=input("請貼上要下載的連結："))
+    print(Video.get_full_info(url=input("請貼上要下載的連結：")))

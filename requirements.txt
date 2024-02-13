@@ -7,3 +7,5 @@ tzdata
 colorlog
 pynacl
 requests
+mutagen
+pillow

@@ -1,15 +1,68 @@
+# coding=utf-8
+import mutagen.id3
+from mutagen.id3 import ID3
+import requests
+from PIL import Image
+import io
+from string import hexdigits
+from random import choice
+from os import remove
+
 import youtube_download as yt_dl
 import m4a_to_mp3 as mt3
 
 
-def main_dl(video_instance: yt_dl.Video, file_name, mp3_path, bit_rate=128):
+def main_dl(
+    video_instance: yt_dl.Video, file_name, mp3_path, metadata: dict, bit_rate=128
+):
     video_instance.download(file_name + ".m4a")
-    mt3.m4a_to_mp3(file_name, mp3_path, bit_rate)
+    output_path = mt3.m4a_to_mp3(file_name, mp3_path, bit_rate)
+    edit_mp3_metadata(output_path, metadata) if metadata != {} else None
     return "finished"
 
 
+def edit_mp3_metadata(mp3_path: str, data: dict):
+    audio_file = ID3(mp3_path, v2_version=3)
+    audio_file.add(
+        mutagen.id3.TIT2(encoding=3, text=data["title"] if data["title"] else "")
+    )
+    audio_file.add(
+        mutagen.id3.TPE1(encoding=3, text=data["artist"] if data["artist"] else "")
+    )
+    if "thumbnail_url" in data and data["thumbnail_url"] != "":
+        img_name = save_thumbnail_from_url(data["thumbnail_url"])
+        with open(img_name, "rb") as f:
+            image_data = f.read()
+        audio_file.add(
+            mutagen.id3.APIC(
+                encoding=3, mime="image/png", type=3, data=image_data
+            )
+        )
+        remove(img_name)
+    audio_file.save(v2_version=3)
+
+
+def save_thumbnail_from_url(url: str):
+    image_data = requests.get(url).content
+    image = Image.open(io.BytesIO(image_data)).convert("RGB")
+    random_char_list = [choice(hexdigits) for i in range(4)]
+    file_name = "".join(random_char_list) + ".png"
+    image.save(file_name, "png")
+    return file_name
+
+
 if __name__ == "__main__":
-    url = input("請貼上要下載的連結：")
+    dl_url = input("請貼上要下載的連結：")
     m_file_name = input("請輸入下載後的檔案名稱(不含副檔名)：")
     m_mp3_path = input("輸入mp3檔輸出的路徑(結尾請加\\)：") + m_file_name + ".mp3"
-    main_dl(yt_dl.Video(url), m_file_name, m_mp3_path, 320)
+    main_dl(
+        yt_dl.Video(dl_url),
+        m_file_name,
+        m_mp3_path,
+        {
+            "title": "test1",
+            "artist": "浠Mizuki",
+            "thumbnail_url": "",
+        },
+        320,
+    )
