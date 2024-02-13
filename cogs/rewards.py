@@ -82,7 +82,8 @@ class Rewards(commands.Cog):
             self.add_item(
                 ui.InputText(
                     style=InputTextStyle.short,
-                    label="限制時間 (格式：YYYY/MM/DD HH:MM，24小時制)",
+                    label="截止時間 (格式：YYYY/MM/DD HH:MM，24小時制)",
+                    placeholder="若未指定，則代碼不會到期",
                     min_length=16,
                     max_length=16,
                     required=False,
