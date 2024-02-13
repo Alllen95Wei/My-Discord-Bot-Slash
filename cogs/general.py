@@ -701,7 +701,7 @@ class Events(commands.Cog):
             )
         elif datetime.datetime.now(tz=now_tz).second == 30:
             activity = discord.Activity(
-                name="⚠️近期進行程式結構整理，功能可能不穩定⚠️", type=discord.ActivityType.playing
+                name=get_RPC_context(), type=discord.ActivityType.playing
             )
             await self.bot.change_presence(
                 activity=activity, status=discord.Status.online
