@@ -817,7 +817,7 @@ class Events(commands.Cog):
         elif isinstance(error, discord.errors.Forbidden) or isinstance(
             error, discord.errors.HTTPException
         ):
-            self.real_logger.warning(f"無法傳送贈禮通知給對方，因為該用戶已關閉私人訊息。")
+            self.real_logger.warning("無法傳送贈禮通知給對方，因為該用戶已關閉私人訊息。")
             embed = discord.Embed(
                 title="錯誤",
                 description="糟糕！對方似乎已關閉「允許陌生人傳送陌生訊息」功能，你的贈禮無法送達！",
