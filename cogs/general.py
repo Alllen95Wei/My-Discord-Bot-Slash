@@ -884,8 +884,8 @@ class Events(commands.Cog):
                 return
         if message.channel.id in exclude_channel:
             return
-        memeber_obj = json_assistant.User(message.author.id)
-        time_delta = time.time() - memeber_obj.get_last_active_time()
+        member_obj = json_assistant.User(message.author.id)
+        time_delta = time.time() - member_obj.get_last_active_time()
         if time_delta < 300:
             return
         if "Direct Message" in str(message.channel):
@@ -899,22 +899,22 @@ class Events(commands.Cog):
                 self.real_logger.info(
                     f"獲得經驗值：{message.author.name} 文字經驗值 +{len(msg_in)} (訊息長度：{len(msg_in)})"
                 )
-                memeber_obj.add_exp("text", len(msg_in))
+                member_obj.add_exp("text", len(msg_in))
             else:
-                memeber_obj.add_exp("text", 15)
+                member_obj.add_exp("text", 15)
                 self.real_logger.info(
                     f"獲得經驗值：{message.author.name} 文字經驗值 +15 (訊息長度：{len(msg_in)})"
                 )
-        memeber_obj.set_last_active_time(time.time())
-        if memeber_obj.level_calc("text"):
+        member_obj.set_last_active_time(time.time())
+        if member_obj.level_calc("text"):
             self.real_logger.info(
                 f"等級提升：{message.author.name} 文字等級"
-                f"達到 {memeber_obj.get_level('text')} 等"
+                f"達到 {member_obj.get_level('text')} 等"
             )
             embed = discord.Embed(
                 title="等級提升",
                 description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
-                f"**{memeber_obj.get_level('text')}** 等！",
+                f"**{member_obj.get_level('text')}** 等！",
                 color=default_color,
             )
             embed.set_thumbnail(url=message.author.display_avatar)
