@@ -1296,7 +1296,7 @@ async def test(ctx):
     await ctx.respond("測試完成。(Nothing happened)", ephemeral=True)
 
 
-@discord.slash_command(name="reload", description="重新載入所有extension以套用最新變更。(請先使用「/update」)")
+@bot.slash_command(name="reload", description="重新載入所有extension以套用最新變更。(請先使用「/update」)")
 @commands.is_owner()
 async def reload(ctx):
     extension_list = list(bot.extensions)
