@@ -121,23 +121,20 @@ class Basics(commands.Cog):
                 self.metadata,
                 self.bit_rate,
             )
-            if isinstance(result, discord.File):
-                try:
-                    await interaction.edit_original_response(embed=None, file=result)
-                except Exception as e:
-                    if "Request entity too large" in str(e):
-                        embed = discord.Embed(
-                            title="錯誤", description="檔案過大，無法上傳。", color=error_color
-                        )
-                        embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-                    else:
-                        embed = discord.Embed(
-                            title="錯誤", description="發生未知錯誤。", color=error_color
-                        )
-                        embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-                    await interaction.edit_original_response(embed=embed)
-            elif isinstance(result, discord.Embed):
-                await interaction.response.edit_message(embed=result)
+            try:
+                await interaction.edit_original_response(embed=None, file=result)
+            except Exception as e:
+                if "Request entity too large" in str(e):
+                    embed = discord.Embed(
+                        title="錯誤", description="檔案過大，無法上傳。", color=error_color
+                    )
+                    embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+                else:
+                    embed = discord.Embed(
+                        title="錯誤", description="發生未知錯誤。", color=error_color
+                    )
+                    embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+                await interaction.edit_original_response(embed=embed)
 
         @discord.ui.button(style=discord.ButtonStyle.red, label="取消下載", emoji="❌")
         async def no_btn(
