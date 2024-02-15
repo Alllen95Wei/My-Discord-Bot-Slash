@@ -210,11 +210,20 @@ class Basics(commands.Cog):
     async def bugflag(self, ctx):
         self.real_logger.bugflag(f"{ctx.author} 標記了錯誤。")
         self.real_logger.bugflag(f"頻道ID：{ctx.channel.id} ({ctx.channel})")
-        dev_embed = discord.Embed(title="bugflag", description=f"{ctx.author.mention} 標記了錯誤。", color=default_color)
+        dev_embed = discord.Embed(
+            title="bugflag",
+            description=f"{ctx.author.mention} 標記了錯誤。",
+            color=default_color,
+        )
         dev_embed.add_field(name="時間", value=f"<t:{int(time.time())}:F>", inline=False)
         dev_embed.add_field(name="頻道", value=f"<#{ctx.channel.id}>", inline=False)
+        dev_embed.add_field(name="對方的使用者資料 (RAW)", value=f"```{json_assistant.User(ctx.author.id).get_raw_info()}```",
+                            inline=False)
         await self.bot.get_user(657519721138094080).send(embed=dev_embed)
-        embed = discord.Embed(title="已標記！", description="機器人已標記了錯誤，同時通知開發者！", color=default_color)
+        embed = discord.Embed(
+            title="已標記！", description="機器人已標記了錯誤，同時通知開發者！", color=default_color
+        )
+        embed.add_field(name="你的使用者資料 (RAW)", value=f"```{json_assistant.User(ctx.author.id).get_raw_info()}```")
         await ctx.respond(embed=embed)
 
     @discord.slash_command(name="dps", description="查詢伺服器電腦的CPU及記憶體使用率。")
