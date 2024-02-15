@@ -1,4 +1,5 @@
 # coding=utf-8
+import PIL
 import mutagen.id3
 from mutagen.id3 import ID3
 import requests
@@ -30,21 +31,25 @@ def edit_mp3_metadata(mp3_path: str, data: dict):
         mutagen.id3.TPE1(encoding=3, text=data["artist"] if data["artist"] else "")
     )
     if "thumbnail_url" in data and data["thumbnail_url"] != "":
-        img_name = save_thumbnail_from_url(data["thumbnail_url"])
-        with open(img_name, "rb") as f:
-            image_data = f.read()
+        try:
+            img_name = save_thumbnail_from_url(data["thumbnail_url"])
+            with open(img_name, "rb") as f:
+                image_data = f.read()
+            remove(img_name)
+        except RuntimeError:
+            image_data = ""
         audio_file.add(
-            mutagen.id3.APIC(
-                encoding=3, mime="image/png", type=3, data=image_data
-            )
+            mutagen.id3.APIC(encoding=3, mime="image/png", type=3, data=image_data)
         )
-        remove(img_name)
     audio_file.save(v2_version=3)
 
 
 def save_thumbnail_from_url(url: str):
     image_data = requests.get(url).content
-    image = Image.open(io.BytesIO(image_data)).convert("RGB")
+    try:
+        image = Image.open(io.BytesIO(image_data)).convert("RGB")
+    except PIL.UnidentifiedImageError as e:
+        raise RuntimeError("Invalid thumbnail URL!") from e
     random_char_list = [choice(hexdigits) for i in range(4)]
     file_name = "".join(random_char_list) + ".png"
     image.save(file_name, "png")
@@ -62,7 +67,7 @@ if __name__ == "__main__":
         {
             "title": "test1",
             "artist": "浠Mizuki",
-            "thumbnail_url": "",
+            "thumbnail_url": "https://www.youtube.com/",
         },
         320,
     )
