@@ -148,7 +148,10 @@ class Basics(commands.Cog):
         def youtube_start_download(
             video_instance: yt_download.Video, metadata: dict, bit_rate: int
         ) -> discord.File:
-            file_name = video_instance.get_id() + "_" + str(bit_rate)
+            if metadata != {}:
+                file_name = video_instance.get_id() + "_" + str(bit_rate) + "_MD"
+            else:
+                file_name = video_instance.get_id() + "_" + str(bit_rate)
             mp3_file_name = f"{file_name}.mp3"
             mp3_file_path = os.path.join(parent_dir, "ytdl", mp3_file_name)
             if (
