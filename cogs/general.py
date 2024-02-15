@@ -498,77 +498,89 @@ class Basics(commands.Cog):
     ):
         await ctx.defer()
         m_video = yt_download.Video(連結)
-        length = m_video.get_length()
-        metadata = (
-            {
-                "title": m_video.get_title(),
-                "artist": m_video.get_uploader(),
-                "thumbnail_url": m_video.get_thumbnail(),
-            }
-            if 加入後設資料
-            else {}
-        )
-        if length > 512:
+        if m_video.is_live():  # 排除直播影片
             embed = discord.Embed(
-                title="影片長度過長",
-                description=f"影片長度(`{length}`秒)超過512秒，下載後可能無法成功上傳。是否仍要嘗試下載？",
+                title="此影片目前直播/串流中",
+                description="你所提供的影片為直播且仍在串流中，無法下載。請在串流結束後再嘗試下載。",
                 color=error_color,
             )
             embed.add_field(
                 name="影片名稱", value=f"[{m_video.get_title()}]({連結})", inline=False
             )
-            embed.add_field(name="影片長度", value=f"`{length}`秒", inline=False)
             embed.set_image(url=m_video.get_thumbnail())
-            confirm_download = self.ConfirmDownload(
-                outer_instance=self,
-                video_instance=m_video,
-                metadata=metadata,
-                bit_rate=位元率,
-            )
-            await ctx.respond(embed=embed, view=confirm_download)
+            await ctx.respond(embed=embed)
         else:
-            embed = discord.Embed(
-                title="確認下載", description="已開始下載，請稍候。", color=default_color
+            length = m_video.get_length()
+            metadata = (
+                {
+                    "title": m_video.get_title(),
+                    "artist": m_video.get_uploader(),
+                    "thumbnail_url": m_video.get_thumbnail(),
+                }
+                if 加入後設資料
+                else {}
             )
-            embed.add_field(
-                name="影片名稱", value=f"[{m_video.get_title()}]({連結})", inline=False
-            )
-            embed.add_field(name="影片長度", value=f"`{length}`秒", inline=False)
-            embed.set_image(url=m_video.get_thumbnail())
-            embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
-            start_dl_message = await ctx.respond(embed=embed)
-            try:
-                await start_dl_message.edit(
-                    file=await self.run_blocking(
-                        self.bot,
-                        self.ConfirmDownload.youtube_start_download,
-                        m_video,
-                        metadata,
-                        位元率,
-                    )
+            if length > 512:
+                embed = discord.Embed(
+                    title="影片長度過長",
+                    description=f"影片長度(`{length}`秒)超過512秒，下載後可能無法成功上傳。是否仍要嘗試下載？",
+                    color=error_color,
                 )
-            except Exception as e:
-                if "Request entity too large" in str(e):
-                    embed = discord.Embed(
-                        title="錯誤", description="檔案過大，無法上傳。", color=error_color
+                embed.add_field(
+                    name="影片名稱", value=f"[{m_video.get_title()}]({連結})", inline=False
+                )
+                embed.add_field(name="影片長度", value=f"`{length}`秒", inline=False)
+                embed.set_image(url=m_video.get_thumbnail())
+                confirm_download = self.ConfirmDownload(
+                    outer_instance=self,
+                    video_instance=m_video,
+                    metadata=metadata,
+                    bit_rate=位元率,
+                )
+                await ctx.respond(embed=embed, view=confirm_download)
+            else:
+                embed = discord.Embed(
+                    title="確認下載", description="已開始下載，請稍候。", color=default_color
+                )
+                embed.add_field(
+                    name="影片名稱", value=f"[{m_video.get_title()}]({連結})", inline=False
+                )
+                embed.add_field(name="影片長度", value=f"`{length}`秒", inline=False)
+                embed.set_image(url=m_video.get_thumbnail())
+                embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
+                start_dl_message = await ctx.respond(embed=embed)
+                try:
+                    await start_dl_message.edit(
+                        file=await self.run_blocking(
+                            self.bot,
+                            self.ConfirmDownload.youtube_start_download,
+                            m_video,
+                            metadata,
+                            位元率,
+                        )
                     )
-                    embed.add_field(
-                        name="是否調整過位元率？",
-                        value="如果你選擇了其他位元率，可能會導致檔案過大。請試著降低位元率。",
-                        inline=False,
-                    )
-                    embed.add_field(
-                        name="是否加入了後設資料？",
-                        value="後設資料可能增加了檔案的大小。請試著將`加入後設資料`參數改為`False`。",
-                        inline=False,
-                    )
-                    embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-                else:
-                    embed = discord.Embed(
-                        title="錯誤", description="發生未知錯誤。", color=error_color
-                    )
-                    embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-                await start_dl_message.edit(embed=embed)
+                except Exception as e:
+                    if "Request entity too large" in str(e):
+                        embed = discord.Embed(
+                            title="錯誤", description="檔案過大，無法上傳。", color=error_color
+                        )
+                        embed.add_field(
+                            name="是否調整過位元率？",
+                            value="如果你選擇了其他位元率，可能會導致檔案過大。請試著降低位元率。",
+                            inline=False,
+                        )
+                        embed.add_field(
+                            name="是否加入了後設資料？",
+                            value="後設資料可能增加了檔案的大小。請試著將`加入後設資料`參數改為`False`。",
+                            inline=False,
+                        )
+                        embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+                    else:
+                        embed = discord.Embed(
+                            title="錯誤", description="發生未知錯誤。", color=error_color
+                        )
+                        embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+                    await start_dl_message.edit(embed=embed)
 
 
 class Events(commands.Cog):
