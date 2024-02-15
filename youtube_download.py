@@ -65,6 +65,13 @@ class Video:
         uploader = info_dict["uploader"]
         return uploader
 
+    def is_live(self) -> bool:
+        info_dict = self.full_info
+        try:
+            return info_dict["is_live"]
+        except KeyError:
+            return False
+
     @staticmethod
     def get_full_info(url):
         # get full info
