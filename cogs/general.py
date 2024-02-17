@@ -847,7 +847,6 @@ class Events(commands.Cog):
 
     @tasks.loop(seconds=1)
     async def set_presence_as_year_process(self):
-        self.real_logger.debug("set_presence_as_year_process in progress...")
         year_process = self.get_year_process()
         current_year = datetime.datetime.now(tz=now_tz).year
         if datetime.datetime.now(tz=now_tz).second == 0:
@@ -868,7 +867,6 @@ class Events(commands.Cog):
 
     @tasks.loop(seconds=10)
     async def give_voice_exp(self):  # 給予語音經驗
-        self.real_logger.debug("give_voice_exp in progress...")
         exclude_channel = [888707777659289660, 1076702101964599337]
         for server in self.bot.guilds:
             for channel in server.channels:
@@ -1017,8 +1015,8 @@ class Events(commands.Cog):
         await self.bot.change_presence(
             activity=normal_activity, status=discord.Status.online
         )
-        await self.give_voice_exp.start()
-        await self.set_presence_as_year_process.start()
+        self.give_voice_exp.start()
+        self.set_presence_as_year_process.start()
         # await check_voice_channel()
 
     @commands.Cog.listener()
