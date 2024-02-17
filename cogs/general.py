@@ -2,7 +2,10 @@
 import discord
 from discord.ext import commands
 from discord.ext import tasks
-from discord import Option
+from discord import Option, Interaction
+from discord.ui import Modal
+from discord.ui import InputText
+from discord import InputTextStyle
 import os
 import git
 import time
@@ -46,7 +49,7 @@ class Basics(commands.Cog):
     class GiftInTurn(discord.ui.View):
         def __init__(
             self,
-            giver: [discord.User, discord.Member],
+            giver: discord.User | discord.Member,
             real_logger: logger.CreateLogger,
         ):
             super().__init__(timeout=3600 * 3)
@@ -100,20 +103,33 @@ class Basics(commands.Cog):
         ):
             await interaction.response.defer()
             button.disabled = True
-            embed = discord.Embed(
-                title="確認下載", description="已開始下載，請稍候。", color=default_color
-            )
-            embed.add_field(
-                name="影片名稱",
-                value=f"[{self.m_video.get_title()}]({self.m_video.url})",
-                inline=False,
-            )
-            embed.add_field(
-                name="影片長度", value=f"`{self.m_video.get_length()}`秒", inline=False
-            )
-            embed.set_image(url=self.m_video.get_thumbnail())
-            embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
-            await interaction.edit_original_response(embed=embed, view=None)
+            if self.metadata == {}:
+                embed = discord.Embed(
+                    title="確認下載", description="已開始下載，請稍候。", color=default_color
+                )
+                embed.add_field(
+                    name="影片名稱",
+                    value=f"[{self.m_video.get_title()}]({self.m_video.url})",
+                    inline=False,
+                )
+                embed.add_field(
+                    name="影片長度", value=f"`{self.m_video.get_length()}`秒", inline=False
+                )
+                embed.set_image(url=self.m_video.get_thumbnail())
+                embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
+                await interaction.edit_original_response(embed=embed, view=None)
+            else:
+                embed = discord.Embed(
+                    title="編輯後設資料",
+                    description="請點擊下方按鈕，以編輯、確認後設資料。",
+                    color=default_color,
+                )
+                embed.add_field(
+                    name="為何會出現這則訊息？",
+                    value="由於你使用指令時，將`加入後設資料`設為`True`。\n"
+                    "如要忽略此步驟，請將`加入後設資料`設為`False`。",
+                )
+                await interaction.edit_original_response(embed=embed, view=None)
             result = await Basics.run_blocking(
                 self.outer_instance,
                 self.youtube_start_download,
@@ -160,6 +176,122 @@ class Basics(commands.Cog):
                 == "finished"
             ):
                 return discord.File(mp3_file_path)
+
+    class MP3MetadataEditor(Modal):
+        def __init__(
+            self,
+            outer_instance,
+            video: yt_download.Video,
+            bit_rate: int,
+            prefill_metadata: dict,
+        ):
+            super().__init__(title="後設資料編輯器")
+            self.bot = outer_instance.bot
+            self.real_logger = outer_instance.real_logger
+            self.video = video
+            self.bit_rate = bit_rate
+
+            self.add_item(
+                InputText(
+                    style=InputTextStyle.short,
+                    label="標題",
+                    value=prefill_metadata["title"],
+                    placeholder="將儲存於TIT2 (ID3v2)",
+                )
+            )
+            self.add_item(
+                InputText(
+                    style=InputTextStyle.short,
+                    label="作者",
+                    value=prefill_metadata["artist"],
+                    placeholder="將儲存於TPE1 (ID3v2)",
+                )
+            )
+            self.add_item(
+                InputText(
+                    style=InputTextStyle.short,
+                    label="縮圖連結",
+                    value=prefill_metadata["thumbnail_url"],
+                    placeholder="儲存為PNG編碼後，將儲存於APIC - Type 3 (ID3v2)",
+                )
+            )
+
+        async def callback(self, interaction: Interaction):
+            metadata = {
+                "title": self.children[0].value if self.children[0].value else "",
+                "artist": self.children[1].value if self.children[1].value else "",
+                "thumbnail_url": self.children[2].value
+                if self.children[2].value
+                else "",
+            }
+            embed = discord.Embed(
+                title="確認下載", description="已開始下載，請稍候。", color=default_color
+            )
+            embed.add_field(
+                name="影片名稱",  # TODO: 在影片名稱中加入超連結
+                value=self.video.get_title(),
+                inline=False,
+            )
+            embed.add_field(
+                name="影片長度", value=f"`{self.video.get_length()}`秒", inline=False
+            )
+            embed.add_field(name="後設資料：標題", value=metadata["title"], inline=False)
+            embed.add_field(name="後設資料：作者", value=metadata["artist"], inline=False)
+            embed.add_field(
+                name="後設資料皆採用ID3v2.3標記。",
+                value="[點此](https://zh.wikipedia.org/zh-tw/ID3)了解ID3標記",
+                inline=False,
+            )
+            embed.set_image(url=metadata["thumbnail_url"])
+            await interaction.edit_original_response(view=None)
+            try:
+                result = await Basics.run_blocking(
+                    self.bot,
+                    Basics.ConfirmDownload.youtube_start_download,
+                    self.video,
+                    metadata,
+                    self.bit_rate,
+                )
+                try:
+                    await interaction.edit_original_response(embed=None, file=result)
+                except Exception as e:
+                    if "Request entity too large" in str(e):
+                        embed = discord.Embed(
+                            title="錯誤", description="檔案過大，無法上傳。", color=error_color
+                        )
+                        embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+                    else:
+                        embed = discord.Embed(
+                            title="錯誤", description="發生未知錯誤。", color=error_color
+                        )
+                        embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+                    await interaction.edit_original_response(embed=embed)
+            except Exception as e:
+                embed = discord.Embed(
+                    title="錯誤：下載失敗", description="下載影片時發生錯誤。", color=error_color
+                )
+                embed.add_field(name=f"錯誤訊息", value=f"```{e}```", inline=False)
+                await interaction.edit_original_response(embed=embed)
+
+    class MP3MetadataEditorView(discord.ui.View):
+        def __init__(
+            self,
+            outer_instance,
+            video: yt_download.Video,
+            bit_rate: int,
+            prefill_metadata: dict,
+        ):
+            super().__init__(timeout=300)
+
+            self.editor_instance = Basics.MP3MetadataEditor(
+                outer_instance, video, bit_rate, prefill_metadata
+            )
+
+        @discord.ui.button(label="點此編輯後設資料", style=discord.ButtonStyle.green, emoji="📝")
+        async def editor_btn(
+            self, button: discord.ui.Button, interaction: discord.Interaction
+        ):
+            await interaction.response.send_modal(self.editor_instance)
 
     # Slash Cmds
 
@@ -220,13 +352,19 @@ class Basics(commands.Cog):
         )
         dev_embed.add_field(name="時間", value=f"<t:{int(time.time())}:F>", inline=False)
         dev_embed.add_field(name="頻道", value=f"<#{ctx.channel.id}>", inline=False)
-        dev_embed.add_field(name="對方的使用者資料 (RAW)", value=f"```{json_assistant.User(ctx.author.id).get_raw_info()}```",
-                            inline=False)
+        dev_embed.add_field(
+            name="對方的使用者資料 (RAW)",
+            value=f"```{json_assistant.User(ctx.author.id).get_raw_info()}```",
+            inline=False,
+        )
         await self.bot.get_user(657519721138094080).send(embed=dev_embed)
         embed = discord.Embed(
             title="已標記！", description="機器人已標記了錯誤，同時通知開發者！", color=default_color
         )
-        embed.add_field(name="你的使用者資料 (RAW)", value=f"```{json_assistant.User(ctx.author.id).get_raw_info()}```")
+        embed.add_field(
+            name="你的使用者資料 (RAW)",
+            value=f"```{json_assistant.User(ctx.author.id).get_raw_info()}```",
+        )
         await ctx.respond(embed=embed)
 
     @discord.slash_command(name="dps", description="查詢伺服器電腦的CPU及記憶體使用率。")
@@ -513,7 +651,7 @@ class Basics(commands.Cog):
         if m_video.is_live():  # 排除直播影片
             embed = discord.Embed(
                 title="此影片目前直播/串流中",
-                description="你所提供的影片為直播且仍在串流中，無法下載。請在串流結束後再嘗試下載。",
+                description="你所提供的影片為直播且仍在串流中，無法下載。\n請在串流結束後再嘗試下載。",
                 color=error_color,
             )
             embed.add_field(
@@ -523,15 +661,14 @@ class Basics(commands.Cog):
             await ctx.respond(embed=embed)
         else:
             length = m_video.get_length()
-            metadata = (
-                {
+            if 加入後設資料:
+                metadata = {
                     "title": m_video.get_title(),
                     "artist": m_video.get_uploader(),
                     "thumbnail_url": m_video.get_thumbnail(),
                 }
-                if 加入後設資料
-                else {}
-            )
+            else:
+                metadata = {}
             if length > 512:
                 embed = discord.Embed(
                     title="影片長度過長",
@@ -880,9 +1017,9 @@ class Events(commands.Cog):
         await self.bot.change_presence(
             activity=normal_activity, status=discord.Status.online
         )
+        await self.give_voice_exp.start()
         await self.set_presence_as_year_process.start()
         # await check_voice_channel()
-        await self.give_voice_exp.start()
 
     @commands.Cog.listener()
     async def on_application_command(self, ctx):
