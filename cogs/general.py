@@ -118,6 +118,27 @@ class Basics(commands.Cog):
                 embed.set_image(url=self.m_video.get_thumbnail())
                 embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
                 await interaction.edit_original_response(embed=embed, view=None)
+                result = await Basics.run_blocking(
+                    self.outer_instance,
+                    self.youtube_start_download,
+                    self.m_video,
+                    self.metadata,
+                    self.bit_rate,
+                )
+                try:
+                    await interaction.edit_original_response(file=result)
+                except Exception as e:
+                    if "Request entity too large" in str(e):
+                        embed = discord.Embed(
+                            title="錯誤", description="檔案過大，無法上傳。", color=error_color
+                        )
+                        embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+                    else:
+                        embed = discord.Embed(
+                            title="錯誤", description="發生未知錯誤。", color=error_color
+                        )
+                        embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
+                    await interaction.edit_original_response(embed=embed)
             else:
                 embed = discord.Embed(
                     title="編輯後設資料",
@@ -129,28 +150,12 @@ class Basics(commands.Cog):
                     value="由於你使用指令時，將`加入後設資料`設為`True`。\n"
                     "如要忽略此步驟，請將`加入後設資料`設為`False`。",
                 )
-                await interaction.edit_original_response(embed=embed, view=None)
-            result = await Basics.run_blocking(
-                self.outer_instance,
-                self.youtube_start_download,
-                self.m_video,
-                self.metadata,
-                self.bit_rate,
-            )
-            try:
-                await interaction.edit_original_response(embed=None, file=result)
-            except Exception as e:
-                if "Request entity too large" in str(e):
-                    embed = discord.Embed(
-                        title="錯誤", description="檔案過大，無法上傳。", color=error_color
-                    )
-                    embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-                else:
-                    embed = discord.Embed(
-                        title="錯誤", description="發生未知錯誤。", color=error_color
-                    )
-                    embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-                await interaction.edit_original_response(embed=embed)
+                await interaction.edit_original_response(
+                    embed=embed,
+                    view=Basics.MP3MetadataEditorView(
+                        self.outer_instance, self.m_video, self.bit_rate, self.metadata
+                    ),
+                )
 
         @discord.ui.button(style=discord.ButtonStyle.red, label="取消下載", emoji="❌")
         async def no_btn(
@@ -217,6 +222,7 @@ class Basics(commands.Cog):
             )
 
         async def callback(self, interaction: Interaction):
+            await interaction.response.defer()
             metadata = {
                 "title": self.children[0].value if self.children[0].value else "",
                 "artist": self.children[1].value if self.children[1].value else "",
@@ -243,7 +249,7 @@ class Basics(commands.Cog):
                 inline=False,
             )
             embed.set_image(url=metadata["thumbnail_url"])
-            await interaction.edit_original_response(view=None)
+            await interaction.edit_original_response(embed=embed, view=None)
             try:
                 result = await Basics.run_blocking(
                     self.bot,
@@ -253,7 +259,7 @@ class Basics(commands.Cog):
                     self.bit_rate,
                 )
                 try:
-                    await interaction.edit_original_response(embed=None, file=result)
+                    await interaction.edit_original_response(file=result)
                 except Exception as e:
                     if "Request entity too large" in str(e):
                         embed = discord.Embed(
@@ -283,15 +289,23 @@ class Basics(commands.Cog):
         ):
             super().__init__(timeout=300)
 
-            self.editor_instance = Basics.MP3MetadataEditor(
-                outer_instance, video, bit_rate, prefill_metadata
-            )
+            self.outer_instance = outer_instance
+            self.video = video
+            self.bit_rate = bit_rate
+            self.prefill_metadata = prefill_metadata
 
         @discord.ui.button(label="點此編輯後設資料", style=discord.ButtonStyle.green, emoji="📝")
         async def editor_btn(
             self, button: discord.ui.Button, interaction: discord.Interaction
         ):
-            await interaction.response.send_modal(self.editor_instance)
+            await interaction.response.send_modal(
+                Basics.MP3MetadataEditor(
+                    self.outer_instance,
+                    self.video,
+                    self.bit_rate,
+                    self.prefill_metadata,
+                )
+            )
 
     # Slash Cmds
 
@@ -638,7 +652,7 @@ class Basics(commands.Cog):
         連結: Option(str, "欲下載的影片網址", required=True),  # noqa: PEP 3131
         加入後設資料: Option(  # noqa: PEP 3131
             bool, "是否在檔案中加入影片標題、作者與縮圖，會影響檔案的大小", required=False
-        ) = True,
+        ) = False,
         位元率: Option(  # noqa: PEP 3131
             int,
             description="下載後，轉換為MP3時所使用的位元率，會影響檔案的大小與品質",
@@ -688,48 +702,75 @@ class Basics(commands.Cog):
                 )
                 await ctx.respond(embed=embed, view=confirm_download)
             else:
-                embed = discord.Embed(
-                    title="確認下載", description="已開始下載，請稍候。", color=default_color
-                )
-                embed.add_field(
-                    name="影片名稱", value=f"[{m_video.get_title()}]({連結})", inline=False
-                )
-                embed.add_field(name="影片長度", value=f"`{length}`秒", inline=False)
-                embed.set_image(url=m_video.get_thumbnail())
-                embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
-                start_dl_message = await ctx.respond(embed=embed)
-                try:
-                    await start_dl_message.edit(
-                        file=await self.run_blocking(
-                            self.bot,
-                            self.ConfirmDownload.youtube_start_download,
-                            m_video,
-                            metadata,
-                            位元率,
-                        )
+                if 加入後設資料:
+                    embed = discord.Embed(
+                        title="編輯後設資料",
+                        description="請點擊下方按鈕，以編輯、確認後設資料。",
+                        color=default_color,
                     )
-                except Exception as e:
-                    if "Request entity too large" in str(e):
-                        embed = discord.Embed(
-                            title="錯誤", description="檔案過大，無法上傳。", color=error_color
+                    embed.add_field(
+                        name="為何會出現這則訊息？",
+                        value="由於你使用指令時，將`加入後設資料`設為`True`。\n"
+                        "如要忽略此步驟，請將`加入後設資料`設為`False`。",
+                    )
+                    await ctx.respond(
+                        embed=embed,
+                        view=Basics.MP3MetadataEditorView(
+                            self,
+                            m_video,
+                            位元率,
+                            metadata,
+                        ),
+                    )
+                else:
+                    embed = discord.Embed(
+                        title="確認下載", description="已開始下載，請稍候。", color=default_color
+                    )
+                    embed.add_field(
+                        name="影片名稱",
+                        value=f"[{m_video.get_title()}]({連結})",
+                        inline=False,
+                    )
+                    embed.add_field(name="影片長度", value=f"`{length}`秒", inline=False)
+                    embed.set_image(url=m_video.get_thumbnail())
+                    embed.set_footer(text="下載所需時間依影片長度、網路狀況及影片來源端而定。")
+                    start_dl_message = await ctx.respond(embed=embed)
+                    try:
+                        await start_dl_message.edit(
+                            file=await self.run_blocking(
+                                self.bot,
+                                self.ConfirmDownload.youtube_start_download,
+                                m_video,
+                                metadata,
+                                位元率,
+                            )
                         )
-                        embed.add_field(
-                            name="是否調整過位元率？",
-                            value="如果你選擇了其他位元率，可能會導致檔案過大。請試著降低位元率。",
-                            inline=False,
-                        )
-                        embed.add_field(
-                            name="是否加入了後設資料？",
-                            value="後設資料可能增加了檔案的大小。請試著將`加入後設資料`參數改為`False`。",
-                            inline=False,
-                        )
-                        embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-                    else:
-                        embed = discord.Embed(
-                            title="錯誤", description="發生未知錯誤。", color=error_color
-                        )
-                        embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
-                    await start_dl_message.edit(embed=embed)
+                    except Exception as e:
+                        if "Request entity too large" in str(e):
+                            embed = discord.Embed(
+                                title="錯誤", description="檔案過大，無法上傳。", color=error_color
+                            )
+                            embed.add_field(
+                                name="是否調整過位元率？",
+                                value="如果你選擇了其他位元率，可能會導致檔案過大。請試著降低位元率。",
+                                inline=False,
+                            )
+                            embed.add_field(
+                                name="是否加入了後設資料？",
+                                value="後設資料可能增加了檔案的大小。請試著將`加入後設資料`參數改為`False`。",
+                                inline=False,
+                            )
+                            embed.add_field(
+                                name="錯誤訊息", value=f"```{e}```", inline=False
+                            )
+                        else:
+                            embed = discord.Embed(
+                                title="錯誤", description="發生未知錯誤。", color=error_color
+                            )
+                            embed.add_field(
+                                name="錯誤訊息", value=f"```{e}```", inline=False
+                            )
+                        await start_dl_message.edit(embed=embed)
 
 
 class Events(commands.Cog):
