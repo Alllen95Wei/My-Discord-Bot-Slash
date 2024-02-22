@@ -234,20 +234,12 @@ class Basics(commands.Cog):
                 title="確認下載", description="已開始下載，請稍候。", color=default_color
             )
             embed.add_field(
-                name="影片名稱",  # TODO: 在影片名稱中加入超連結
-                value=self.video.get_title(),
-                inline=False,
-            )
-            embed.add_field(
-                name="影片長度", value=f"`{self.video.get_length()}`秒", inline=False
-            )
-            embed.add_field(name="後設資料：標題", value=metadata["title"], inline=False)
-            embed.add_field(name="後設資料：作者", value=metadata["artist"], inline=False)
-            embed.add_field(
                 name="後設資料皆採用ID3v2.3標記。",
                 value="[點此](https://zh.wikipedia.org/zh-tw/ID3)了解ID3標記",
                 inline=False,
             )
+            embed.add_field(name="標題 (後設資料)", value=metadata["title"], inline=False)
+            embed.add_field(name="作者 (後設資料)", value=metadata["artist"], inline=False)
             embed.set_image(url=metadata["thumbnail_url"])
             await interaction.edit_original_response(embed=embed, view=None)
             try:
