@@ -24,14 +24,23 @@ class Misfit(commands.Cog):
         self.real_logger = real_logger
 
     @discord.user_command(name="600他")
+    @commands.has_permissions(moderate_members=True)
     async def ten_mins_ban(self, ctx, user: discord.Member | discord.User):
-        current_time = datetime.datetime.now(tz=now_tz)
-        timeout_time = current_time + datetime.timedelta(minutes=10)
-        await user.timeout(until=timeout_time, reason=f"{ctx.user} 600他")
-        embed = Embed(
-            title="他被600了！", description=f"{user.mention}已經被600了w", color=default_color
-        )
-        await ctx.respond(embed=embed)
+        if ctx.guild.id == 1030069819199991838:
+            current_time = datetime.datetime.now(tz=now_tz)
+            timeout_time = current_time + datetime.timedelta(minutes=10)
+            await user.timeout(until=timeout_time, reason=f"{ctx.user} 600他")
+            embed = Embed(
+                title="他被600了！",
+                description=f"{user.mention}已經被600了w",
+                color=default_color,
+            )
+            await ctx.respond(embed=embed)
+        else:
+            embed = Embed(
+                title="錯誤", description="此指令僅允許在「損友俱樂部」使用！", color=error_color
+            )
+            await ctx.respond(embed=embed, ephemeral=True)
 
 
 def setup(bot):
