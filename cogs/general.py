@@ -268,7 +268,7 @@ class Basics(commands.Cog):
                 embed = discord.Embed(
                     title="錯誤：下載失敗", description="下載影片時發生錯誤。", color=error_color
                 )
-                embed.add_field(name=f"錯誤訊息", value=f"```{e}```", inline=False)
+                embed.add_field(name="錯誤訊息", value=f"```{e}```", inline=False)
                 await interaction.edit_original_response(embed=embed)
 
     class MP3MetadataEditorView(discord.ui.View):
