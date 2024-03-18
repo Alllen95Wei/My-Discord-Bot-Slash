@@ -54,7 +54,7 @@ class Misfit(commands.Cog):
                     msg_in = msg_in[:msg_in.find("&list=")]
                     await message.reply(f"{message.author.mention} 偵測到此連結來自播放清單！已轉換為單一影片連結。")
                 ap_cmd = "ap!p " + msg_in
-                await message.channel.send(ap_cmd)
+                await message.channel.send(ap_cmd, delete_after=3)
 
 
 def setup(bot):
