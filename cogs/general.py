@@ -854,8 +854,6 @@ class Basics(commands.Cog):
                                     return "已經連線至語音頻道。"
                                 else:
                                     return str(e)
-                        else:
-                            return None
 
 
 class Events(commands.Cog):
