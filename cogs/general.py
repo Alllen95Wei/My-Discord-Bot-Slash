@@ -771,8 +771,8 @@ class Basics(commands.Cog):
         self,
         ctx,
         頻道: Option(discord.VoiceChannel, "指定要加入的頻道", required=False),  # noqa: PEP 3131
-        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,
-    ):  # noqa: PEP 3131
+        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa: PEP 3131
+    ):
         if 頻道 is None:
             msg = await self.check_voice_channel()
             if isinstance(msg, int):
@@ -807,8 +807,8 @@ class Basics(commands.Cog):
 
     @discord.slash_command(name="dc", description="從目前的語音頻道中斷連接。")
     async def dc(
-        self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False
-    ):  # noqa: PEP 3131
+        self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa: PEP 3131
+    ):
         try:
             await ctx.guild.change_voice_state(channel=None)
             embed = discord.Embed(
