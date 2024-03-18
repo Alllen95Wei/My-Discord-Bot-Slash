@@ -764,6 +764,99 @@ class Basics(commands.Cog):
                             )
                         await start_dl_message.edit(embed=embed)
 
+    @discord.slash_command(
+        name="rc", description="重新連接至語音頻道。可指定頻道，否則將自動檢測音樂機器人及Allen Why在哪個頻道並加入。"
+    )
+    async def rc(
+        self,
+        ctx,
+        頻道: Option(discord.VoiceChannel, "指定要加入的頻道", required=False),  # noqa: PEP 3131
+        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,
+    ):  # noqa: PEP 3131
+        if 頻道 is None:
+            msg = await self.check_voice_channel()
+            if isinstance(msg, int):
+                embed = discord.Embed(
+                    title="已加入頻道", description=f"已經自動加入了 <#{msg}>！", color=default_color
+                )
+            elif isinstance(msg, str):
+                embed = discord.Embed(
+                    title="錯誤", description=f"發生錯誤：`{msg}`", color=error_color
+                )
+            elif msg is None:
+                embed = discord.Embed(
+                    title="錯誤",
+                    description="找不到<@885723595626676264>及<@657519721138094080>在哪個頻道。",
+                    color=error_color,
+                )
+            else:
+                embed = discord.Embed(
+                    title="錯誤", description="發生未知錯誤。", color=error_color
+                )
+        else:
+            try:
+                await 頻道.guild.change_voice_state(channel=頻道)
+                embed = discord.Embed(
+                    title="已加入頻道", description=f"已經加入了 <#{頻道.id}>！", color=default_color
+                )
+            except Exception as e:
+                embed = discord.Embed(
+                    title="錯誤", description=f"發生錯誤：`{e}`", color=error_color
+                )
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+    @discord.slash_command(name="dc", description="從目前的語音頻道中斷連接。")
+    async def dc(
+        self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False
+    ):  # noqa: PEP 3131
+        try:
+            await ctx.guild.change_voice_state(channel=None)
+            embed = discord.Embed(
+                title="已斷開連接", description="已經從語音頻道中斷連接。", color=default_color
+            )
+        except Exception as e:
+            if str(e) == "'NoneType' object has no attribute 'disconnect'":
+                embed = discord.Embed(
+                    title="錯誤", description="目前沒有連接到任何語音頻道。", color=error_color
+                )
+            else:
+                embed = discord.Embed(
+                    title="錯誤", description=f"發生錯誤：`{e}`", color=error_color
+                )
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
+
+    async def check_voice_channel(self):
+        # 列出所有語音頻道
+        voice_channel_lists = []
+        for server in self.bot.guilds:
+            for channel in server.channels:
+                if channel.type == discord.ChannelType.voice:
+                    voice_channel_lists.append(channel)
+                    self.real_logger.debug(f"找到語音頻道：{server.name}/{channel.name}")
+                    members = channel.members
+                    # msg = ""
+                    # 列出所有語音頻道的成員
+                    for member in members:
+                        self.real_logger.debug(f"   ⌊{member.name}")
+                        if member.id == 885723595626676264 or member.id == 657519721138094080:
+                            # 若找到Allen Music Bot或Allen Why，則嘗試加入該語音頻道
+                            try:
+                                await channel.guild.change_voice_state(
+                                    channel=channel, self_mute=True, self_deaf=True
+                                )
+                                # msg = "加入語音頻道：" + server.name + "/" + channel.name
+                                # log_writter.write_log(msg)
+                                return channel.id
+                            except Exception as e:
+                                # msg = "加入語音頻道失敗：" + server.name + "/" + channel.name + "(" + str(e) + ")"
+                                # log_writter.write_log(msg)
+                                if str(e) == "Already connected to a voice channel.":
+                                    return "已經連線至語音頻道。"
+                                else:
+                                    return str(e)
+                        else:
+                            return None
+
 
 class Events(commands.Cog):
     def __init__(self, bot: commands.Bot, real_logger: logger.CreateLogger):
