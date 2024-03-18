@@ -47,15 +47,14 @@ class Misfit(commands.Cog):
         if message.author.id == self.bot.user.id:
             return
         if message.guild.id == 1030069819199991838:
-            if message.channel.id == 891665312028713001:
-                msg_in = message.content
-                if msg_in.startswith("https://www.youtube.com") or msg_in.startswith("https://youtu.be") or \
-                        msg_in.startswith("https://open.spotify.com"):
-                    if "&list=" in msg_in:
-                        msg_in = msg_in[:msg_in.find("&list=")]
-                        await message.reply(f"{message.author.mention} 偵測到此連結來自播放清單！已轉換為單一影片連結。")
-                    ap_cmd = "ap!p " + msg_in
-                    await message.channel.send(ap_cmd)
+            msg_in = message.content
+            if msg_in.startswith("https://www.youtube.com") or msg_in.startswith("https://youtu.be") or \
+                    msg_in.startswith("https://open.spotify.com"):
+                if "&list=" in msg_in:
+                    msg_in = msg_in[:msg_in.find("&list=")]
+                    await message.reply(f"{message.author.mention} 偵測到此連結來自播放清單！已轉換為單一影片連結。")
+                ap_cmd = "ap!p " + msg_in
+                await message.channel.send(ap_cmd)
 
 
 def setup(bot):
