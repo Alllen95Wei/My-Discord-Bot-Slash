@@ -834,7 +834,6 @@ class Basics(commands.Cog):
                     voice_channel_lists.append(channel)
                     self.real_logger.debug(f"找到語音頻道：{server.name}/{channel.name}")
                     members = channel.members
-                    # msg = ""
                     # 列出所有語音頻道的成員
                     for member in members:
                         self.real_logger.debug(f"   ⌊{member.name}")
@@ -844,12 +843,8 @@ class Basics(commands.Cog):
                                 await channel.guild.change_voice_state(
                                     channel=channel, self_mute=True, self_deaf=True
                                 )
-                                # msg = "加入語音頻道：" + server.name + "/" + channel.name
-                                # log_writter.write_log(msg)
                                 return channel.id
                             except Exception as e:
-                                # msg = "加入語音頻道失敗：" + server.name + "/" + channel.name + "(" + str(e) + ")"
-                                # log_writter.write_log(msg)
                                 if str(e) == "Already connected to a voice channel.":
                                     return "已經連線至語音頻道。"
                                 else:

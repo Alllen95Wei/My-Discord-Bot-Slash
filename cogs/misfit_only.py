@@ -42,17 +42,62 @@ class Misfit(commands.Cog):
             )
             await ctx.respond(embed=embed, ephemeral=True)
 
+    async def check_voice_channel(self) -> int | str:
+        # 列出所有語音頻道
+        voice_channel_lists = []
+        for server in self.bot.guilds:
+            for channel in server.channels:
+                if channel.type == discord.ChannelType.voice:
+                    voice_channel_lists.append(channel)
+                    self.real_logger.debug(f"找到語音頻道：{server.name}/{channel.name}")
+                    members = channel.members
+                    # 列出所有語音頻道的成員
+                    for member in members:
+                        self.real_logger.debug(f"   ⌊{member.name}")
+                        if (
+                            member.id == 885723595626676264
+                            or member.id == 657519721138094080
+                        ):
+                            # 若找到Allen Music Bot或Allen Why，則嘗試加入該語音頻道
+                            try:
+                                await channel.guild.change_voice_state(
+                                    channel=channel, self_mute=True, self_deaf=True
+                                )
+                                return channel.id
+                            except Exception as e:
+                                if str(e) == "Already connected to a voice channel.":
+                                    return "已經連線至語音頻道。"
+                                else:
+                                    return str(e)
+
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         if message.author.id == self.bot.user.id:
             return
         if message.guild.id == 1030069819199991838:
             msg_in = message.content
-            if msg_in.startswith("https://www.youtube.com") or msg_in.startswith("https://youtu.be") or \
-                    msg_in.startswith("https://open.spotify.com"):
+            if (
+                msg_in.startswith("https://www.youtube.com")
+                or msg_in.startswith("https://youtu.be")
+                or msg_in.startswith("https://open.spotify.com")
+            ):
+                check_vc_result = await self.check_voice_channel()
+                if isinstance(check_vc_result, str):
+                    await message.channel.send(
+                        "**注意：機器人自動加入語音頻道時失敗。音樂機器人可能會回傳錯誤。**",
+                        delete_after=5)
                 if "&list=" in msg_in:
-                    msg_in = msg_in[:msg_in.find("&list=")]
-                    await message.reply(f"{message.author.mention} 偵測到此連結來自播放清單！已轉換為單一影片連結。")
+                    msg_in = msg_in[: msg_in.find("&list=")]
+                    await message.reply(
+                        f"{message.author.mention} 偵測到此連結來自播放清單！已轉換為單一影片連結。",
+                        delete_after=5,
+                    )
+                elif "?list=" in msg_in:
+                    msg_in = msg_in[: msg_in.find("?list=")]
+                    await message.reply(
+                        f"{message.author.mention} 偵測到此連結來自播放清單！已轉換為單一影片連結。",
+                        delete_after=5,
+                    )
                 ap_cmd = "ap!p " + msg_in
                 await message.channel.send(ap_cmd, delete_after=3)
 
