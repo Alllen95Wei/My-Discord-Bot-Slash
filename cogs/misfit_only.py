@@ -100,6 +100,7 @@ class Misfit(commands.Cog):
                     )
                 ap_cmd = "ap!p " + msg_in
                 await message.channel.send(ap_cmd, delete_after=3)
+                await message.add_reaction(":white_check_mark:")
 
 
 def setup(bot):
