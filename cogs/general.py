@@ -1158,8 +1158,8 @@ class Events(commands.Cog):
             return
         msg_in = message.content
         exclude_channel = [1035754607286169631, 1035754607286169631, 891665312028713001]
-        if (message.channel.id == 891665312028713001  #
-                or message.guild.id == 1030069819199991838):
+        if (message.channel.id == 891665312028713001  # 貓娘實驗室/音樂指令區
+                or message.guild.id == 1030069819199991838):  # 損友俱樂部
             if (
                 msg_in.startswith("https://www.youtube.com")
                 or msg_in.startswith("https://youtu.be")
