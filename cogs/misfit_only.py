@@ -99,9 +99,9 @@ class Misfit(commands.Cog):
                         f"{message.author.mention} 偵測到此連結來自播放清單！已轉換為單一影片連結。",
                         delete_after=5,
                     )
-                ap_cmd = "ap!p " + msg_in
-                await message.channel.send(ap_cmd, delete_after=3)
-                await message.add_reaction("✅")
+            ap_cmd = "ap!p " + msg_in
+            await message.channel.send(ap_cmd, delete_after=3)
+            await message.add_reaction("✅")
 
 
 def setup(bot):
