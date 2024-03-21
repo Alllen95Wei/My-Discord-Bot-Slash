@@ -74,7 +74,7 @@ class Misfit(commands.Cog):
     async def on_message(self, message: discord.Message):
         if message.author.id == self.bot.user.id:
             return
-        if message.guild.id == 1030069819199991838:
+        if message.guild.id == 1030069819199991838 or message.channel.id == 891665312028713001:
             msg_in = message.content
             if (
                 msg_in.startswith("https://www.youtube.com")
