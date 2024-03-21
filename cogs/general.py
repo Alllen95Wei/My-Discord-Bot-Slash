@@ -807,7 +807,9 @@ class Basics(commands.Cog):
 
     @discord.slash_command(name="dc", description="從目前的語音頻道中斷連接。")
     async def dc(
-        self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa: PEP 3131
+        self,
+        ctx,
+        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa: PEP 3131
     ):
         try:
             await ctx.guild.change_voice_state(channel=None)
@@ -837,7 +839,10 @@ class Basics(commands.Cog):
                     # 列出所有語音頻道的成員
                     for member in members:
                         self.real_logger.debug(f"   ⌊{member.name}")
-                        if member.id == 885723595626676264 or member.id == 657519721138094080:
+                        if (
+                            member.id == 885723595626676264
+                            or member.id == 657519721138094080
+                        ):
                             # 若找到Allen Music Bot或Allen Why，則嘗試加入該語音頻道
                             try:
                                 await channel.guild.change_voice_state(
@@ -1153,19 +1158,34 @@ class Events(commands.Cog):
             return
         msg_in = message.content
         exclude_channel = [1035754607286169631, 1035754607286169631, 891665312028713001]
-        if message.channel.id == 891665312028713001:
+        if (message.channel.id == 891665312028713001  #
+                or message.guild.id == 1030069819199991838):
             if (
                 msg_in.startswith("https://www.youtube.com")
                 or msg_in.startswith("https://youtu.be")
                 or msg_in.startswith("https://open.spotify.com")
+                or msg_in.startswith("https://music.youtube.com")
             ):
+                check_vc_result = await self.check_voice_channel()
+                if isinstance(check_vc_result, str):
+                    await message.channel.send(
+                        "**注意：機器人自動加入語音頻道時失敗。音樂機器人可能會回傳錯誤。**", delete_after=5
+                    )
                 if "&list=" in msg_in:
                     msg_in = msg_in[: msg_in.find("&list=")]
-                    await message.channel.send(
-                        f"<@{message.author.id}> 偵測到此連結來自播放清單！已轉換為單一影片連結。"
+                    await message.reply(
+                        f"{message.author.mention} 偵測到此連結來自播放清單！已轉換為單一影片連結。",
+                        delete_after=5,
+                    )
+                elif "?list=" in msg_in:
+                    msg_in = msg_in[: msg_in.find("?list=")]
+                    await message.reply(
+                        f"{message.author.mention} 偵測到此連結來自播放清單！已轉換為單一影片連結。",
+                        delete_after=5,
                     )
                 ap_cmd = "ap!p " + msg_in
-                await message.channel.send(ap_cmd)
+                await message.channel.send(ap_cmd, delete_after=3)
+                await message.add_reaction("✅")
                 return
         if message.channel.id in exclude_channel:
             return
