@@ -42,34 +42,6 @@ class Misfit(commands.Cog):
             )
             await ctx.respond(embed=embed, ephemeral=True)
 
-    async def check_voice_channel(self) -> int | str:
-        # 列出所有語音頻道
-        voice_channel_lists = []
-        for server in self.bot.guilds:
-            for channel in server.channels:
-                if channel.type == discord.ChannelType.voice:
-                    voice_channel_lists.append(channel)
-                    self.real_logger.debug(f"找到語音頻道：{server.name}/{channel.name}")
-                    members = channel.members
-                    # 列出所有語音頻道的成員
-                    for member in members:
-                        self.real_logger.debug(f"   ⌊{member.name}")
-                        if (
-                            member.id == 885723595626676264
-                            or member.id == 657519721138094080
-                        ):
-                            # 若找到Allen Music Bot或Allen Why，則嘗試加入該語音頻道
-                            try:
-                                await channel.guild.change_voice_state(
-                                    channel=channel, self_mute=True, self_deaf=True
-                                )
-                                return channel.id
-                            except Exception as e:
-                                if str(e) == "Already connected to a voice channel.":
-                                    return "已經連線至語音頻道。"
-                                else:
-                                    return str(e)
-
     # @commands.Cog.listener()
     # async def on_message(self, message: discord.Message):
     #     if message.author.id == self.bot.user.id:
