@@ -63,7 +63,6 @@ class Backup(commands.Cog):
                 user_obj.get_last_daily_reward_claimed()
                 self.real_logger.debug("    最後每日獎勵領取時間資料檢查：通過")
                 self.real_logger.info("  檢查未發現問題")
-                self.backup_data(user)
             except JSONDecodeError as error:
                 self.real_logger.warning("    單項檢查時偵測到錯誤")
                 self.real_logger.warning(
@@ -78,6 +77,7 @@ class Backup(commands.Cog):
                 self.real_logger.info("    開始還原程序")
                 self.restore_data(user)
                 continue
+            self.backup_data(user)
         self.real_logger.info(f"完成使用者資料檢查，耗時 {round(time.time()-start_time, 3)} 秒")
 
     def backup_data(self, user_id: str):
