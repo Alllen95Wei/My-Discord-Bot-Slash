@@ -140,7 +140,7 @@ class Backup(commands.Cog):
     @commands.is_owner()
     @backup_cmds.command(name="force_backup", description="手動開始備份(不檢查資料完整性)")
     async def force_backup(
-        self, ctx, user: Option(discord.User, required=False) = None
+        self, ctx, user: Option(discord.Member, name="使用者", description="指定要備份的使用者，留空以備份所有檔案", required=False) = None
     ):
         await ctx.defer()
         start_time = time.time()
