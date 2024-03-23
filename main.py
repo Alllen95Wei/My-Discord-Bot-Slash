@@ -1370,6 +1370,6 @@ async def reload(ctx):
 
 
 bot.load_extensions("cogs.general", "cogs.exp_sys", "cogs.anonymous", "cogs.dev_only", "cogs.announcement",
-                    "cogs.rewards", "cogs.misfit_only")
+                    "cogs.rewards", "cogs.misfit_only", "cogs.backup_sys")
 
 bot.run(TOKEN)
