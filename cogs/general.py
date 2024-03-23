@@ -1193,6 +1193,7 @@ class Events(commands.Cog):
                 or msg_in.startswith("https://youtu.be")
                 or msg_in.startswith("https://open.spotify.com")
                 or msg_in.startswith("https://music.youtube.com")
+                or msg_in.startswith("https://m.youtube.com")
             ):
                 check_vc_result = await self.check_voice_channel()
                 if isinstance(check_vc_result, str):
