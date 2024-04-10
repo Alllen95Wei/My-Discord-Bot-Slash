@@ -12,6 +12,7 @@ import time
 import datetime
 import zoneinfo
 import functools
+import urllib.parse
 from typing import Callable
 from random import choice
 from random import randint
@@ -509,8 +510,6 @@ class Basics(commands.Cog):
         內容: Option(str, "要轉換的文字", required=True),  # noqa
         私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
     ):
-        import urllib.parse
-
         text = urllib.parse.quote(內容)
         url = f"https://quickchart.io/chart?cht=qr&chs=500x500&choe=UTF-8&chld=H|1&chl={text}"
         embed = discord.Embed(
