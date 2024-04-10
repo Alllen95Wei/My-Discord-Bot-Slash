@@ -20,16 +20,17 @@ class User:
                     user_info = json.loads(f.read())
                     return user_info
             else:
-                empty_data = {"join_date": None,
-                              "exp":
-                                  {"voice": 0,
-                                   "text": 0},
-                              "level":
-                                  {"voice": 0,
-                                   "text": 0},
-                              "last_active_time": 0,
-                              "last_daily_reward_claimed": 0
-                              }
+                empty_data = {
+                    "join_date": None,
+                    "exp": {"voice": 0, "text": 0},
+                    "level": {"voice": 0, "text": 0},
+                    "notify": {
+                        "voice": 1,
+                        "text": 1,
+                    },
+                    "last_active_time": 0,
+                    "last_daily_reward_claimed": 0,
+                }
                 return empty_data
         else:
             with open(file, "r") as f:
@@ -45,7 +46,7 @@ class User:
         if exp_type in ["voice", "text"]:
             return round(user_info["exp"][exp_type] * 10) / 10
         else:
-            raise ValueError("exp_type must be either \"voice\" or \"text\"")
+            raise ValueError('exp_type must be either "voice" or "text"')
 
     def add_exp(self, exp_type, amount):
         user_info = self.get_raw_info(self.user_id)
@@ -53,7 +54,7 @@ class User:
             user_info["exp"][exp_type] += amount
             self.write_raw_info(user_info)
         else:
-            raise ValueError("exp_type must be either \"voice\" or \"text\"")
+            raise ValueError('exp_type must be either "voice" or "text"')
 
     def set_join_date(self, date):
         user_info = self.get_raw_info()
@@ -83,12 +84,20 @@ class User:
     def joined_time(self):
         raw_date = self.get_join_date()
         if raw_date is not None:
-            join_date = datetime.datetime(year=raw_date[0], month=raw_date[1], day=raw_date[2],
-                                          hour=raw_date[3], minute=raw_date[4], second=raw_date[5])
+            join_date = datetime.datetime(
+                year=raw_date[0],
+                month=raw_date[1],
+                day=raw_date[2],
+                hour=raw_date[3],
+                minute=raw_date[4],
+                second=raw_date[5],
+            )
             now = datetime.datetime.now()
             time_diff = now - join_date
-            time_diff = f"{time_diff.days} 天， {time_diff.seconds // 3600} 小時， " \
-                        f"{(time_diff.seconds // 60) % 60} 分鐘， {time_diff.seconds % 60} 秒"
+            time_diff = (
+                f"{time_diff.days} 天， {time_diff.seconds // 3600} 小時， "
+                f"{(time_diff.seconds // 60) % 60} 分鐘， {time_diff.seconds % 60} 秒"
+            )
             return time_diff
         else:
             return None
@@ -98,7 +107,7 @@ class User:
             user_info = self.get_raw_info()
             return user_info["level"][level_type]
         else:
-            raise ValueError("level_type must be either \"voice\" or \"text\"")
+            raise ValueError('level_type must be either "voice" or "text"')
 
     def add_level(self, level_type, level):
         user_info = self.get_raw_info()
@@ -114,7 +123,7 @@ class User:
                 exp_needed = 50 + (30 * current_level)
             return exp_needed
         else:
-            raise ValueError("level_type must be either \"voice\" or \"text\"")
+            raise ValueError('level_type must be either "voice" or "text"')
 
     def level_calc(self, level_type):
         if level_type in ["voice", "text"]:
@@ -127,7 +136,7 @@ class User:
             else:
                 return False
         else:
-            raise ValueError("level_type must be either \"voice\" or \"text\"")
+            raise ValueError('level_type must be either "voice" or "text"')
 
     def get_last_active_time(self):
         user_info = self.get_raw_info()
@@ -250,12 +259,7 @@ def get_daily_reward_probability() -> dict:
             user_info = json.loads(f.read())
             return user_info
     else:
-        empty_data = {
-            10: 0,
-            20: 0,
-            50: 0,
-            100: 0
-        }
+        empty_data = {10: 0, 20: 0, 50: 0, 100: 0}
         return empty_data
 
 
@@ -290,8 +294,10 @@ def edit_announcement_receiver(user_id: int, announcement_types: list):
     announcement_data = get_announcement_receivers()
     for a_type in announcement_types:
         if a_type not in ["一般公告", "緊急公告", "更新通知", "雜七雜八"]:
-            raise ValueError("announcement_type must be \"一般公告\", \"緊急公告\", \"更新通知\", \"雜七雜八\""
-                             f"({a_type} was given)")
+            raise ValueError(
+                'announcement_type must be "一般公告", "緊急公告", "更新通知", "雜七雜八"'
+                f"({a_type} was given)"
+            )
     if not announcement_types:
         try:
             del announcement_data[str(user_id)]
@@ -338,11 +344,12 @@ class RewardData:
                     user_info = json.loads(f.read())
                     return user_info
             else:
-                empty_data = {"title": "",
-                              "description": "",
-                              "reward": {"text": 0, "voice": 0},
-                              "limit": {"claimed": [], "amount": None, "time": 0}
-                              }
+                empty_data = {
+                    "title": "",
+                    "description": "",
+                    "reward": {"text": 0, "voice": 0},
+                    "limit": {"claimed": [], "amount": None, "time": 0},
+                }
                 return empty_data
         else:
             with open(file, "r") as f:
@@ -381,7 +388,7 @@ class RewardData:
             data["reward"][reward_type] = amount
             self.write_raw_info(data)
         else:
-            raise ValueError("reward_type must be either \"text\" or \"voice\"")
+            raise ValueError('reward_type must be either "text" or "voice"')
 
     def get_amount(self) -> int | None:
         date = self.get_raw_info()
