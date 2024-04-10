@@ -512,7 +512,7 @@ class Basics(commands.Cog):
         import urllib.parse
 
         text = urllib.parse.quote(內容)
-        url = f"https://chart.apis.google.com/chart?cht=qr&chs=500x500&choe=UTF-8&chld=H|1&chl={text}"
+        url = f"https://quickchart.io/chart?cht=qr&chs=500x500&choe=UTF-8&chld=H|1&chl={text}"
         embed = discord.Embed(
             title="QR Code", description=f"內容：{內容}", color=default_color
         )
