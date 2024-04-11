@@ -602,7 +602,7 @@ class Basics(commands.Cog):
                 time.time()
             )
             json_assistant.add_daily_reward_probability(reward)
-            if receiver_obj.level_calc("text"):
+            if receiver_obj.level_calc("text") and receiver_obj.notify_threshold_reached("text"):
                 self.real_logger.info(
                     f"等級提升：{receiver.name} 文字等級達到 {receiver_obj.get_level('text')} 等"
                 )
@@ -1020,16 +1020,17 @@ class Events(commands.Cog):
                                     f"等級提升：{member.name} 語音等級"
                                     f"達到 {member_obj.get_level('voice')} 等"
                                 )
-                                embed = discord.Embed(
-                                    title="等級提升",
-                                    description=f":tada:恭喜 <@{member.id}> *語音*等級升級到 "
-                                    f"**{member_obj.get_level('voice')}**"
-                                    f" 等！",
-                                    color=default_color,
-                                )
-                                embed.set_thumbnail(url=member.display_avatar)
-                                embed.set_footer(text="關於經驗值計算系統，請輸入/user_info about")
-                                await member.send(embed=embed)
+                                if member_obj.notify_threshold_reached("voice"):
+                                    embed = discord.Embed(
+                                        title="等級提升",
+                                        description=f":tada:恭喜 <@{member.id}> *語音*等級升級到 "
+                                        f"**{member_obj.get_level('voice')}**"
+                                        f" 等！",
+                                        color=default_color,
+                                    )
+                                    embed.set_thumbnail(url=member.display_avatar)
+                                    embed.set_footer(text="關於經驗值計算系統，請輸入/user_info about")
+                                    await member.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -1058,10 +1059,10 @@ class Events(commands.Cog):
                 color=0x57C2EA,
             )
             await new_member.send(embed=embed)
-            embed = discord.Embed(
-                title="取得臨時身分組", description="在取得正式身分組前，請點擊下方按鈕取得臨時身分組。", color=0x57C2EA
-            )
-            await new_member.send(embed=embed, view=self.GetTmpRole(self))
+            # embed = discord.Embed(
+            #     title="取得臨時身分組", description="在取得正式身分組前，請點擊下方按鈕取得臨時身分組。", color=0x57C2EA
+            # )
+            # await new_member.send(embed=embed, view=self.GetTmpRole(self))
         elif guild_joined.id == 1114203090950836284:
             embed = discord.Embed(
                 title=f"歡迎加入 {member.guild.name} ！",
@@ -1239,7 +1240,7 @@ class Events(commands.Cog):
                     f"獲得經驗值：{message.author.name} 文字經驗值 +15 (訊息長度：{len(msg_in)})"
                 )
         member_obj.set_last_active_time(time.time())
-        if member_obj.level_calc("text"):
+        if member_obj.level_calc("text") and member_obj.notify_threshold_reached("text"):
             self.real_logger.info(
                 f"等級提升：{message.author.name} 文字等級"
                 f"達到 {member_obj.get_level('text')} 等"

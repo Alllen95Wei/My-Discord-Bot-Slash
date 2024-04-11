@@ -24,10 +24,11 @@ class User:
                     "join_date": None,
                     "exp": {"voice": 0, "text": 0},
                     "level": {"voice": 0, "text": 0},
-                    "notify": {
-                        "voice": 1,
+                    "notify_threshold": {
+                        "voice": 5,
                         "text": 1,
                     },
+                    "last_notify": {"voice": 0, "text": 0},
                     "last_active_time": 0,
                     "last_daily_reward_claimed": 0,
                 }
@@ -109,12 +110,26 @@ class User:
         else:
             raise ValueError('level_type must be either "voice" or "text"')
 
-    def add_level(self, level_type, level):
+    def add_level(self, level_type: str, level):
         user_info = self.get_raw_info()
         user_info["level"][level_type] += level
         self.write_raw_info(user_info)
 
-    def upgrade_exp_needed(self, level_type):
+    def get_last_notify_level(self) -> dict:
+        user_info = self.get_raw_info()
+        last_notify_lvl = user_info.get("last_notify", {"voice": 0, "text": 0})
+        return last_notify_lvl
+
+    def set_last_notify_level(self, level_type: str, level: int):
+        if level_type in ["voice", "text"]:
+            user_info = self.get_raw_info()
+            last_notify_lvl = user_info.get("last_notify", {"voice": 0, "text": 0})
+            last_notify_lvl[level_type] = level
+            user_info["last_notify"] = last_notify_lvl
+        else:
+            raise ValueError('level_type must be either "voice" or "text"')
+
+    def upgrade_exp_needed(self, level_type: str):
         if level_type in ["voice", "text"]:
             current_level = self.get_level(level_type)
             if level_type == "text":
@@ -125,13 +140,42 @@ class User:
         else:
             raise ValueError('level_type must be either "voice" or "text"')
 
-    def level_calc(self, level_type):
+    def level_calc(self, level_type: str) -> bool:
         if level_type in ["voice", "text"]:
             exp = self.get_exp(level_type)
             exp_needed = self.upgrade_exp_needed(level_type)
             if exp >= exp_needed:
                 self.add_level(level_type, 1)
                 self.add_exp(level_type, -exp_needed)
+                return True
+            else:
+                return False
+        else:
+            raise ValueError('level_type must be either "voice" or "text"')
+
+    def get_notify_threshold(self) -> dict:
+        user_info = self.get_raw_info()
+        threshold = user_info.get(
+            "notify_threshold",
+            {
+                "voice": 5,
+                "text": 1,
+            },
+        )
+        return threshold
+
+    def set_notify_threshold(self, text_lvl: int, voice_lvl: int):
+        user_info = self.get_raw_info()
+        user_info["notify_threshold"] = {"text": text_lvl, "voice": voice_lvl}
+        self.write_raw_info(user_info)
+
+    def notify_threshold_reached(self, level_type: str) -> bool:
+        if level_type in ["voice", "text"]:
+            threshold = self.get_notify_threshold()[level_type]
+            last_notify_lvl = self.get_last_notify_level()[level_type]
+            current_lvl = self.get_level(level_type)
+            if (current_lvl - last_notify_lvl) >= threshold:
+                self.set_last_notify_level(level_type, current_lvl)
                 return True
             else:
                 return False
