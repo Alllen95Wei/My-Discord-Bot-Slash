@@ -3,7 +3,7 @@ import datetime
 
 import discord
 from discord.ext import commands
-from discord import Option, Embed
+from discord import Embed
 import os
 import zoneinfo
 from pathlib import Path
