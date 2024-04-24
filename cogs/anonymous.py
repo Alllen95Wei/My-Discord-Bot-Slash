@@ -91,7 +91,7 @@ class Anonymous(commands.Cog):
                 await self.TOS(ctx)
             else:
                 new_identity_id = ""
-                for i in range(4):
+                for _ in range(4):
                     new_identity_id += str(randint(0, 9))
                 new_identity = [身分, new_identity_id]
                 json_assistant.set_anonymous_identity(ctx.author.id, new_identity)
