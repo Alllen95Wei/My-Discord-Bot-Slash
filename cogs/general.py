@@ -177,7 +177,7 @@ class Basics(commands.Cog):
             mp3_file_name = f"{file_name}.mp3"
             mp3_file_path = os.path.join(parent_dir, "ytdl", mp3_file_name)
             if (
-                os.path.exists(mp3_file_path)
+                (metadata == {} and os.path.exists(mp3_file_path))
                 or main_dl(video_instance, file_name, mp3_file_path, metadata, bit_rate)
                 == "finished"
             ):
