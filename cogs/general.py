@@ -627,10 +627,11 @@ class Basics(commands.Cog):
             # 列出所有點數獎勵出現的次數
             embed.add_field(
                 name=f"{j}點",
-                value=f"{daily_reward_prob_raw_data[str(j)]}次 "
+                value=f"{daily_reward_prob_raw_data[str(j)]} 次 "
                 f"({round(daily_reward_prob_raw_data[str(j)] / sum_of_rewards * 100, 1)} %)",
                 inline=False,
             )
+        embed.add_field(name="已領取獎勵數量", value=f"{sum_of_rewards} 次", inline=False)
         embed.set_footer(text="贈禮加成！現在起，領取每日獎勵時指定「贈與使用者」，對方將更有機會獲得高點數獎勵！")
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
