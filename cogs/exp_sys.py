@@ -275,6 +275,16 @@ class UserInfo(commands.Cog):
             upgrade_embed.set_thumbnail(url=ctx.author.display_avatar)
             await ctx.respond(embed=upgrade_embed, ephemeral=私人訊息)
 
+    @discord.message_command(name="估算訊息經驗值")
+    async def calculate_message_exp(self, ctx, message: discord.Message):
+        msg_content = message.content
+        exp = len(msg_content) if len(msg_content) <= 15 else 15
+        embed = discord.Embed(title="估算文字經驗值", color=default_color)
+        embed.add_field(name="原訊息內容", value=f"```\n{msg_content}\n```", inline=False)
+        embed.add_field(name="訊息長度", value=f"`{len(msg_content)}` 字元", inline=False)
+        embed.add_field(name="實領文字經驗值", value=f"`{exp}` 點", inline=True)
+        await ctx.respond(embed=embed, ephemeral=True)
+
 
 def setup(bot):
     bot.add_cog(UserInfo(bot, bot.logger))
