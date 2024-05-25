@@ -33,6 +33,16 @@ now_tz = zoneinfo.ZoneInfo("Asia/Taipei")
 base_dir = os.path.abspath(os.path.dirname(__file__))
 parent_dir = str(Path(__file__).parent.parent.absolute())
 
+exp_reports_list = {}
+exp_report_template = {
+    "join_at": 0,
+    "leave_at": 0,
+    "channel": 0,
+    "partners": [],
+    "time_exp": 0,
+    "activity_bonus": 0
+}
+
 
 class Basics(commands.Cog):
     def __init__(self, bot: commands.Bot, real_logger: logger.CreateLogger):
@@ -1013,6 +1023,7 @@ class Events(commands.Cog):
                             for a in member.activities:
                                 if isinstance(a, discord.Activity):
                                     value += 0.1
+                            value = floor(value * 10) / 10
                             member_obj = json_assistant.User(member.id)
                             member_obj.add_exp("voice", value)
                             self.real_logger.info(f"獲得經驗值：{member.name} 獲得語音經驗 {value}")
