@@ -555,14 +555,22 @@ class Basics(commands.Cog):
         else:
             random_reference = randint(1, 200)
             if 贈與使用者 and 贈與使用者.id != ctx.author.id:  # 贈禮
-                if 1 <= random_reference < 91:  # 45%
+                if 1 <= random_reference < 81:  # 40%
                     reward = 10
-                elif 91 <= random_reference < 161:  # 35%
+                elif 81 <= random_reference < 121:  # 20%
                     reward = 20
-                elif 161 <= random_reference < 191:  # 15%
+                elif 121 <= random_reference < 161:  # 20%
                     reward = 50
-                else:  # 5%
+                else:  # 20%
                     reward = 100
+                # if 1 <= random_reference < 91:  # 45%
+                #     reward = 10
+                # elif 91 <= random_reference < 161:  # 35%
+                #     reward = 20
+                # elif 161 <= random_reference < 191:  # 15%
+                #     reward = 50
+                # else:  # 5%
+                #     reward = 100
                 receiver = 贈與使用者
                 self.real_logger.info(
                     f"{ctx.author.name}#{ctx.author.discriminator} 贈送 {receiver.name}#{receiver.discriminator}"
@@ -589,18 +597,18 @@ class Basics(commands.Cog):
                 receiver = ctx.author
                 if 1 <= random_reference < 101:  # 50%
                     reward = 10
-                # elif 101 <= random_reference < 141:  # 20%
-                #     reward = 20
-                # elif 141 <= random_reference < 171:  # 15%
-                #     reward = 50
-                # else:  # 15%
-                #     reward = 100
-                elif 101 <= random_reference < 181:  # 40%
+                elif 101 <= random_reference < 141:  # 20%
                     reward = 20
-                elif 181 <= random_reference < 196:  # 7.5%
+                elif 141 <= random_reference < 171:  # 15%
                     reward = 50
-                else:  # 2.5%
+                else:  # 15%
                     reward = 100
+                # elif 101 <= random_reference < 181:  # 40%
+                #     reward = 20
+                # elif 181 <= random_reference < 196:  # 7.5%
+                #     reward = 50
+                # else:  # 2.5%
+                #     reward = 100
             receiver_obj = json_assistant.User(receiver.id)
             receiver_obj.add_exp("text", reward)
             embed = discord.Embed(
@@ -612,7 +620,9 @@ class Basics(commands.Cog):
                 time.time()
             )
             json_assistant.add_daily_reward_probability(reward)
-            if receiver_obj.level_calc("text") and receiver_obj.notify_threshold_reached("text"):
+            if receiver_obj.level_calc(
+                "text"
+            ) and receiver_obj.notify_threshold_reached("text"):
                 self.real_logger.info(
                     f"等級提升：{receiver.name} 文字等級達到 {receiver_obj.get_level('text')} 等"
                 )
@@ -642,7 +652,8 @@ class Basics(commands.Cog):
                 inline=False,
             )
         embed.add_field(name="已領取獎勵數量", value=f"{sum_of_rewards} 次", inline=False)
-        embed.set_footer(text="贈禮加成！現在起，領取每日獎勵時指定「贈與使用者」，對方將更有機會獲得高點數獎勵！")
+        # embed.set_footer(text="贈禮加成！現在起，領取每日獎勵時指定「贈與使用者」，對方將更有機會獲得高點數獎勵！")
+        embed.set_footer(text="為慶祝每日獎勵領取達到2000次，高點數獎勵的機率提升！")
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
     @discord.slash_command(
