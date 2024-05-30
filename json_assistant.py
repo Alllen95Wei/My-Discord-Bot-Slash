@@ -359,7 +359,7 @@ class RewardData:
     @staticmethod
     def create_new_reward():
         while True:
-            random_char_list = [choice(hexdigits) for i in range(8)]
+            random_char_list = [choice(hexdigits) for _ in range(8)]
             random_char = "".join(random_char_list).upper()
             file = os.path.join(base_dir, "reward_data", random_char + ".json")
             if not os.path.exists(file):
