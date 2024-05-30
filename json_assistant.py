@@ -380,7 +380,7 @@ class RewardData:
         file = os.path.join(base_dir, "reward_data")
         return [i.split(".")[0] for i in os.listdir(file)]
 
-    def get_raw_info(self, is_dict=True):
+    def get_raw_info(self, is_dict=True) -> dict | str:
         file = os.path.join(base_dir, "reward_data", str(self.reward_id) + ".json")
         if is_dict:
             if os.path.exists(file):
@@ -435,8 +435,8 @@ class RewardData:
             raise ValueError('reward_type must be either "text" or "voice"')
 
     def get_amount(self) -> int | None:
-        date = self.get_raw_info()
-        return date["limit"]["amount"]
+        data = self.get_raw_info()
+        return data["limit"]["amount"]
 
     def set_amount(self, amount: int):
         data = self.get_raw_info()
