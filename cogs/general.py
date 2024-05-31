@@ -1133,7 +1133,7 @@ class Events(commands.Cog):
                         inline=False,
                     )
                     embed.set_footer(text="目前此功能測試中。如要停用此功能，請使用/user_info set_voice_exp_report指令。")
-                    await member.send(embed=embed)
+                    # await member.send(embed=embed)
             elif before is not None and before.channel.id != after.channel.id:  # 加入其他頻道
                 report = exp_reports_list.get(member.id, exp_report_template)
                 if before.channel is None:
