@@ -143,6 +143,22 @@ class UserInfo(commands.Cog):
         )
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
+    @user_info.command(name="set_voice_exp_report", description="設定結束語音階段時，是否要傳送經驗值報告。")
+    async def set_voice_exp_report(
+        self,
+        ctx,
+        enabled: Option(bool, name="啟用", description="是否啟用經驗值報告", required=True),
+        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
+    ):
+        user_obj = json_assistant.User(ctx.author.id)
+        user_obj.set_exp_report_enabled(enabled)
+        embed = discord.Embed(
+            title="設定完成",
+            description=f"已 **{'啟用' if enabled else '停用'}** 語音經驗值報告。",
+            color=default_color,
+        )
+        await ctx.send(embed=embed, ephemeral=私人訊息)
+
     @user_info.command(name="about", description="顯示關於經驗值及等級的計算。")
     async def exp_about(self, ctx):
         embed = discord.Embed(
@@ -224,7 +240,8 @@ class UserInfo(commands.Cog):
         if user_obj.level_calc(類型) and user_obj.notify_threshold_reached(類型):
             lvl_type = {"text": "文字", "voice": "語音"}[類型]
             self.real_logger.info(
-                f"等級提升：{ctx.author.name} {lvl_type}等級" f"達到 {user_obj.get_level('類型')} 等"
+                f"等級提升：{ctx.author.name} {lvl_type}等級"
+                f"達到 {user_obj.get_level('類型')} 等"
             )
             upgrade_embed = discord.Embed(
                 title="等級提升",
@@ -264,7 +281,8 @@ class UserInfo(commands.Cog):
         if user_obj.level_calc(類型) and user_obj.notify_threshold_reached(類型):
             lvl_type = {"text": "文字", "voice": "語音"}[類型]
             self.real_logger.info(
-                f"等級提升：{ctx.author.name} {lvl_type}等級" f"達到 {user_obj.get_level('類型')} 等"
+                f"等級提升：{ctx.author.name} {lvl_type}等級"
+                f"達到 {user_obj.get_level('類型')} 等"
             )
             upgrade_embed = discord.Embed(
                 title="等級提升",
