@@ -1009,7 +1009,6 @@ class Events(commands.Cog):
 
     @tasks.loop(seconds=10)
     async def give_voice_exp(self):  # 給予語音經驗
-        global exp_reports_list
         exclude_channel = [888707777659289660, 1076702101964599337]
         for server in self.bot.guilds:
             for channel in server.channels:
