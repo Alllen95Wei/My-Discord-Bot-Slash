@@ -1133,6 +1133,7 @@ class Events(commands.Cog):
                         value=f"`{report['activity_bonus']}` 點",
                         inline=False,
                     )
+                    embed.set_footer(text="目前此功能測試中。如要停用此功能，請使用/user_info set_voice_exp_report指令。")
                     await member.send(embed=embed)
             else:  # 加入其他頻道
                 report = exp_reports_list.get(member.id, exp_report_template)
