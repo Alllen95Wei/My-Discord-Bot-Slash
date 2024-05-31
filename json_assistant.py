@@ -185,7 +185,7 @@ class User:
 
     def get_exp_report_enabled(self) -> bool:
         user_info = self.get_raw_info()
-        return user_info.get("voice_exp_report_enabled", False)
+        return user_info.get("voice_exp_report_enabled", True)
 
     def set_exp_report_enabled(self, enabled: bool):
         user_info = self.get_raw_info()
