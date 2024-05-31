@@ -795,16 +795,16 @@ class Basics(commands.Cog):
         私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa: PEP 3131
     ):
         if 頻道 is None:
-            msg = await self.check_voice_channel()
-            if isinstance(msg, int):
+            result = await self.check_voice_channel()
+            if isinstance(result, int):
                 embed = discord.Embed(
-                    title="已加入頻道", description=f"已經自動加入了 <#{msg}>！", color=default_color
+                    title="已加入頻道", description=f"已經自動加入了 <#{result}>！", color=default_color
                 )
-            elif isinstance(msg, str):
+            elif isinstance(result, str):
                 embed = discord.Embed(
-                    title="錯誤", description=f"發生錯誤：`{msg}`", color=error_color
+                    title="錯誤", description=f"發生錯誤：`{result}`", color=error_color
                 )
-            elif msg is None:
+            elif result is None:
                 embed = discord.Embed(
                     title="錯誤",
                     description="找不到<@885723595626676264>及<@657519721138094080>在哪個頻道。",
