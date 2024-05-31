@@ -36,11 +36,10 @@ parent_dir = str(Path(__file__).parent.parent.absolute())
 exp_reports_list = {}
 exp_report_template = {
     "join_at": 0,
-    "leave_at": 0,
-    "channel": 0,
+    "channels": [],
     "partners": [],
     "time_exp": 0,
-    "activity_bonus": 0
+    "activity_bonus": 0,
 }
 
 
@@ -186,11 +185,9 @@ class Basics(commands.Cog):
                 file_name = video_instance.get_id() + "_" + str(bit_rate)
             mp3_file_name = f"{file_name}.mp3"
             mp3_file_path = os.path.join(parent_dir, "ytdl", mp3_file_name)
-            if (
-                (metadata == {} and os.path.exists(mp3_file_path))
-                or main_dl(video_instance, file_name, mp3_file_path, metadata, bit_rate)
-                == "finished"
-            ):
+            if (metadata == {} and os.path.exists(mp3_file_path)) or main_dl(
+                video_instance, file_name, mp3_file_path, metadata, bit_rate
+            ) == "finished":
                 return discord.File(mp3_file_path)
 
     class MP3MetadataEditor(Modal):
@@ -1012,6 +1009,7 @@ class Events(commands.Cog):
 
     @tasks.loop(seconds=10)
     async def give_voice_exp(self):  # 給予語音經驗
+        global exp_reports_list
         exclude_channel = [888707777659289660, 1076702101964599337]
         for server in self.bot.guilds:
             for channel in server.channels:
@@ -1029,11 +1027,16 @@ class Events(commands.Cog):
                         ):
                             active_human_members.append(member)
                     for member in active_human_members:
+                        exp_report: dict = exp_reports_list.get(
+                            member.id, exp_report_template
+                        )
                         if len(active_human_members) > 1:  # 若語音頻道人數大於1
                             value = 1 + len(active_human_members) / 10
+                            exp_report["time_exp"] += value
                             for a in member.activities:
                                 if isinstance(a, discord.Activity):
                                     value += 0.1
+                                    exp_report["activity_bonus"] += 0.1
                             value = floor(value * 10) / 10
                             member_obj = json_assistant.User(member.id)
                             member_obj.add_exp("voice", value)
@@ -1052,8 +1055,92 @@ class Events(commands.Cog):
                                         color=default_color,
                                     )
                                     embed.set_thumbnail(url=member.display_avatar)
-                                    embed.set_footer(text="關於經驗值計算系統，請輸入/user_info about")
+                                    embed.set_footer(
+                                        text="關於經驗值計算系統，請輸入/user_info about"
+                                    )
                                     await member.send(embed=embed)
+                            for m in active_human_members:
+                                if (
+                                    m.id not in exp_report["partners"]
+                                    and m.id != member.id
+                                ):
+                                    exp_report["partners"].append(m.id)
+                            if member_obj.get_exp_report_enabled():
+                                exp_reports_list[member.id] = exp_report
+
+    @staticmethod
+    def convert_seconds(seconds: int) -> str:
+        hours = seconds // 3600
+        seconds %= 3600
+        minutes = seconds // 60
+        seconds %= 60
+        return f"`{hours}` 小時 `{minutes}` 分 `{seconds}` 秒"
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(
+        self,
+        member: discord.Member,
+        before: discord.VoiceState,
+        after: discord.VoiceState,
+    ):
+        global exp_reports_list
+        print(after)
+        if json_assistant.User(member.id).get_exp_report_enabled():
+            if after.channel is None:  # 中斷語音連線
+                if member.id in exp_reports_list.keys():
+                    report = exp_reports_list[member.id]
+                    time_delta = int(time.time()) - report["join_at"]
+                    embed = discord.Embed(
+                        title="語音經驗值報告",
+                        description="👋剛才語音階段的的經驗值報告如下！",
+                        color=default_color,
+                    )
+                    embed.add_field(
+                        name="開始於", value=f"<t:{report['join_at']}>", inline=True
+                    )
+                    embed.add_field(
+                        name="結束於", value=f"<t:{int(time.time())}>", inline=True
+                    )
+                    embed.add_field(
+                        name="總時長", value=self.convert_seconds(time_delta), inline=True
+                    )
+                    channel_str, partner_str = "", ""
+                    for c in report["channels"]:
+                        c = "<#" + str(c) + ">"
+                        channel_str += c
+                    for m in report["partners"]:
+                        if m == member.id:
+                            report["partners"].remove(m)
+                            continue
+                        m = "<@" + str(m) + ">"
+                        partner_str += m
+                    embed.add_field(
+                        name=f"加入過的頻道 (共{len(report['channels'])}個)",
+                        value=channel_str,
+                        inline=False,
+                    )
+                    embed.add_field(
+                        name=f"與你互動過的使用者 (共{len(report['partners'])}位)",
+                        value=partner_str,
+                        inline=False,
+                    )
+                    embed.add_field(
+                        name="時間點數 (因待在語音頻道而獲得的點數)",
+                        value=f"`{report['time_exp']}` 點",
+                        inline=False,
+                    )
+                    embed.add_field(
+                        name="活動加成 (因進行遊戲、聆聽Spotify等而額外獲得的點數)",
+                        value=f"`{report['activity_bonus']}` 點",
+                        inline=False,
+                    )
+                    await member.send(embed=embed)
+            else:  # 加入其他頻道
+                report = exp_reports_list.get(member.id, exp_report_template)
+                if before.channel is None:
+                    report["join_at"] = int(time.time())
+                report["channels"].append(after.channel.id)
+                exp_reports_list[member.id] = report
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -1209,8 +1296,10 @@ class Events(commands.Cog):
             return
         msg_in = message.content
         exclude_channel = [1035754607286169631, 1035754607286169631, 891665312028713001]
-        if (message.channel.id == 891665312028713001  # 貓娘實驗室/音樂指令區
-                or message.guild.id == 1030069819199991838):  # 損友俱樂部
+        if (
+            message.channel.id == 891665312028713001  # 貓娘實驗室/音樂指令區
+            or message.guild.id == 1030069819199991838
+        ):  # 損友俱樂部
             if (
                 msg_in.startswith("https://www.youtube.com")
                 or msg_in.startswith("https://youtu.be")
@@ -1263,7 +1352,9 @@ class Events(commands.Cog):
                     f"獲得經驗值：{message.author.name} 文字經驗值 +15 (訊息長度：{len(msg_in)})"
                 )
         member_obj.set_last_active_time(time.time())
-        if member_obj.level_calc("text") and member_obj.notify_threshold_reached("text"):
+        if member_obj.level_calc("text") and member_obj.notify_threshold_reached(
+            "text"
+        ):
             self.real_logger.info(
                 f"等級提升：{message.author.name} 文字等級"
                 f"達到 {member_obj.get_level('text')} 等"
