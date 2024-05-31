@@ -46,13 +46,15 @@ class UserInfo(commands.Cog):
         embed.add_field(name="語音等級", value=f"{voice_level}", inline=False)
         embed.add_field(name="語音經驗值", value=f"{voice_exp}", inline=False)
         date = None
-        if isinstance(使用者, discord.member.Member):
+        if isinstance(使用者, discord.Member):
             guild = ctx.guild
             guild_name = guild.name
             date = guild.get_member(使用者.id).joined_at.astimezone(tz=now_tz)
-        elif isinstance(使用者, discord.user.User):
+        elif isinstance(使用者, discord.User):
             guild_name = "Discord"
             date = 使用者.created_at.astimezone(tz=now_tz)
+        else:
+            guild_name = "Discord"
         date = date.timestamp()
         embed.add_field(
             name=f"加入 {guild_name} 時間 (UTC+8)", value=f"<t:{int(date)}>", inline=False
