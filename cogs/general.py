@@ -1082,7 +1082,6 @@ class Events(commands.Cog):
         before: discord.VoiceState,
         after: discord.VoiceState,
     ):
-        global exp_reports_list
         print(after)
         if json_assistant.User(member.id).get_exp_report_enabled():
             if after.channel is None:  # 中斷語音連線
@@ -1135,7 +1134,7 @@ class Events(commands.Cog):
                     )
                     embed.set_footer(text="目前此功能測試中。如要停用此功能，請使用/user_info set_voice_exp_report指令。")
                     await member.send(embed=embed)
-            elif before.channel.id != after.channel.id:  # 加入其他頻道
+            elif before is not None and before.channel.id != after.channel.id:  # 加入其他頻道
                 report = exp_reports_list.get(member.id, exp_report_template)
                 if before.channel is None:
                     report["join_at"] = int(time.time())
