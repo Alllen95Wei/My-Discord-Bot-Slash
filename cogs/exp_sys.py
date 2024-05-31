@@ -150,6 +150,7 @@ class UserInfo(commands.Cog):
         self,
         ctx,
         enabled: Option(bool, name="啟用", description="是否啟用經驗值報告", required=True),
+        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
     ):
         user_obj = json_assistant.User(ctx.author.id)
         user_obj.set_exp_report_enabled(enabled)
@@ -158,7 +159,7 @@ class UserInfo(commands.Cog):
             description=f"已 **{'啟用' if enabled else '停用'}** 語音經驗值報告。",
             color=default_color,
         )
-        await ctx.send(embed=embed)
+        await ctx.respond(embed=embed, ephemeral=私人訊息)
 
     @user_info.command(name="about", description="顯示關於經驗值及等級的計算。")
     async def exp_about(self, ctx):
