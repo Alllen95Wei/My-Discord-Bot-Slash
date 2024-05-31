@@ -29,6 +29,7 @@ class User:
                         "text": 1,
                     },
                     "last_notify": {"voice": 0, "text": 0},
+                    "voice_exp_report_enabled": False,
                     "last_active_time": 0,
                     "last_daily_reward_claimed": 0,
                 }
@@ -181,6 +182,15 @@ class User:
                 return False
         else:
             raise ValueError('level_type must be either "voice" or "text"')
+
+    def get_exp_report_enabled(self) -> bool:
+        user_info = self.get_raw_info()
+        return user_info.get("voice_exp_report_enabled", False)
+
+    def set_exp_report_enabled(self, enabled: bool):
+        user_info = self.get_raw_info()
+        user_info["voice_exp_report_enabled"] = enabled
+        self.write_raw_info(user_info)
 
     def get_last_active_time(self):
         user_info = self.get_raw_info()
