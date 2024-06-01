@@ -1110,15 +1110,15 @@ class Events(commands.Cog):
                     embed.add_field(
                         name="總時長", value=self.convert_seconds(time_delta), inline=True
                     )
-                    channel_str, partner_str = "", ""
+                    channel_str, partner_str = "、", "、"
                     for c in report["channels"]:
                         c = "<#" + str(c) + ">"
-                        channel_str += c
+                        channel_str.join(c)
                     for m in report["partners"]:
                         if m == member.id:
                             continue
                         m = "<@" + str(m) + ">"
-                        partner_str += m
+                        partner_str.join(m)
                     embed.add_field(
                         name=f"加入過的頻道 (共{len(report['channels'])}個)",
                         value=channel_str,
