@@ -18,6 +18,7 @@ from random import choice
 from random import randint
 from pathlib import Path
 from math import floor
+from copy import deepcopy
 
 import logger
 import json_assistant
@@ -795,7 +796,9 @@ class Basics(commands.Cog):
             result = await self.check_voice_channel()
             if isinstance(result, int):
                 embed = discord.Embed(
-                    title="已加入頻道", description=f"已經自動加入了 <#{result}>！", color=default_color
+                    title="已加入頻道",
+                    description=f"已經自動加入了 <#{result}>！",
+                    color=default_color,
                 )
             elif isinstance(result, str):
                 embed = discord.Embed(
@@ -1027,7 +1030,7 @@ class Events(commands.Cog):
                             active_human_members.append(member)
                     for member in active_human_members:
                         exp_report: dict = exp_reports_list.get(
-                            member.id, exp_report_template
+                            member.id, deepcopy(exp_report_template)
                         )
                         if len(active_human_members) > 1:  # 若語音頻道人數大於1
                             value = 1 + len(active_human_members) / 10
@@ -1082,11 +1085,11 @@ class Events(commands.Cog):
         before: discord.VoiceState,
         after: discord.VoiceState,
     ):
-        print(after)
         if json_assistant.User(member.id).get_exp_report_enabled():
             if after.channel is None:  # 中斷語音連線
+                self.real_logger.debug(f"{member.name} 結束了語音階段：{before.channel.name}")
                 if member.id in exp_reports_list.keys():
-                    report = exp_reports_list[member.id]
+                    report = exp_reports_list.pop(member.id)
                     time_delta = int(time.time()) - report["join_at"]
                     embed = discord.Embed(
                         title="語音經驗值報告",
@@ -1108,7 +1111,6 @@ class Events(commands.Cog):
                         channel_str += c
                     for m in report["partners"]:
                         if m == member.id:
-                            report["partners"].remove(m)
                             continue
                         m = "<@" + str(m) + ">"
                         partner_str += m
@@ -1124,20 +1126,33 @@ class Events(commands.Cog):
                     )
                     embed.add_field(
                         name="時間點數 (因待在語音頻道而獲得的點數)",
-                        value=f"`{report['time_exp']}` 點",
+                        value=f"`{floor(report['time_exp']*10)/10}` 點",
                         inline=False,
                     )
                     embed.add_field(
                         name="活動加成 (因進行遊戲、聆聽Spotify等而額外獲得的點數)",
-                        value=f"`{report['activity_bonus']}` 點",
+                        value=f"`{floor(report['activity_bonus']*10)/10}` 點",
                         inline=False,
                     )
-                    embed.set_footer(text="目前此功能測試中。如要停用此功能，請使用/user_info set_voice_exp_report指令。")
-                    # await member.send(embed=embed)
-            elif before is not None and before.channel.id != after.channel.id:  # 加入其他頻道
-                report = exp_reports_list.get(member.id, exp_report_template)
-                if before.channel is None:
-                    report["join_at"] = int(time.time())
+                    embed.set_footer(
+                        text="目前此功能測試中。如要停用此功能，請使用/user_info set_voice_exp_report指令。"
+                    )
+                    await member.send(embed=embed)
+            elif (
+                before.channel is not None and before.channel.id != after.channel.id
+            ):  # 加入其他頻道
+                self.real_logger.debug(
+                    f"{member.name} 加入了其他頻道：{before.channel.name} -> {after.channel.name}"
+                )
+                report = exp_reports_list.get(member.id, deepcopy(exp_report_template))
+                report["channels"].append(after.channel.id)
+                exp_reports_list[member.id] = report
+            elif before.channel is None and after.channel is not None:  # 開始語音階段
+                self.real_logger.debug(
+                    f"{member.name} 開始了語音階段：{after.channel.name}"
+                )
+                report = exp_reports_list.get(member.id, deepcopy(exp_report_template))
+                report["join_at"] = int(time.time())
                 report["channels"].append(after.channel.id)
                 exp_reports_list[member.id] = report
 
