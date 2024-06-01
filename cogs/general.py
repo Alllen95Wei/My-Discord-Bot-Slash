@@ -1090,6 +1090,11 @@ class Events(commands.Cog):
                 self.real_logger.debug(f"{member.name} 結束了語音階段：{before.channel.name}")
                 if member.id in exp_reports_list.keys():
                     report = exp_reports_list.pop(member.id)
+                    if report["time_exp"] == 0:
+                        self.real_logger.debug(
+                            f"語音階段中未獲得任何語音經驗值，因此不傳送報告給 {member.name}"
+                        )
+                        return
                     time_delta = int(time.time()) - report["join_at"]
                     embed = discord.Embed(
                         title="語音經驗值報告",
@@ -1148,9 +1153,7 @@ class Events(commands.Cog):
                 report["channels"].append(after.channel.id)
                 exp_reports_list[member.id] = report
             elif before.channel is None and after.channel is not None:  # 開始語音階段
-                self.real_logger.debug(
-                    f"{member.name} 開始了語音階段：{after.channel.name}"
-                )
+                self.real_logger.debug(f"{member.name} 開始了語音階段：{after.channel.name}")
                 report = exp_reports_list.get(member.id, deepcopy(exp_report_template))
                 report["join_at"] = int(time.time())
                 report["channels"].append(after.channel.id)
