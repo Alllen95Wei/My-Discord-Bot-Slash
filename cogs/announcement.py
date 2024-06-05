@@ -33,6 +33,7 @@ class Announcement(commands.Cog):
             self.add_item(ui.InputText(style=InputTextStyle.short, label="類型", value=announcement_type))
             self.add_item(ui.InputText(style=InputTextStyle.long, label="公告內文",
                                        placeholder="請輸入公告內容(支援markdown)"))
+            self.add_item(ui.InputText(style=InputTextStyle.long, label="附圖", placeholder="貼上圖片的URL", required=False))
 
         async def callback(self, interaction: Interaction):
             await interaction.response.defer()
@@ -44,6 +45,8 @@ class Announcement(commands.Cog):
                                     f"\n\n*\\- {self.bot.get_user(self.bot.owner_id).display_name}*")  # 加上署名
             announcement_embed = Embed(title=title_types[self.announcement_type],
                                        description=announcement_content, color=announcement_color)
+            if self.children[2].value != "":
+                announcement_embed.set_image(url=self.children[2].value)
             announcement_embed.set_footer(text=f"由於你訂閱了「{self.announcement_type}」類別，因此收到了這則訊息。")
             receiver_data = json_assistant.get_announcement_receivers()
             successful_users, failed_users, unsubscribed_users = "", "", ""
