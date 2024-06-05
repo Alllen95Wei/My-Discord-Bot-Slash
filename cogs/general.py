@@ -1110,10 +1110,12 @@ class Events(commands.Cog):
                     embed.add_field(
                         name="總時長", value=self.convert_seconds(time_delta), inline=True
                     )
-                    channel_str, partner_str = "、", "、"
+                    channel_str, partner_str = "", ""
                     for c in report["channels"]:
                         c = "<#" + str(c) + ">"
                         channel_str += c
+                    if member.id in report["partners"]:
+                        report["partners"].remove(member.id)
                     for m in report["partners"]:
                         if m == member.id:
                             continue
