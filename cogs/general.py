@@ -1029,9 +1029,7 @@ class Events(commands.Cog):
                         ):
                             active_human_members.append(member)
                     for member in active_human_members:
-                        exp_report: dict = exp_reports_list.get(
-                            member.id, deepcopy(exp_report_template)
-                        )
+                        exp_report: dict = exp_reports_list[member.id]
                         if len(active_human_members) > 1:  # 若語音頻道人數大於1
                             value = 1 + len(active_human_members) / 10
                             exp_report["time_exp"] += value
@@ -1314,11 +1312,18 @@ class Events(commands.Cog):
         if message.author.id == self.bot.user.id:
             return
         msg_in = message.content
-        exclude_channel = [1035754607286169631, 1035754607286169631, 891665312028713001]
+        exclude_channels = [
+            1035754607286169631,
+        ]
+        music_cmd_channels = [
+            891665312028713001,  # 貓娘實驗室/音樂指令區
+            1114523541312897034,  # FRC7636/指令區
+            1248646014798397491,  # 野人集中營/music
+        ]
+        exclude_channels.append(music_cmd_channels)
         if (
-            message.channel.id == 891665312028713001  # 貓娘實驗室/音樂指令區
-            or message.guild.id == 1030069819199991838
-        ):  # 損友俱樂部
+            message.channel.id in music_cmd_channels
+        ):
             if (
                 msg_in.startswith("https://www.youtube.com")
                 or msg_in.startswith("https://youtu.be")
@@ -1347,7 +1352,7 @@ class Events(commands.Cog):
                 await message.channel.send(ap_cmd, delete_after=3)
                 await message.add_reaction("✅")
                 return
-        if message.channel.id in exclude_channel:
+        if message.channel.id in exclude_channels:
             return
         member_obj = json_assistant.User(message.author.id)
         time_delta = time.time() - member_obj.get_last_active_time()
