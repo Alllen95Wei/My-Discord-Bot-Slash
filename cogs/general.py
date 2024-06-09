@@ -1026,7 +1026,7 @@ class Events(commands.Cog):
                             not member.bot
                             and not member.voice.self_mute
                             and not member.voice.self_deaf
-                        ) or True:
+                        ):
                             active_human_members.append(member)
                     for member in active_human_members:
                         exp_report: dict = exp_reports_list.get(member.id, deepcopy(exp_report_template))
