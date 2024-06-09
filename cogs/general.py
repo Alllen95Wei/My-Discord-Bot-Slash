@@ -1026,10 +1026,10 @@ class Events(commands.Cog):
                             not member.bot
                             and not member.voice.self_mute
                             and not member.voice.self_deaf
-                        ):
+                        ) or True:
                             active_human_members.append(member)
                     for member in active_human_members:
-                        exp_report: dict = exp_reports_list[member.id]
+                        exp_report: dict = exp_reports_list.get(member.id, deepcopy(exp_report_template))
                         if len(active_human_members) > 1:  # 若語音頻道人數大於1
                             value = 1 + len(active_human_members) / 10
                             exp_report["time_exp"] += value
@@ -1088,11 +1088,11 @@ class Events(commands.Cog):
                 self.real_logger.debug(f"{member.name} 結束了語音階段：{before.channel.name}")
                 if member.id in exp_reports_list.keys():
                     report = exp_reports_list.pop(member.id)
-                    # if report["time_exp"] == 0 and report["activity_bonus"] == 0:
-                    #     self.real_logger.debug(
-                    #         f"語音階段中未獲得任何語音經驗值，因此不傳送報告給 {member.name}"
-                    #     )
-                    #     return
+                    if report["time_exp"] == 0 and report["activity_bonus"] == 0:
+                        self.real_logger.debug(
+                            f"語音階段中未獲得任何語音經驗值，因此不傳送報告給 {member.name}"
+                        )
+                        return
                     time_delta = int(time.time()) - report["join_at"]
                     embed = discord.Embed(
                         title="語音經驗值報告",
