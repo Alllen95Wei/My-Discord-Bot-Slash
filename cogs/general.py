@@ -1319,6 +1319,7 @@ class Events(commands.Cog):
             891665312028713001,  # 貓娘實驗室/音樂指令區
             1114523541312897034,  # FRC7636/指令區
             1248646014798397491,  # 野人集中營/music
+            1249352023615344671,  # 損友俱樂部/丟song
         ]
         exclude_channels.append(music_cmd_channels)
         if message.channel.id in music_cmd_channels:
