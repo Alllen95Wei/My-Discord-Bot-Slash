@@ -1339,14 +1339,14 @@ class Events(commands.Cog):
                 if "&list=" in msg_in:
                     msg_in = msg_in[: msg_in.find("&list=")]
                     await message.reply(
-                        f"{message.author.mention} 偵測到此連結來自播放清單！已轉換為單一影片連結。",
-                        delete_after=5,
+                        "偵測到此連結來自播放清單！已轉換為單一影片連結。",
+                        delete_after=3,
                     )
                 elif "?list=" in msg_in:
                     msg_in = msg_in[: msg_in.find("?list=")]
                     await message.reply(
-                        f"{message.author.mention} 偵測到此連結來自播放清單！已轉換為單一影片連結。",
-                        delete_after=5,
+                        "偵測到此連結來自播放清單！已轉換為單一影片連結。",
+                        delete_after=3,
                     )
                 ap_cmd = "ap!p " + msg_in
                 await message.channel.send(ap_cmd, delete_after=3)
