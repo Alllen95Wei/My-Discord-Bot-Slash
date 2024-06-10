@@ -848,6 +848,45 @@ class Basics(commands.Cog):
                 )
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
+    @discord.message_command(name="Music Bot 錯誤訊息分析")
+    async def musicbot_error_explanation(self, ctx, message: discord.Message):
+        not_an_error_embed = discord.Embed(
+            title="錯誤", description="此訊息似乎不是錯誤訊息。", color=error_color
+        )
+        if message.author.id == 885723595626676264:
+            try:
+                error_msg = message.embeds[0].fields[0]
+                if error_msg.name != "Error":
+                    embed = not_an_error_embed
+                else:
+                    musicbot_error = json_assistant.MusicbotError(error_msg.value)
+                    embed = discord.Embed(
+                        title="Music Bot 錯誤訊息分析",
+                        description="已在資料庫中搜尋到此問題的說明。\n"
+                        f"問題內容：```{musicbot_error.exact_problem}```",
+                        color=default_color,
+                    )
+                    embed.add_field(name="說明", value=musicbot_error.get_description(), inline=False)
+                    embed.add_field(name="解決方法", value=musicbot_error.get_solution(), inline=False)
+            except IndexError:
+                embed = not_an_error_embed
+            except KeyError:
+                embed = discord.Embed(
+                    title="錯誤", description="此問題目前尚未有解決方案。", color=error_color
+                )
+                embed.add_field(
+                    name="現在該怎麼辦？", value="請私訊<@657519721138094080>，並附上音樂機器人錯誤訊息的截圖。感謝！"
+                )
+            except Exception as e:
+                embed = discord.Embed(
+                    title="錯誤", description=f"發生錯誤：`{e}`", color=error_color
+                )
+        else:
+            embed = discord.Embed(
+                title="錯誤", description="此訊息 **不是** 由 MusicBot 傳送。", color=error_color
+            )
+        await ctx.respond(embed=embed, ephemeral=True)
+
     async def check_voice_channel(self):
         # 列出所有語音頻道
         voice_channel_lists = []
@@ -1029,7 +1068,9 @@ class Events(commands.Cog):
                         ):
                             active_human_members.append(member)
                     for member in active_human_members:
-                        exp_report: dict = exp_reports_list.get(member.id, deepcopy(exp_report_template))
+                        exp_report: dict = exp_reports_list.get(
+                            member.id, deepcopy(exp_report_template)
+                        )
                         if len(active_human_members) > 1:  # 若語音頻道人數大於1
                             value = 1 + len(active_human_members) / 10
                             exp_report["time_exp"] += value

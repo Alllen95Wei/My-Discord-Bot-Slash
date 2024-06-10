@@ -470,3 +470,28 @@ class RewardData:
         data = self.get_raw_info()
         data["limit"]["time"] = time
         self.write_raw_info(data)
+
+
+class MusicbotError:
+    file = os.path.join(base_dir, "musicbot_error_explanation.json")
+
+    def __init__(self, error: str):
+        database = self.read_file()
+        for key in database.keys():
+            if key in error:
+                self.exact_problem = key
+                self.description = database[key]["description"]
+                self.solution = database[key]["solution"]
+                return
+        raise KeyError("The error message cannot be explained now.")
+
+    @staticmethod
+    def read_file() -> dict:
+        with open(file=MusicbotError.file, mode="r", encoding="utf-8") as f:
+            return json.loads(f.read())
+
+    def get_description(self) -> str:
+        return self.description
+
+    def get_solution(self) -> str:
+        return self.solution

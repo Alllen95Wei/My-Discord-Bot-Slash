@@ -1,0 +1,42 @@
+{
+  "沒有歌可以放了！": {
+    "description": "目前點播的歌曲已經播放完畢，因此佇列為空。",
+    "solution": "使用`ap!p <連結>`點播新的歌曲。"
+  },
+  "This command requires you to be in a Guild Voice channel.": {
+    "description": "此指令需要 **與音樂機器人同一個語音頻道** 才可使用。",
+    "solution": "加入音樂機器人目前的語音頻道，並再次使用指令。"
+  },
+  "blocked by the song blocklist": {
+    "description": "嘗試點播的歌曲已被封鎖，無法點播。",
+    "solution": "(無)"
+  },
+  "無效的號碼。" : {
+    "description": "你所指定的歌曲編號不存在。",
+    "solution": "使用`ap!q`查詢目前佇列，確認歌曲編號後再次使用指令。"
+  },
+  "Private video.": {
+    "description": "嘗試點播的歌曲為私人影片，無法點播。",
+    "solution": "(無)"
+  },
+  "你不在語音頻道！": {
+    "description": "你必須在任一語音頻道內，才能使用此指令。",
+    "solution": "加入一個音樂機器人可加入的語音頻道後，再次使用指令。"
+  },
+  "You do not have permission to force skip a looped song.": {
+    "description": "目前的歌曲在循環播放中，因此無法跳過。",
+    "solution": "使用`ap!repeat`指令取消循環後，再次使用指令。"
+  },
+  "The bot is not in a voice channel.": {
+    "description": "音樂機器人目前未加入任何語音頻道。",
+    "solution": "使用`ap!s`讓機器人加入你目前的語音頻道，並再次使用指令。"
+  },
+  "無法跳過！ 播放器沒在播放！": {
+    "description": "目前沒有在播放任何歌曲，因此跳過指令無效。",
+    "solution": "等待機器人開始播放歌曲後，再次使用指令。"
+  },
+  "THIS IS A TEMPLATE": {
+    "description": "",
+    "solution": ""
+  }
+}
