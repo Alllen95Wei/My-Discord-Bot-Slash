@@ -1321,7 +1321,7 @@ class Events(commands.Cog):
             1248646014798397491,  # 野人集中營/music
             1249352023615344671,  # 損友俱樂部/丟song
         ]
-        exclude_channels.append(music_cmd_channels)
+        exclude_channels += music_cmd_channels
         if message.channel.id in music_cmd_channels:
             if (
                 msg_in.startswith("https://www.youtube.com")
