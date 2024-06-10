@@ -35,6 +35,10 @@
     "description": "目前沒有在播放任何歌曲，因此跳過指令無效。",
     "solution": "等待機器人開始播放歌曲後，再次使用指令。"
   },
+  "You don't have permission to use that command.": {
+    "description": "你沒有權限使用此指令。",
+    "solution": "請嘗試使用其他指令(如`ap!pn`改使用`ap!p`)，或是詢問管理員。"
+  },
   "THIS IS A TEMPLATE": {
     "description": "",
     "solution": ""
