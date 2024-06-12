@@ -1322,7 +1322,7 @@ class Events(commands.Cog):
         )
         self.real_logger.info(f'{ctx.author} 執行了斜線指令 "{cmd}"')
 
-    async def check_voice_channel(self) -> int | str:
+    async def check_voice_channel(self) -> discord.VoiceChannel | str:
         # 列出所有語音頻道
         voice_channel_lists = []
         for server in self.bot.guilds:
@@ -1343,7 +1343,7 @@ class Events(commands.Cog):
                                 await channel.guild.change_voice_state(
                                     channel=channel, self_mute=True, self_deaf=True
                                 )
-                                return channel.id
+                                return channel
                             except Exception as e:
                                 if str(e) == "Already connected to a voice channel.":
                                     return "已經連線至語音頻道。"
@@ -1351,7 +1351,7 @@ class Events(commands.Cog):
                                     return str(e)
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         if message.author.id == self.bot.user.id:
             return
         msg_in = message.content
@@ -1376,25 +1376,27 @@ class Events(commands.Cog):
             ):
                 check_vc_result = await self.check_voice_channel()
                 if isinstance(check_vc_result, str):
-                    await message.channel.send(
-                        "**注意：機器人自動加入語音頻道時失敗。音樂機器人可能會回傳錯誤。**", delete_after=5
-                    )
-                if "&list=" in msg_in:
-                    msg_in = msg_in[: msg_in.find("&list=")]
-                    await message.reply(
-                        "偵測到此連結來自播放清單！已轉換為單一影片連結。",
-                        delete_after=3,
-                    )
-                elif "?list=" in msg_in:
-                    msg_in = msg_in[: msg_in.find("?list=")]
-                    await message.reply(
-                        "偵測到此連結來自播放清單！已轉換為單一影片連結。",
-                        delete_after=3,
-                    )
-                ap_cmd = "ap!p " + msg_in
-                await message.channel.send(ap_cmd, delete_after=3)
-                await message.add_reaction("✅")
-                return
+                    embed = discord.Embed(title="錯誤", description="機器人自動加入語音頻道時失敗。", color=error_color)
+                    embed.add_field(name="錯誤訊息", value=check_vc_result)
+                    await message.channel.send(embed=embed)
+                elif isinstance(check_vc_result, discord.VoiceChannel):
+                    if message.author in check_vc_result.members:
+                        if "&list=" in msg_in:
+                            msg_in = msg_in[: msg_in.find("&list=")]
+                            await message.reply(
+                                "偵測到此連結來自播放清單！已轉換為單一影片連結。",
+                                delete_after=3,
+                            )
+                        elif "?list=" in msg_in:
+                            msg_in = msg_in[: msg_in.find("?list=")]
+                            await message.reply(
+                                "偵測到此連結來自播放清單！已轉換為單一影片連結。",
+                                delete_after=3,
+                            )
+                        ap_cmd = "ap!p " + msg_in
+                        await message.channel.send(ap_cmd, delete_after=3)
+                        await message.add_reaction("✅")
+                        return
         if message.channel.id in exclude_channels:
             return
         member_obj = json_assistant.User(message.author.id)
