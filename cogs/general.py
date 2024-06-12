@@ -1353,7 +1353,8 @@ class Events(commands.Cog):
                     await message.channel.send(embed=embed)
                 elif isinstance(check_vc_result, discord.VoiceChannel):
                     self.real_logger.debug(f"已連線至語音頻道：{check_vc_result.name}")
-                    print(m.name for m in check_vc_result.members)
+                    for m in check_vc_result.members:
+                        print(m.name)
                     if message.author in check_vc_result.members:
                         if "&list=" in msg_in:
                             msg_in = msg_in[: msg_in.find("&list=")]
