@@ -35,9 +35,9 @@
     "description": "目前沒有在播放任何歌曲，因此跳過指令無效。",
     "solution": "等待機器人開始播放歌曲後，再次使用指令。"
   },
-  "You don't have permission to use that command.": {
-    "description": "你沒有權限使用此指令。",
-    "solution": "請嘗試使用其他指令(如`ap!pn`改使用`ap!p`)，或是詢問管理員。"
+  "無權使用此服務": {
+    "description": "所提供的媒體不是來自允許的來源。",
+    "solution": "- **自動點歌**時發生此錯誤：手動使用`ap!p`再次點播。\n- **手動點歌**時發生此錯誤：請使用YouTube的影片連結點播。"
   },
   "提供了不合理的音量": {
     "description": "設定音量時，所設置的音量不在`1`~`100`之間。",
@@ -46,6 +46,10 @@
   "members-only content": {
     "description": "此影片為會員限定內容，因此機器人無法下載。",
     "solution": "(無)"
+  },
+  "You don't have permission to use that command.": {
+    "description": "你沒有權限使用此指令。",
+    "solution": "請嘗試使用其他指令(如`ap!pn`改使用`ap!p`)，或是詢問管理員。"
   },
   "THIS IS A TEMPLATE": {
     "description": "",
