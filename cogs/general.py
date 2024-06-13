@@ -863,7 +863,7 @@ class Basics(commands.Cog):
                     embed = discord.Embed(
                         title="Music Bot 錯誤訊息分析",
                         description="已在資料庫中搜尋到此問題的說明。\n"
-                        f"問題內容：```{musicbot_error.exact_problem}```",
+                        f"問題關鍵字：```{musicbot_error.exact_problem}```",
                         color=default_color,
                     )
                     embed.add_field(name="說明", value=musicbot_error.get_description(), inline=False)
