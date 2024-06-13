@@ -43,6 +43,10 @@
     "description": "設定音量時，所設置的音量不在`1`~`100`之間。",
     "solution": "- **絕對**音量：請輸入`1`~`100`之間的數值。\n- **相對**音量：請確認經過運算後，音量會在`1`~`100`之間。"
   },
+  "members-only content": {
+    "description": "此影片為會員限定內容，因此機器人無法下載。",
+    "solution": "(無)"
+  },
   "THIS IS A TEMPLATE": {
     "description": "",
     "solution": ""
