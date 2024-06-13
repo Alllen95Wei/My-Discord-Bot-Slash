@@ -1113,13 +1113,17 @@ class Events(commands.Cog):
                         color=default_color,
                     )
                     embed.add_field(
-                        name="開始於", value=f"<t:{report['join_at']}>", inline=True
+                        name="開始於",
+                        value=f"<t:{report['join_at']}>" if report['join_at'] != 0 else "(不適用)",
+                        inline=True
                     )
                     embed.add_field(
                         name="結束於", value=f"<t:{int(time.time())}>", inline=True
                     )
                     embed.add_field(
-                        name="總時長", value=self.convert_seconds(time_delta), inline=True
+                        name="總時長",
+                        value=self.convert_seconds(time_delta) if report['join_at'] != 0 else "(不適用)",
+                        inline=True
                     )
                     channel_str, partner_str = "", ""
                     for c in report["channels"]:
