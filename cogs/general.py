@@ -940,7 +940,7 @@ class Events(commands.Cog):
                 discord.ui.InputText(
                     style=discord.InputTextStyle.short,
                     label="請輸入你的真實姓名",
-                    max_length=20,
+                    max_length=100,
                     required=True,
                 )
             )
