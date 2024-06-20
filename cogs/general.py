@@ -816,9 +816,13 @@ class Basics(commands.Cog):
                 )
         else:
             try:
-                await 頻道.guild.change_voice_state(channel=頻道, self_deaf=True, self_mute=True)
+                await 頻道.guild.change_voice_state(
+                    channel=頻道, self_deaf=True, self_mute=True
+                )
                 embed = discord.Embed(
-                    title="已加入頻道", description=f"已經加入了 {頻道.mention}！", color=default_color
+                    title="已加入頻道",
+                    description=f"已經加入了 {頻道.mention}！",
+                    color=default_color,
                 )
             except Exception as e:
                 embed = discord.Embed(
@@ -866,8 +870,12 @@ class Basics(commands.Cog):
                         f"問題關鍵字：```{musicbot_error.exact_problem}```",
                         color=default_color,
                     )
-                    embed.add_field(name="說明", value=musicbot_error.get_description(), inline=False)
-                    embed.add_field(name="解決方法", value=musicbot_error.get_solution(), inline=False)
+                    embed.add_field(
+                        name="說明", value=musicbot_error.get_description(), inline=False
+                    )
+                    embed.add_field(
+                        name="解決方法", value=musicbot_error.get_solution(), inline=False
+                    )
             except IndexError:
                 embed = not_an_error_embed
             except KeyError:
@@ -1114,16 +1122,20 @@ class Events(commands.Cog):
                     )
                     embed.add_field(
                         name="開始於",
-                        value=f"<t:{report['join_at']}>" if report['join_at'] != 0 else "(不適用)",
-                        inline=True
+                        value=f"<t:{report['join_at']}>"
+                        if report["join_at"] != 0
+                        else "(不適用)",
+                        inline=True,
                     )
                     embed.add_field(
                         name="結束於", value=f"<t:{int(time.time())}>", inline=True
                     )
                     embed.add_field(
                         name="總時長",
-                        value=self.convert_seconds(time_delta) if report['join_at'] != 0 else "(不適用)",
-                        inline=True
+                        value=self.convert_seconds(time_delta)
+                        if report["join_at"] != 0
+                        else "(不適用)",
+                        inline=True,
                     )
                     channel_str, partner_str = "", ""
                     for c in report["channels"]:
@@ -1299,7 +1311,9 @@ class Events(commands.Cog):
         self.real_logger.info(f'{ctx.author} 執行了斜線指令 "{cmd}"')
 
     @staticmethod
-    async def check_voice_channel(instance, server: discord.Guild) -> discord.VoiceChannel | str:
+    async def check_voice_channel(
+        instance, server: discord.Guild
+    ) -> discord.VoiceChannel | str:
         # 列出所有語音頻道
         voice_channel_lists = []
         for channel in server.channels:
@@ -1330,6 +1344,12 @@ class Events(commands.Cog):
     async def on_message(self, message: discord.Message):
         if message.author.id == self.bot.user.id:
             return
+        if "Direct Message" in str(message.channel):
+            embed = discord.Embed(
+                title="是不是傳錯人了...？", description="很抱歉，目前本機器人不接受私人訊息。", color=error_color
+            )
+            await message.channel.send(embed=embed)
+            return
         msg_in = message.content
         exclude_channels = [
             1035754607286169631,
@@ -1341,52 +1361,46 @@ class Events(commands.Cog):
             1249352023615344671,  # 損友俱樂部/丟song
         ]
         exclude_channels += music_cmd_channels
-        if message.channel.id in music_cmd_channels:
-            if (
-                msg_in.startswith("https://www.youtube.com")
-                or msg_in.startswith("https://youtu.be")
-                or msg_in.startswith("https://m.youtube.com")
-                or msg_in.startswith("https://youtube.com")
-                or msg_in.startswith("https://open.spotify.com")
-                or msg_in.startswith("https://music.youtube.com")
-            ):
-                check_vc_result = await self.check_voice_channel(self, message.guild)
-                if isinstance(check_vc_result, str):
-                    embed = discord.Embed(title="錯誤", description="機器人自動加入語音頻道時失敗。", color=error_color)
-                    embed.add_field(name="錯誤訊息", value=check_vc_result)
-                    await message.channel.send(embed=embed)
-                elif isinstance(check_vc_result, discord.VoiceChannel):
-                    self.real_logger.debug(f"已連線至語音頻道：{check_vc_result.name}")
-                    for m in check_vc_result.members:
-                        print(m.name)
-                    if message.author in check_vc_result.members:
-                        if "&list=" in msg_in:
-                            msg_in = msg_in[: msg_in.find("&list=")]
-                            await message.reply(
-                                "偵測到此連結來自播放清單！已轉換為單一影片連結。",
-                                delete_after=3,
-                            )
-                        elif "?list=" in msg_in:
-                            msg_in = msg_in[: msg_in.find("?list=")]
-                            await message.reply(
-                                "偵測到此連結來自播放清單！已轉換為單一影片連結。",
-                                delete_after=3,
-                            )
-                        ap_cmd = "ap!p " + msg_in
-                        await message.channel.send(ap_cmd, delete_after=3)
-                        await message.add_reaction("✅")
-                        return
+        if message.channel.id in music_cmd_channels and (
+            msg_in.startswith("https://www.youtube.com")
+            or msg_in.startswith("https://youtu.be")
+            or msg_in.startswith("https://m.youtube.com")
+            or msg_in.startswith("https://youtube.com")
+            or msg_in.startswith("https://open.spotify.com")
+            or msg_in.startswith("https://music.youtube.com")
+        ):
+            check_vc_result = await self.check_voice_channel(self, message.guild)
+            if isinstance(check_vc_result, str):
+                embed = discord.Embed(
+                    title="錯誤", description="機器人自動加入語音頻道時失敗。", color=error_color
+                )
+                embed.add_field(name="錯誤訊息", value=check_vc_result)
+                await message.channel.send(embed=embed)
+            elif isinstance(check_vc_result, discord.VoiceChannel):
+                self.real_logger.debug(f"已連線至語音頻道：{check_vc_result.name}")
+                for m in check_vc_result.members:
+                    print(m.name)
+                if message.author in check_vc_result.members:
+                    if "&list=" in msg_in:
+                        msg_in = msg_in[: msg_in.find("&list=")]
+                        await message.reply(
+                            "偵測到此連結來自播放清單！已轉換為單一影片連結。",
+                            delete_after=3,
+                        )
+                    elif "?list=" in msg_in:
+                        msg_in = msg_in[: msg_in.find("?list=")]
+                        await message.reply(
+                            "偵測到此連結來自播放清單！已轉換為單一影片連結。",
+                            delete_after=3,
+                        )
+                    ap_cmd = "ap!p " + msg_in
+                    await message.channel.send(ap_cmd, delete_after=3)
+                    await message.add_reaction("✅")
         if message.channel.id in exclude_channels:
             return
         member_obj = json_assistant.User(message.author.id)
         time_delta = time.time() - member_obj.get_last_active_time()
         if time_delta < 300:
-            return
-        if "Direct Message" in str(message.channel):
-            embed = discord.Embed(
-                title="是不是傳錯人了...？", description="很抱歉，目前本機器人不接受私人訊息。", color=error_color
-            )
-            await message.channel.send(embed=embed)
             return
         if not message.author.bot and isinstance(msg_in, str):
             if len(msg_in) <= 15:
