@@ -69,7 +69,7 @@ class Misfit(commands.Cog):
         try:
             await target_member.move_to(jail_channel, reason="坐牢")
         except discord.HTTPException:
-            embed.add_field(name="哎呀！看來他尚未連線至任何語音頻道...", value="但別擔心，他將會在連限至語音頻道的瞬間**強制入獄**！")
+            embed.add_field(name="哎呀！看來他尚未連線至任何語音頻道...", value="但別擔心，他將會在連線至語音頻道的瞬間**強制入獄**！")
         await ctx.respond(embed=embed)
 
     @discord.slash_command(
