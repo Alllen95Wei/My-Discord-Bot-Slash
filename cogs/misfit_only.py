@@ -60,13 +60,16 @@ class Misfit(commands.Cog):
         ),
     ):
         prison[target_member.id] = jail_channel.id
-        await target_member.move_to(jail_channel, reason="坐牢")
         embed = Embed(
             title="成功！",
             description=f"已經把{target_member.mention}送進監獄！他應該很快就會離開了...",
             color=default_color,
         )
         embed.add_field(name="監獄地點", value=jail_channel.mention)
+        try:
+            await target_member.move_to(jail_channel, reason="坐牢")
+        except discord.HTTPException:
+            embed.add_field(name="哎呀！看來他尚未連線至任何語音頻道...", value="但別擔心，他將會在連限至語音頻道的瞬間**強制入獄**！")
         await ctx.respond(embed=embed)
 
     @discord.slash_command(
