@@ -104,7 +104,7 @@ class Misfit(commands.Cog):
         after: discord.VoiceState,
     ):
         if after.channel.guild.id == 1030069819199991838 and member.id in prison.keys():
-            if after.channel.id != prison[member.id]:
+            if after.channel is not None and after.channel.id != prison[member.id]:
                 await member.move_to(
                     channel=self.bot.get_channel(prison[member.id]), reason="坐牢"
                 )
