@@ -60,6 +60,7 @@ class Misfit(commands.Cog):
         ),
     ):
         prison[target_member.id] = jail_channel.id
+        await target_member.move_to(jail_channel, reason="坐牢")
         embed = Embed(
             title="成功！",
             description=f"已經把{target_member.mention}送進監獄！他應該很快就會離開了...",
