@@ -4,7 +4,6 @@ import datetime
 import discord
 from discord.ext import commands
 from discord import Embed
-from discord import Option
 import os
 import zoneinfo
 from pathlib import Path
@@ -44,77 +43,6 @@ class Misfit(commands.Cog):
                 title="錯誤", description="此指令僅允許在「損友俱樂部」使用！", color=error_color
             )
             await ctx.respond(embed=embed, ephemeral=True)
-
-    @discord.slash_command(
-        name="send_to_jail", description="把某人關進監牢！！！", guild_ids=[1030069819199991838]
-    )
-    @commands.has_permissions(moderate_members=True)
-    async def send_to_jail(
-        self,
-        ctx,
-        target_member: Option(
-            discord.Member, name="囚犯", description="誰要被送進監牢？", required=True
-        ),
-        jail_channel: Option(
-            discord.VoiceChannel, name="監牢", description="監牢在哪？", required=True
-        ),
-    ):
-        prison[target_member.id] = jail_channel
-        embed = Embed(
-            title="成功！",
-            description=f"已經把{target_member.mention}送進監獄！他應該很快就會離開了...",
-            color=default_color,
-        )
-        embed.add_field(name="監獄地點", value=jail_channel.mention, inline=False)
-        try:
-            await target_member.move_to(jail_channel, reason="坐牢")
-        except discord.HTTPException:
-            embed.add_field(
-                name="哎呀！看來他尚未連線至任何語音頻道...",
-                value="但別擔心，他將會在連線至語音頻道的瞬間**強制入獄**！",
-                inline=False,
-            )
-        await ctx.respond(embed=embed)
-
-    @discord.slash_command(
-        name="leave_jail", description="把某人救出監牢", guild_ids=[1030069819199991838]
-    )
-    @commands.has_permissions(moderate_members=True)
-    async def leave_jail(
-        self,
-        ctx,
-        target_member: Option(
-            discord.Member, name="囚犯", description="誰要被救出監牢？", required=True
-        ),
-    ):
-        if target_member.id in prison.keys():
-            del prison[target_member.id]
-            embed = Embed(
-                title="成功！",
-                description=f"{target_member.mention}，恭喜出獄！",
-                color=default_color,
-            )
-            await ctx.respond(embed=embed)
-        else:
-            embed = Embed(
-                title="錯誤：此使用者不在監獄中",
-                description=f"{target_member.mention}好像不在監獄之中...",
-                color=error_color,
-            )
-            await ctx.respond(embed=embed, ephemeral=True)
-
-    @commands.Cog.listener()
-    async def on_voice_state_update(
-        self,
-        member: discord.Member,
-        before: discord.VoiceState,
-        after: discord.VoiceState,
-    ):
-        if after.channel.guild.id == 1030069819199991838 and member.id in prison.keys():
-            if after.channel is not None and after.channel.id != prison[member.id].id:
-                await member.move_to(
-                    channel=prison[member.id], reason="坐牢"
-                )
 
     # @commands.Cog.listener()
     # async def on_message(self, message: discord.Message):
