@@ -1259,11 +1259,17 @@ class Events(commands.Cog):
                 description=f"這個指令正在冷卻中，請在`{round(error.retry_after)}`秒後再試。",
                 color=error_color,
             )
+            embed.add_field(name="錯誤內容", value="```" + str(error) + "```", inline=False)
             await ctx.respond(embed=embed, ephemeral=True)
-        elif isinstance(error, commands.NotOwner):
+        elif (
+            isinstance(error, commands.NotOwner)
+            or isinstance(error, commands.MissingPermissions)
+            or isinstance(error, commands.MissingRole)
+        ):
             embed = discord.Embed(
                 title="錯誤", description="你沒有權限使用此指令。", color=error_color
             )
+            embed.add_field(name="錯誤內容", value="```" + str(error) + "```", inline=False)
             await ctx.respond(embed=embed, ephemeral=True)
         elif isinstance(error, discord.errors.Forbidden) or isinstance(
             error, discord.errors.HTTPException
