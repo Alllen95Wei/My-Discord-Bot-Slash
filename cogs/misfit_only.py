@@ -18,7 +18,7 @@ now_tz = zoneinfo.ZoneInfo("Asia/Taipei")
 base_dir = os.path.abspath(os.path.dirname(__file__))
 parent_dir = str(Path(__file__).parent.parent.absolute())
 
-prison = {}
+prison: dict[int, discord.VoiceChannel] = {}
 
 
 class Misfit(commands.Cog):
@@ -59,7 +59,7 @@ class Misfit(commands.Cog):
             discord.VoiceChannel, name="監牢", description="監牢在哪？", required=True
         ),
     ):
-        prison[target_member.id] = jail_channel.id
+        prison[target_member.id] = jail_channel
         embed = Embed(
             title="成功！",
             description=f"已經把{target_member.mention}送進監獄！他應該很快就會離開了...",
@@ -111,9 +111,9 @@ class Misfit(commands.Cog):
         after: discord.VoiceState,
     ):
         if after.channel.guild.id == 1030069819199991838 and member.id in prison.keys():
-            if after.channel is not None and after.channel.id != prison[member.id]:
+            if after.channel is not None and after.channel.id != prison[member.id].id:
                 await member.move_to(
-                    channel=self.bot.get_channel(prison[member.id]), reason="坐牢"
+                    channel=prison[member.id], reason="坐牢"
                 )
 
     # @commands.Cog.listener()
