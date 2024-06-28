@@ -27,7 +27,7 @@ class Jail(commands.Cog):
         self.real_logger = real_logger
 
     @JAIL_CMDS.command(
-        name="send", description="把某人關進監牢！！！", guild_ids=[1030069819199991838]
+        name="lock_in", description="把某人關進監牢！！！", guild_ids=[1030069819199991838]
     )
     @commands.has_permissions(moderate_members=True)
     async def send_to_jail(
@@ -58,7 +58,7 @@ class Jail(commands.Cog):
         await ctx.respond(embed=embed)
 
     @JAIL_CMDS.command(
-        name="leave_jail", description="把某人救出監牢", guild_ids=[1030069819199991838]
+        name="kick", description="把某人移出監牢", guild_ids=[1030069819199991838]
     )
     @commands.has_permissions(moderate_members=True)
     async def leave_jail(
