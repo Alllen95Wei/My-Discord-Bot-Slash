@@ -1149,7 +1149,7 @@ class Events(commands.Cog):
                             continue
                         m = "<@" + str(m) + ">"
                         partner_str += m
-                    partner_str = partner_str.replace("><", ">\n、<")
+                    partner_str = partner_str.replace("><", ">\n<")
                     embed.add_field(
                         name=f"加入過的頻道 (共{len(report['channels'])}個)",
                         value=channel_str,
