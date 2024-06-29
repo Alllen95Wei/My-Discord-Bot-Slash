@@ -1141,7 +1141,7 @@ class Events(commands.Cog):
                     for c in report["channels"]:
                         c = "<#" + str(c) + ">"
                         channel_str += c
-                    channel_str = channel_str.replace("><", ">、<")
+                    channel_str = channel_str.replace("><", ">\n<")
                     if member.id in report["partners"]:
                         report["partners"].remove(member.id)
                     for m in report["partners"]:
@@ -1149,7 +1149,7 @@ class Events(commands.Cog):
                             continue
                         m = "<@" + str(m) + ">"
                         partner_str += m
-                    partner_str = partner_str.replace("><", ">、<")
+                    partner_str = partner_str.replace("><", ">\n、<")
                     embed.add_field(
                         name=f"加入過的頻道 (共{len(report['channels'])}個)",
                         value=channel_str,
