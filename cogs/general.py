@@ -1000,11 +1000,7 @@ class Events(commands.Cog):
             year_to_sec = 31622400
         else:
             year_to_sec = 31536000
-        jun_1st = datetime.datetime.timestamp(
-            datetime.datetime.strptime(f"{current_year}/01/01", "%Y/%m/%d").replace(
-                tzinfo=now_tz
-            )
-        )
+        jun_1st = datetime.datetime(year=current_year, month=1, day=1, tzinfo=now_tz).timestamp()
         year_process_sec = time.time() - jun_1st
         year_process = floor((year_process_sec / year_to_sec) * 10000) / 100
         return year_process
