@@ -1396,7 +1396,7 @@ class Events(commands.Cog):
                             delete_after=3,
                         )
                     ap_cmd = "ap!p " + msg_in
-                    await message.channel.send(ap_cmd, delete_after=3)
+                    await message.channel.send(ap_cmd, delete_after=0.5)
                     await message.add_reaction("✅")
         if message.channel.id in exclude_channels:
             return
