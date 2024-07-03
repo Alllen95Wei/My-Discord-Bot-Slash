@@ -147,7 +147,7 @@ class Backup(commands.Cog):
                 if file_name.isnumeric():
                     self.backup_data(file_name)
         else:
-            self.backup_data(user.id)
+            self.backup_data(str(user.id))
         embed = discord.Embed(
             title="備份完成",
             description=f"流程耗時 `{round(time.time()-start_time, 3)}` 秒",
@@ -160,7 +160,7 @@ class Backup(commands.Cog):
     async def force_restore(self, ctx, user: Option(discord.User, required=True)):
         await ctx.defer()
         start_time = time.time()
-        self.restore_data(user.id)
+        self.restore_data(str(user.id))
         embed = discord.Embed(
             title="還原完成",
             description=f"流程耗時 `{round(time.time()-start_time, 3)}` 秒",
