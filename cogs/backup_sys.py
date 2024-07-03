@@ -103,6 +103,10 @@ class Backup(commands.Cog):
         self.real_logger.info("    寫入備份資料中")
         json_assistant.User(user_id).write_raw_info(json_assistant.User.INIT_DATA)
         self.real_logger.info("  還原完成")
+        embed = discord.Embed(title="還原系統通知", description="還原系統檢查資料時，發現了資料問題，並已成功還原。", color=default_color)
+        embed.add_field(name="使用者", value=f"<@{user_id}> ({self.bot.get_user(int(user_id)).name})")
+        allen = self.bot.get_user(657519721138094080)
+        allen.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -126,7 +130,14 @@ class Backup(commands.Cog):
     @commands.is_owner()
     @backup_cmds.command(name="force_backup", description="手動開始備份(不檢查資料完整性)")
     async def force_backup(
-        self, ctx, user: Option(discord.Member, name="使用者", description="指定要備份的使用者，留空以備份所有檔案", required=False) = None
+        self,
+        ctx,
+        user: Option(
+            discord.Member,
+            name="使用者",
+            description="指定要備份的使用者，留空以備份所有檔案",
+            required=False,
+        ) = None,
     ):
         await ctx.defer()
         start_time = time.time()
