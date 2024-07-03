@@ -96,26 +96,12 @@ class Backup(commands.Cog):
                 data = json.loads(f.read())
             if data == "":
                 self.real_logger.info("    使用者沒有備份資料可用，替換為初始化資料")
-                data = {
-                    "join_date": None,
-                    "exp": {"voice": 0, "text": 0},
-                    "level": {"voice": 0, "text": 0},
-                    "last_active_time": 0,
-                    "last_daily_reward_claimed": 0,
-                }
             else:
                 self.real_logger.info("    成功讀取備份資料")
         else:
             self.real_logger.info("    使用者沒有備份資料可用，替換為初始化資料")
-            data = {
-                "join_date": None,
-                "exp": {"voice": 0, "text": 0},
-                "level": {"voice": 0, "text": 0},
-                "last_active_time": 0,
-                "last_daily_reward_claimed": 0,
-            }
         self.real_logger.info("    寫入備份資料中")
-        json_assistant.User(user_id).write_raw_info(data)
+        json_assistant.User(user_id).write_raw_info(json_assistant.User.INIT_DATA)
         self.real_logger.info("  還原完成")
 
     @commands.Cog.listener()

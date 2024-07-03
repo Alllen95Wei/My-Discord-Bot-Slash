@@ -9,18 +9,7 @@ base_dir = os.path.abspath(os.path.dirname(__file__))
 
 
 class User:
-    def __init__(self, user_id: [int, str]):
-        self.user_id = user_id
-
-    def get_raw_info(self, is_dict=True):
-        file = os.path.join(base_dir, "user_data", str(self.user_id) + ".json")
-        if is_dict:
-            if os.path.exists(file):
-                with open(file, "r") as f:
-                    user_info = json.loads(f.read())
-                    return user_info
-            else:
-                empty_data = {
+    INIT_DATA = {
                     "join_date": None,
                     "exp": {"voice": 0, "text": 0},
                     "level": {"voice": 0, "text": 0},
@@ -33,7 +22,19 @@ class User:
                     "last_active_time": 0,
                     "last_daily_reward_claimed": 0,
                 }
-                return empty_data
+
+    def __init__(self, user_id: [int, str]):
+        self.user_id = user_id
+
+    def get_raw_info(self, is_dict=True):
+        file = os.path.join(base_dir, "user_data", str(self.user_id) + ".json")
+        if is_dict:
+            if os.path.exists(file):
+                with open(file, "r") as f:
+                    user_info = json.loads(f.read())
+                    return user_info
+            else:
+                return self.INIT_DATA
         else:
             with open(file, "r") as f:
                 return f.read()
