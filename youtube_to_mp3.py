@@ -8,7 +8,7 @@ import io
 from string import hexdigits
 from random import choice
 from os import remove
-import magic
+# import magic
 import logging
 
 import youtube_download as yt_dl
@@ -36,12 +36,11 @@ def edit_mp3_metadata(mp3_path: str, data: dict):
     if "thumbnail_url" in data and data["thumbnail_url"] != "":
         try:
             img_name = save_thumbnail_from_url(data["thumbnail_url"])
-            file_mime = magic.from_file(img_name, mime=True)
             with open(img_name, "rb") as f:
                 image_data = f.read()
             remove(img_name)
             audio_file.add(
-                mutagen.id3.APIC(encoding=3, mime=file_mime, type=3, data=image_data)
+                mutagen.id3.APIC(encoding=3, mime="image/png", type=3, data=image_data)
             )
         except Exception as e:
             logging.warning(f"加入縮圖時發生錯誤，已取消 ({e})")
