@@ -8,6 +8,8 @@ import io
 from string import hexdigits
 from random import choice
 from os import remove
+import magic
+import logging
 
 import youtube_download as yt_dl
 import m4a_to_mp3 as mt3
@@ -18,6 +20,7 @@ def main_dl(
 ):
     video_instance.download(file_name + ".m4a")
     output_path = mt3.m4a_to_mp3(file_name, mp3_path, bit_rate)
+    clear_mp3_metadata(output_path)
     edit_mp3_metadata(output_path, metadata) if metadata != {} else None
     return "finished"
 
@@ -33,14 +36,21 @@ def edit_mp3_metadata(mp3_path: str, data: dict):
     if "thumbnail_url" in data and data["thumbnail_url"] != "":
         try:
             img_name = save_thumbnail_from_url(data["thumbnail_url"])
+            file_mime = magic.from_file(img_name, mime=True)
             with open(img_name, "rb") as f:
                 image_data = f.read()
             remove(img_name)
-        except RuntimeError:
-            image_data = ""
-        audio_file.add(
-            mutagen.id3.APIC(encoding=3, mime="image/png", type=3, data=image_data)
-        )
+            audio_file.add(
+                mutagen.id3.APIC(encoding=3, mime=file_mime, type=3, data=image_data)
+            )
+        except Exception as e:
+            logging.warning(f"加入縮圖時發生錯誤，已取消 ({e})")
+    audio_file.save(v2_version=3)
+
+
+def clear_mp3_metadata(mp3_path: str):
+    audio_file = ID3(mp3_path, v2_version=3)
+    audio_file.delete()
     audio_file.save(v2_version=3)
 
 
@@ -50,9 +60,9 @@ def save_thumbnail_from_url(url: str):
         image = Image.open(io.BytesIO(image_data)).convert("RGB")
     except PIL.UnidentifiedImageError as e:
         raise RuntimeError("Invalid thumbnail URL!") from e
-    random_char_list = [choice(hexdigits) for i in range(4)]
+    random_char_list = [choice(hexdigits) for _ in range(4)]
     file_name = "".join(random_char_list) + ".png"
-    image.save(file_name, "png")
+    image.save(file_name)
     return file_name
 
 

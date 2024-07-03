@@ -180,10 +180,7 @@ class Basics(commands.Cog):
         def youtube_start_download(
             video_instance: yt_download.Video, metadata: dict, bit_rate: int
         ) -> discord.File:
-            if metadata != {}:
-                file_name = video_instance.get_id() + "_" + str(bit_rate) + "_MD"
-            else:
-                file_name = video_instance.get_id() + "_" + str(bit_rate)
+            file_name = video_instance.get_id() + "_" + str(bit_rate)
             mp3_file_name = f"{file_name}.mp3"
             mp3_file_path = os.path.join(parent_dir, "ytdl", mp3_file_name)
             if (metadata == {} and os.path.exists(mp3_file_path)) or main_dl(
@@ -205,6 +202,8 @@ class Basics(commands.Cog):
             self.video = video
             self.bit_rate = bit_rate
 
+            self.prefill_metadata = prefill_metadata
+
             self.add_item(
                 InputText(
                     style=InputTextStyle.short,
@@ -221,22 +220,14 @@ class Basics(commands.Cog):
                     placeholder="將儲存於TPE1 (ID3v2)",
                 )
             )
-            self.add_item(
-                InputText(
-                    style=InputTextStyle.short,
-                    label="縮圖連結",
-                    value=prefill_metadata["thumbnail_url"],
-                    placeholder="儲存為PNG編碼後，將儲存於APIC - Type 3 (ID3v2)",
-                )
-            )
 
         async def callback(self, interaction: Interaction):
             await interaction.response.defer()
             metadata = {
                 "title": self.children[0].value if self.children[0].value else "",
                 "artist": self.children[1].value if self.children[1].value else "",
-                "thumbnail_url": self.children[2].value
-                if self.children[2].value
+                "thumbnail_url": self.prefill_metadata["thumbnail_url"]
+                if self.prefill_metadata["thumbnail_url"]
                 else "",
             }
             embed = discord.Embed(
@@ -664,8 +655,9 @@ class Basics(commands.Cog):
         加入後設資料: Option(  # noqa: PEP 3131
             bool, "是否在檔案中加入影片標題、作者與縮圖，會影響檔案的大小", required=False
         ) = False,
-        位元率: Option(  # noqa: PEP 3131
+        bitrate: Option(  # noqa: PEP 3131
             int,
+            name="位元率",
             description="下載後，轉換為MP3時所使用的位元率，會影響檔案的大小與品質",
             choices=[96, 128, 160, 192, 256, 320],
             required=False,
@@ -694,10 +686,11 @@ class Basics(commands.Cog):
                 }
             else:
                 metadata = {}
-            if length > 512:
+            limit_length = 209715200 / (bitrate*1000)
+            if length > limit_length:
                 embed = discord.Embed(
                     title="影片長度過長",
-                    description=f"影片長度(`{length}`秒)超過512秒，下載後可能無法成功上傳。是否仍要嘗試下載？",
+                    description=f"影片長度(`{length}`秒)超過`{limit_length}`秒，下載後可能無法成功上傳。是否仍要嘗試下載？",
                     color=error_color,
                 )
                 embed.add_field(
@@ -709,7 +702,7 @@ class Basics(commands.Cog):
                     outer_instance=self,
                     video_instance=m_video,
                     metadata=metadata,
-                    bit_rate=位元率,
+                    bit_rate=bitrate,
                 )
                 await ctx.respond(embed=embed, view=confirm_download)
             else:
@@ -729,7 +722,7 @@ class Basics(commands.Cog):
                         view=Basics.MP3MetadataEditorView(
                             self,
                             m_video,
-                            位元率,
+                            bitrate,
                             metadata,
                         ),
                     )
@@ -753,7 +746,7 @@ class Basics(commands.Cog):
                                 self.ConfirmDownload.youtube_start_download,
                                 m_video,
                                 metadata,
-                                位元率,
+                                bitrate,
                             )
                         )
                     except Exception as e:
