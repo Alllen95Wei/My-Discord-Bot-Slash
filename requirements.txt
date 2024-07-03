@@ -1,5 +1,5 @@
 py-cord
-yt-dlp
+yt-dlp>2023.12.30
 python-dotenv
 psutil
 gitpython>=3.1.41
@@ -8,4 +8,5 @@ colorlog
 pynacl
 requests
 mutagen
-pillow
+pillow>10.2.0
+python-magic
