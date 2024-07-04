@@ -3,18 +3,19 @@ import yt_dlp as youtube_dl
 import os
 
 ytdl_opts = {
-            "skip_download": True,
-            "quiet": True,
-            "no_warnings": True,
-            "ignoreerrors": True,
-            "nocheckcertificate": True,
-            "restrictfilenames": True,
-            "noplaylist": True,
-            "logtostderr": False,
-            "default_search": "auto",
-            "usenetrc": False,
-            "fixup": "detect_or_warn"
-        }
+    "skip_download": True,
+    "quiet": True,
+    "no_warnings": True,
+    "ignoreerrors": True,
+    "nocheckcertificate": True,
+    "restrictfilenames": True,
+    "noplaylist": True,
+    "logtostderr": False,
+    "default_search": "auto",
+    "usenetrc": False,
+    "fixup": "detect_or_warn",
+    # "cookiesfrombrowser": ("chrome",),
+}
 
 
 class Video:
@@ -24,15 +25,16 @@ class Video:
 
     def download(self, file_name):
         dl_opts = {
-            'format': 'bestaudio/best',
-            'outtmpl': os.path.join("ytdl", file_name),
-            'restrictfilenames': True,
-            'noplaylist': True,
-            'nocheckcertificate': True,
-            'logtostderr': False,
-            'default_search': 'auto',
-            'usenetrc': False,
-            "fixup": "detect_or_warn"
+            "format": "bestaudio/best",
+            "outtmpl": os.path.join("ytdl", file_name),
+            "restrictfilenames": True,
+            "noplaylist": True,
+            "nocheckcertificate": True,
+            "logtostderr": False,
+            "default_search": "auto",
+            "usenetrc": False,
+            "fixup": "detect_or_warn",
+            # "cookiesfrombrowser": ("chrome",),
         }
         with youtube_dl.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
