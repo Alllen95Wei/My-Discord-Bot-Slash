@@ -342,7 +342,7 @@ class Basics(commands.Cog):
         update_msg = repo.head.reference.commit.message
         raw_sha = repo.head.object.hexsha
         sha = raw_sha[:7]
-        embed.add_field(name=f"分支訊息：{sha}", value=update_msg, inline=False)
+        embed.add_field(name=f"提交訊息：{sha}", value=update_msg, inline=False)
         year = time.strftime("%Y")
         embed.set_footer(text=f"©Allen Why, {year} | 版本：commit {sha[:7]}")
         await ctx.respond(embed=embed, ephemeral=私人訊息)
