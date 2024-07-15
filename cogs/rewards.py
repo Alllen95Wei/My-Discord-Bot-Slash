@@ -159,7 +159,7 @@ class Rewards(commands.Cog):
                     reward_obj.delete()
                     await interaction.followup.send(embed=embed, ephemeral=True)
                     return
-            await interaction.followup.send(embed=embed, ephemeral=True)
+            await interaction.followup.send(reward_id, embed=embed, ephemeral=True)
 
     class RedeemConfirmation(ui.View):
         def __init__(self, outer_instance, reward_id):
