@@ -243,7 +243,7 @@ class UserInfo(commands.Cog):
             lvl_type = {"text": "文字", "voice": "語音"}[類型]
             self.real_logger.info(
                 f"等級提升：{ctx.author.name} {lvl_type}等級"
-                f"達到 {user_obj.get_level('類型')} 等"
+                f"達到 {user_obj.get_level(類型)} 等"
             )
             upgrade_embed = discord.Embed(
                 title="等級提升",
