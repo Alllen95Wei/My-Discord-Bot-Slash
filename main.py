@@ -13,7 +13,7 @@ bot = commands.Bot(intents=intents, help_command=None)
 base_dir = os.path.abspath(os.path.dirname(__file__))
 # 載入TOKEN
 load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
-TOKEN = str(os.getenv("TOKEN"))
+TOKEN = str(os.getenv("DISCORD_TOKEN"))
 
 # 建立logger
 real_logger = logger.CreateLogger()

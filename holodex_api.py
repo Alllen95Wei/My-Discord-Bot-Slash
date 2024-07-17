@@ -1,6 +1,11 @@
 # coding:utf-8
+from dotenv import load_dotenv
+import os
 import requests
 
+
+base_dir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(dotenv_path=os.path.join(base_dir, "TOKEN.env"))
 
 BASE_URL = "https://holodex.net/api/v2"
 
@@ -8,7 +13,7 @@ BASE_URL = "https://holodex.net/api/v2"
 class HolodexClient:
     def __init__(self):
         self.session = requests.Session()
-        self.session.headers = {"X-APIKEY": ""}
+        self.session.headers = {"X-APIKEY": str(os.getenv("HOLODEX_TOKEN"))}
 
     def get_video_info(self, video_id: str) -> dict:
         url = f"{BASE_URL}/videos/{video_id}?lang=zh&c=1"
