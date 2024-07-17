@@ -1,8 +1,8 @@
 # coding=utf-8
-import yt_dlp as youtube_dl
+import yt_dlp
 import os
 
-ytdl_opts = {
+NO_DL_OPTS = {
     "skip_download": True,
     "quiet": True,
     "no_warnings": True,
@@ -23,7 +23,7 @@ class Video:
         self.url = url
         self.full_info = self.get_full_info(url)
 
-    def download(self, file_name):
+    def download(self, file_name: str):
         dl_opts = {
             "format": "bestaudio/best",
             "outtmpl": os.path.join("ytdl", file_name),
@@ -34,9 +34,28 @@ class Video:
             "default_search": "auto",
             "usenetrc": False,
             "fixup": "detect_or_warn",
-            # "cookiesfrombrowser": ("chrome",),
         }
-        with youtube_dl.YoutubeDL(dl_opts) as ydl:
+        with yt_dlp.YoutubeDL(dl_opts) as ydl:
+            return ydl.download([self.url])
+
+    def download_section(self, file_name: str, start_time: int, end_time: int):
+        dl_opts = {
+            "format": "bestaudio/best",
+            "outtmpl": os.path.join("ytdl", file_name),
+            "restrictfilenames": True,
+            "noplaylist": True,
+            "nocheckcertificate": True,
+            "logtostderr": False,
+            "default_search": "auto",
+            "usenetrc": False,
+            "fixup": "detect_or_warn",
+            "external_downloader": "ffmpeg",
+            "external_downloader_args": {
+                "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
+            },
+            "verbose": True
+        }
+        with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
 
     def get_id(self):
@@ -45,19 +64,16 @@ class Video:
         return vid
 
     def get_length(self):
-        # get video length in seconds
         info_dict = self.full_info
         duration = info_dict["duration"]
         return duration
 
     def get_thumbnail(self):
-        # get thumbnail url
         info_dict = self.full_info
         thumbnail = info_dict["thumbnail"]
         return thumbnail
 
     def get_title(self):
-        # get video title
         info_dict = self.full_info
         title = info_dict["title"]
         return title
@@ -76,12 +92,12 @@ class Video:
 
     @staticmethod
     def get_full_info(url):
-        # get full info
-        with youtube_dl.YoutubeDL(ytdl_opts) as ydl:
+        with yt_dlp.YoutubeDL(NO_DL_OPTS) as ydl:
             info_dict = ydl.extract_info(url, download=False)
             return info_dict
 
 
 if __name__ == "__main__":
     # youtube_download(url=input("請貼上要下載的連結："), file_name=input("請輸入下載後的檔案名稱："))
-    print(Video.get_full_info(url=input("請貼上要下載的連結：")))
+    v = Video(url=input("請貼上要下載的連結："))
+    v.download_section("test.wav", 0, 10)
