@@ -11,9 +11,9 @@ BASE_URL = "https://holodex.net/api/v2"
 
 
 class HolodexClient:
-    def __init__(self):
+    def __init__(self, token: str):
         self.session = requests.Session()
-        self.session.headers = {"X-APIKEY": str(os.getenv("HOLODEX_TOKEN"))}
+        self.session.headers = {"X-APIKEY": token}
 
     def get_video_info(self, video_id: str) -> dict:
         url = f"{BASE_URL}/videos/{video_id}?lang=zh&c=1"
@@ -29,6 +29,6 @@ class HolodexClient:
 
 
 if __name__ == "__main__":
-    client = HolodexClient()
-    vid = "UV9hqvqiM9c"
+    client = HolodexClient(str(os.getenv("HOLODEX_TOKEN")))
+    vid = "tlTxcIUkEeY"
     print(client.fetch_video_timeline(vid))
