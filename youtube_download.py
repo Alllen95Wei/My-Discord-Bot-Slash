@@ -53,7 +53,7 @@ class Video:
             "external_downloader_args": {
                 "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
             },
-            "verbose": True
+            "verbose": True,
         }
         with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
@@ -82,6 +82,11 @@ class Video:
         info_dict = self.full_info
         uploader = info_dict["uploader"]
         return uploader
+
+    def get_extractor(self):
+        info_dict = self.full_info
+        extractor = info_dict["extractor"]
+        return extractor
 
     def is_live(self) -> bool:
         info_dict = self.full_info
