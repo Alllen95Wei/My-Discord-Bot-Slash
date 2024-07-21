@@ -74,7 +74,7 @@ class Holodex(commands.Cog):
                 )
                 embed.add_field(
                     name="片段時間軸",
-                    value="`%02d:%02d:%02d` - `%02d:%02d:%02d`"
+                    value="`%02d:%02d:%02d` - `%02d:%02d:%02d` (`%d` 秒)"
                     % (
                         section["start"] // 3600,
                         (section["start"] % 3600) // 60,
@@ -82,6 +82,7 @@ class Holodex(commands.Cog):
                         section["end"] // 3600,
                         (section["end"] % 3600) // 60,
                         section["end"] % 60,
+                        sect["end"] - sect["start"],
                     ),
                     inline=False,
                 )
@@ -149,7 +150,9 @@ class Holodex(commands.Cog):
                     color=error_color,
                 )
                 embed.add_field(
-                    name="想下載整部影片嗎？", value="請使用</musicdl:1195621958218420245>", inline=False
+                    name="想下載整部影片嗎？",
+                    value="請使用</musicdl:1195621958218420245>",
+                    inline=False,
                 )
                 embed.add_field(
                     name="來源影片", value=f"[{video.get_title()}]({url})", inline=False
