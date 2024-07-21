@@ -34,6 +34,9 @@ class Video:
             "default_search": "auto",
             "usenetrc": False,
             "fixup": "detect_or_warn",
+
+            "username": "oauth2",
+            "password": "",
         }
         with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
