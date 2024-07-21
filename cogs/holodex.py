@@ -131,7 +131,7 @@ class Holodex(commands.Cog):
         try:
             video = youtube_download.Video(url)
             section_list = holodex_client.fetch_video_timeline(video.get_id())
-            if video.get_extractor() != "youtube":
+            if "youtube" not in video.get_extractor():
                 embed = Embed(
                     title="錯誤：連結不是YouTube連結",
                     description="你所提供的連結不是YouTube的連結。請提供有效的YouTube連結。",
