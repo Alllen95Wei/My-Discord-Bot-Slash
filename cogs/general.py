@@ -178,13 +178,15 @@ class Basics(commands.Cog):
 
         @staticmethod
         def youtube_start_download(
-            video_instance: yt_download.Video, metadata: dict, bit_rate: int
+            video_instance: yt_download.Video, metadata: dict, bit_rate: int, file_name=None, section=None
         ) -> discord.File:
-            file_name = video_instance.get_id() + "_" + str(bit_rate)
+            if file_name is None:
+                file_name = video_instance.get_id() + "_" + str(bit_rate)
             mp3_file_name = f"{file_name}.mp3"
             mp3_file_path = os.path.join(parent_dir, "ytdl", mp3_file_name)
+            # TODO: 即使要求加入後設資料，若檔案存在也不會重新下載
             if (metadata == {} and os.path.exists(mp3_file_path)) or main_dl(
-                video_instance, file_name, mp3_file_path, metadata, bit_rate
+                video_instance, file_name, mp3_file_path, metadata, section, bit_rate
             ) == "finished":
                 return discord.File(mp3_file_path)
 
