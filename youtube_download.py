@@ -4,7 +4,7 @@ import os
 
 NO_DL_OPTS = {
     "skip_download": True,
-    "quiet": False,
+    "quiet": True,
     "no_warnings": True,
     "ignoreerrors": True,
     "nocheckcertificate": True,
