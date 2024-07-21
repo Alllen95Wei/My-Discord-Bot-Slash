@@ -25,7 +25,7 @@ class HolodexClient:
         if "songs" in full_info and len(full_info["songs"]) > 0:
             return full_info["songs"]
         else:
-            return None
+            return []
 
 
 if __name__ == "__main__":
