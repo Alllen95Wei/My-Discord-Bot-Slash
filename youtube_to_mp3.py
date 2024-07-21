@@ -16,9 +16,19 @@ import m4a_to_mp3 as mt3
 
 
 def main_dl(
-    video_instance: yt_dl.Video, file_name, mp3_path, metadata: dict, bit_rate=128
+    video_instance: yt_dl.Video,
+    file_name,
+    mp3_path,
+    metadata: dict,
+    section: list = None,
+    bit_rate=128,
 ):
-    video_instance.download(file_name + ".m4a")
+    if section is None:
+        section = [0, 0]
+    if section == [0, 0]:
+        video_instance.download(file_name + ".m4a")
+    else:
+        video_instance.download_section(file_name + ".m4a", section[0], section[1])
     output_path = mt3.m4a_to_mp3(file_name, mp3_path, bit_rate)
     clear_mp3_metadata(output_path)
     edit_mp3_metadata(output_path, metadata) if metadata != {} else None
