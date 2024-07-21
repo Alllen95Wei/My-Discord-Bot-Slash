@@ -14,7 +14,8 @@ NO_DL_OPTS = {
     "default_search": "auto",
     "usenetrc": False,
     "fixup": "detect_or_warn",
-    # "cookiesfrombrowser": ("chrome",),
+    "username": "oauth2",
+    "password": "",
 }
 
 
@@ -34,7 +35,6 @@ class Video:
             "default_search": "auto",
             "usenetrc": False,
             "fixup": "detect_or_warn",
-
             "username": "oauth2",
             "password": "",
         }
@@ -56,7 +56,8 @@ class Video:
             "external_downloader_args": {
                 "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
             },
-            "verbose": True,
+            "username": "oauth2",
+            "password": "",
         }
         with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
