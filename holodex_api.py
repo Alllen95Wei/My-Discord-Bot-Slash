@@ -20,7 +20,11 @@ class HolodexClient:
         result = self.session.get(url=url).json()
         return result
 
-    def fetch_video_timeline(self, video_id: str) -> list[dict] | None:
+    def get_video_channel(self, video_id: str) -> str:
+        full_info = self.get_video_info(video_id)
+        return full_info["channel"]["name"]
+
+    def fetch_video_timeline(self, video_id: str) -> list[dict]:
         full_info = self.get_video_info(video_id)
         if "songs" in full_info and len(full_info["songs"]) > 0:
             return full_info["songs"]
