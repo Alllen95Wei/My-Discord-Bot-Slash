@@ -32,5 +32,5 @@ async def on_ready():
     exit()
 
 load_dotenv("TOKEN.env")
-TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv("DISCORD_TOKEN")
 bot.run(TOKEN)
