@@ -38,9 +38,12 @@ class Holodex(commands.Cog):
         # generate sections
         selections = []
         for sect in sections_list:
+            raw_label = sect["name"]
+            if len(raw_label) > 100:
+                raw_label = raw_label[:97] + "..."
             selections.append(
                 SelectOption(
-                    label=sect["name"],
+                    label=raw_label,
                     value=str(sections_list.index(sect)),
                     description=f"By {sect['original_artist']}，{sect['end'] - sect['start']} 秒",
                 )
