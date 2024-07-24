@@ -127,7 +127,7 @@ class Holodex(commands.Cog):
     @HOLODEX_CMDS.command(name="download", description="從Holodex取得直播時間軸，並下載特定片段")
     async def holodex_download(
         self,
-        ctx,
+        ctx: discord.ApplicationContext,
         url: Option(str, name="直播連結", description="欲抓取時間軸的直播連結(僅限YouTube)"),
     ):
         await ctx.defer()
@@ -172,7 +172,7 @@ class Holodex(commands.Cog):
                     name="片段數量", value=f"`{len(section_list)}`個", inline=False
                 )
                 embed.set_image(url=video.get_thumbnail())
-                view = self.section_selection(ctx.author, video, section_list)
+                view = self.section_selection(ctx.author(), video, section_list)
         except Exception as e:
             embed = Embed(
                 title="錯誤：連結不是YouTube連結",
