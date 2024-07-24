@@ -33,6 +33,7 @@ class Holodex(commands.Cog):
         author: discord.Member | discord.User,
         video_instance: youtube_download.Video,
         sections_list: list,
+        add_to_musicbot_queue: bool = False
     ) -> ui.View:
         view = ui.View()
         # generate sections
@@ -93,11 +94,14 @@ class Holodex(commands.Cog):
                 embed.set_footer(text="請注意，下載時間可能會比/musicdl還要久。請在數分鐘後回來查看。")
                 await interaction.edit_original_response(embed=embed, view=None)
 
-                metadata = {
-                    "title": section["name"],
-                    "artist": holodex_client.get_video_channel(video_instance.get_id()),
-                    "thumbnail_url": video_instance.get_thumbnail(),
-                }
+                if not add_to_musicbot_queue:
+                    metadata = {
+                        "title": section["name"],
+                        "artist": holodex_client.get_video_channel(video_instance.get_id()),
+                        "thumbnail_url": video_instance.get_thumbnail(),
+                    }
+                else:
+                    metadata = {}
                 file_name = f"{video_instance.get_id()}_{section['itunesid']}_320"
                 result = await Basics.run_blocking(
                     self.bot,
@@ -108,7 +112,10 @@ class Holodex(commands.Cog):
                     file_name,
                     [section["start"], section["end"]],
                 )
-                await interaction.edit_original_response(file=result)
+                message = await interaction.edit_original_response(file=result)
+                if add_to_musicbot_queue:
+                    file_url = message.attachments[0].url
+                    await interaction.channel.send("ap!p " + file_url, delete_after=0.5)
             else:
                 embed = Embed(
                     title="錯誤：非指令使用者",
@@ -127,7 +134,7 @@ class Holodex(commands.Cog):
     @HOLODEX_CMDS.command(name="download", description="從Holodex取得直播時間軸，並下載特定片段")
     async def holodex_download(
         self,
-        ctx: discord.ApplicationContext,
+        ctx,
         url: Option(str, name="直播連結", description="欲抓取時間軸的直播連結(僅限YouTube)"),
     ):
         await ctx.defer()
@@ -172,7 +179,7 @@ class Holodex(commands.Cog):
                     name="片段數量", value=f"`{len(section_list)}`個", inline=False
                 )
                 embed.set_image(url=video.get_thumbnail())
-                view = self.section_selection(ctx.author(), video, section_list)
+                view = self.section_selection(ctx.author, video, section_list)
         except Exception as e:
             embed = Embed(
                 title="錯誤：連結不是YouTube連結",
