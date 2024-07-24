@@ -88,5 +88,5 @@ if __name__ == "__main__":
             "artist": "浠Mizuki",
             "thumbnail_url": "https://www.youtube.com/",
         },
-        320,
+        bit_rate=320,
     )
