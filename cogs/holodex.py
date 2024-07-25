@@ -32,8 +32,9 @@ class Holodex(commands.Cog):
         self,
         author: discord.Member | discord.User,
         video_instance: youtube_download.Video,
+        bit_rate: int,
         sections_list: list,
-        add_to_musicbot_queue: bool = False
+        add_to_musicbot_queue: bool = False,
     ) -> ui.View:
         view = ui.View()
         # generate sections
@@ -101,18 +102,20 @@ class Holodex(commands.Cog):
                 if not add_to_musicbot_queue:
                     metadata = {
                         "title": section["name"],
-                        "artist": holodex_client.get_video_channel(video_instance.get_id()),
+                        "artist": holodex_client.get_video_channel(
+                            video_instance.get_id()
+                        ),
                         "thumbnail_url": video_instance.get_thumbnail(),
                     }
                 else:
                     metadata = {}
-                file_name = f"{video_instance.get_id()}_{section['itunesid']}_320"
+                file_name = f"{video_instance.get_id()}_{section['id'][-12:]}_{bit_rate}"
                 result = await Basics.run_blocking(
                     self.bot,
                     Basics.ConfirmDownload.youtube_start_download,
                     video_instance,
                     metadata,
-                    320,
+                    bit_rate,
                     file_name,
                     [section["start"], section["end"]],
                 )
@@ -140,6 +143,13 @@ class Holodex(commands.Cog):
         self,
         ctx,
         url: Option(str, name="直播連結", description="欲抓取時間軸的直播連結(僅限YouTube)"),
+        bitrate: Option(
+            int,
+            name="位元率",
+            description="下載後，轉換為MP3時所使用的位元率，會影響檔案的大小與品質",
+            choices=[96, 128, 160, 192, 256, 320],
+            required=False,
+        ) = 128,
     ):
         await ctx.defer()
         view = ui.View()
@@ -183,7 +193,7 @@ class Holodex(commands.Cog):
                     name="片段數量", value=f"`{len(section_list)}`個", inline=False
                 )
                 embed.set_image(url=video.get_thumbnail())
-                view = self.section_selection(ctx.author, video, section_list)
+                view = self.section_selection(ctx.author, video, bitrate, section_list)
         except Exception as e:
             embed = Embed(
                 title="錯誤：連結不是YouTube連結",
