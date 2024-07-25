@@ -1,10 +1,9 @@
 # coding=utf-8
 import yt_dlp
-import os
 
 NO_DL_OPTS = {
     "skip_download": True,
-    "quiet": True,
+    "quiet": False,
     "no_warnings": True,
     "ignoreerrors": True,
     "nocheckcertificate": True,
@@ -24,10 +23,10 @@ class Video:
         self.url = url
         self.full_info = self.get_full_info(url)
 
-    def download(self, file_name: str):
+    def download(self, file_path: str):
         dl_opts = {
             "format": "bestaudio/best",
-            "outtmpl": os.path.join("ytdl", file_name),
+            "outtmpl": file_path,
             "restrictfilenames": True,
             "noplaylist": True,
             "nocheckcertificate": True,
@@ -41,10 +40,10 @@ class Video:
         with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
 
-    def download_section(self, file_name: str, start_time: int, end_time: int):
+    def download_section(self, file_path: str, start_time: int, end_time: int):
         dl_opts = {
             "format": "bestaudio/best",
-            "outtmpl": os.path.join("ytdl", file_name),
+            "outtmpl": file_path,
             "restrictfilenames": True,
             "noplaylist": True,
             "nocheckcertificate": True,

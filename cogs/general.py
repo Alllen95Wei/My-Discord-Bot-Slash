@@ -184,9 +184,12 @@ class Basics(commands.Cog):
                 file_name = video_instance.get_id() + "_" + str(bit_rate)
             mp3_file_name = f"{file_name}.mp3"
             mp3_file_path = os.path.join(parent_dir, "ytdl", mp3_file_name)
-            # TODO: 即使要求加入後設資料，若檔案存在也不會重新下載
-            if (metadata == {} and os.path.exists(mp3_file_path)) or main_dl(
-                video_instance, file_name, mp3_file_path, metadata, section, bit_rate
+            if main_dl(
+                video_instance=video_instance,
+                mp3_path=mp3_file_path,
+                metadata=metadata,
+                section=section,
+                bit_rate=bit_rate
             ) == "finished":
                 return discord.File(mp3_file_path)
 

@@ -7,7 +7,7 @@ from PIL import Image
 import io
 from string import hexdigits
 from random import choice
-from os import remove
+from os import remove, path
 # import magic
 import logging
 
@@ -17,21 +17,21 @@ import m4a_to_mp3 as mt3
 
 def main_dl(
     video_instance: yt_dl.Video,
-    file_name,
     mp3_path,
     metadata: dict,
     section: list = None,
     bit_rate=128,
 ):
-    if section is None:
-        section = [0, 0]
-    if section == [0, 0]:
-        video_instance.download(file_name + ".m4a")
-    else:
-        video_instance.download_section(file_name + ".m4a", section[0], section[1])
-    output_path = mt3.m4a_to_mp3(file_name, mp3_path, bit_rate)
-    clear_mp3_metadata(output_path)
-    edit_mp3_metadata(output_path, metadata) if metadata != {} else None
+    if not path.exists(mp3_path):
+        if section is None:
+            section = [0, 0]
+        if section == [0, 0]:
+            video_instance.download(mp3_path.replace(".mp3", ".m4a"))
+        else:
+            video_instance.download_section(mp3_path.replace(".mp3", ".m4a"), section[0], section[1])
+        mt3.m4a_to_mp3(mp3_path, bit_rate)
+    clear_mp3_metadata(mp3_path)
+    edit_mp3_metadata(mp3_path, metadata) if metadata != {} else None
     return "finished"
 
 
@@ -77,11 +77,9 @@ def save_thumbnail_from_url(url: str):
 
 if __name__ == "__main__":
     dl_url = input("請貼上要下載的連結：")
-    m_file_name = input("請輸入下載後的檔案名稱(不含副檔名)：")
-    m_mp3_path = input("輸入mp3檔輸出的路徑(結尾請加\\)：") + m_file_name + ".mp3"
+    m_mp3_path = input("輸入mp3檔輸出的路徑(結尾須為.mp3)：")
     main_dl(
         yt_dl.Video(dl_url),
-        m_file_name,
         m_mp3_path,
         {
             "title": "test1",
