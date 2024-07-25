@@ -93,7 +93,8 @@ class Holodex(commands.Cog):
                     ),
                     inline=False,
                 )
-                embed.set_thumbnail(url=section["art"])
+                if section["art"] is not None:
+                    embed.set_thumbnail(url=section["art"])
                 embed.set_footer(text="請注意，下載時間可能會比/musicdl還要久。請在數分鐘後回來查看。")
                 await interaction.edit_original_response(embed=embed, view=None)
 
