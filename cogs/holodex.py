@@ -42,11 +42,14 @@ class Holodex(commands.Cog):
             raw_label = sect["name"]
             if len(raw_label) > 100:
                 raw_label = raw_label[:97] + "..."
+            raw_original_artist = sect["original_artist"]
+            if len(raw_original_artist) > 90:
+                raw_original_artist = raw_original_artist[:87] + "..."
             selections.append(
                 SelectOption(
                     label=raw_label,
                     value=str(sections_list.index(sect)),
-                    description=f"By {sect['original_artist']}，{sect['end'] - sect['start']} 秒",
+                    description=f"By {raw_original_artist}，{sect['end'] - sect['start']} 秒",
                 )
             )
         menu = ui.Select(
