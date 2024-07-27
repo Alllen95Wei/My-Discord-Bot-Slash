@@ -10,7 +10,7 @@ import holodex_api
 
 import logger
 import youtube_download
-from cogs.general import Basics
+from cogs.general import Basics, Events, MUSIC_CMD_CHANNELS
 
 
 error_color = 0xF1411C
@@ -109,7 +109,9 @@ class Holodex(commands.Cog):
                     }
                 else:
                     metadata = {}
-                file_name = f"{video_instance.get_id()}_{section['id'][-12:]}_{bit_rate}"
+                file_name = (
+                    f"{video_instance.get_id()}_{section['id'][-12:]}_{bit_rate}"
+                )
                 result = await Basics.run_blocking(
                     self.bot,
                     Basics.ConfirmDownload.youtube_start_download,
@@ -122,7 +124,28 @@ class Holodex(commands.Cog):
                 message = await interaction.edit_original_response(file=result)
                 if add_to_musicbot_queue:
                     file_url = message.attachments[0].url
-                    await interaction.channel.send("ap!p " + file_url, delete_after=0.5)
+                    check_vc_result = await Events.check_voice_channel(
+                        self, interaction.guild
+                    )
+                    if isinstance(check_vc_result, str):
+                        embed = discord.Embed(
+                            title="錯誤", description="機器人自動加入語音頻道時失敗。", color=error_color
+                        )
+                        embed.add_field(name="錯誤訊息", value=check_vc_result)
+                        await interaction.followup.send(embed=embed)
+                    elif isinstance(check_vc_result, discord.VoiceChannel):
+                        self.real_logger.debug(f"已連線至語音頻道：{check_vc_result.name}")
+                        if interaction.user in check_vc_result.members:
+                            await interaction.channel.send(
+                                "ap!p " + file_url, delete_after=0.5
+                            )
+                        else:
+                            embed = Embed(
+                                title="錯誤：使用者不在語音頻道內",
+                                description="你必須在Allen Music Bot的語音頻道內，才可使用此功能。",
+                                color=error_color,
+                            )
+                            await interaction.followup.send(embed=embed)
             else:
                 embed = Embed(
                     title="錯誤：非指令使用者",
@@ -150,57 +173,74 @@ class Holodex(commands.Cog):
             choices=[96, 128, 160, 192, 256, 320],
             required=False,
         ) = 128,
+        add_to_musicbot_queue: Option(
+            bool,
+            name="加入音樂機器人佇列",
+            description="下載後，是否自動新增至Allen Music Bot佇列中",
+            required=False,
+        ) = False,
     ):
         await ctx.defer()
         view = ui.View()
-        try:
-            video = youtube_download.Video(url)
-            section_list = holodex_client.fetch_video_timeline(video.get_id())
-            if "youtube" not in video.get_extractor():
+        if add_to_musicbot_queue and ctx.channel.id not in MUSIC_CMD_CHANNELS:
+            embed = Embed(
+                title="錯誤：需在音樂機器人指令頻道使用",
+                description="你啟用了「加入音樂機器人佇列」功能。此功能需在音樂機器人指令頻道使用。",
+                colour=error_color,
+            )
+        else:
+            try:
+                video = youtube_download.Video(url)
+                section_list = holodex_client.fetch_video_timeline(video.get_id())
+                if "youtube" not in video.get_extractor():
+                    embed = Embed(
+                        title="錯誤：連結不是YouTube連結",
+                        description="你所提供的連結不是YouTube的連結。請提供有效的YouTube連結。",
+                        color=error_color,
+                    )
+                    embed.add_field(
+                        name="Debug: Extractor",
+                        value=f"```{video.get_extractor()}```",
+                        inline=False,
+                    )
+                elif len(section_list) == 0:
+                    embed = Embed(
+                        title="錯誤：沒有片段",
+                        description="此影片在Holodex中沒有標記任何片段。",
+                        color=error_color,
+                    )
+                    embed.add_field(
+                        name="想下載整部影片嗎？",
+                        value="請使用</musicdl:1195621958218420245>",
+                        inline=False,
+                    )
+                    embed.add_field(
+                        name="來源影片", value=f"[{video.get_title()}]({url})", inline=False
+                    )
+                    embed.set_image(url=video.get_thumbnail())
+                else:
+                    embed = Embed(
+                        title="選擇片段",
+                        description="請從下拉式選單選擇要下載的片段。",
+                        color=default_color,
+                    )
+                    embed.add_field(
+                        name="來源影片", value=f"[{video.get_title()}]({url})", inline=False
+                    )
+                    embed.add_field(
+                        name="片段數量", value=f"`{len(section_list)}`個", inline=False
+                    )
+                    embed.set_image(url=video.get_thumbnail())
+                    view = self.section_selection(
+                        ctx.author, video, bitrate, section_list, add_to_musicbot_queue
+                    )
+            except Exception as e:
                 embed = Embed(
                     title="錯誤：連結不是YouTube連結",
                     description="你所提供的連結不是YouTube的連結。請提供有效的YouTube連結。",
                     color=error_color,
                 )
-                embed.add_field(
-                    name="Debug: Extractor",
-                    value=f"```{video.get_extractor()}```",
-                    inline=False,
-                )
-            elif len(section_list) == 0:
-                embed = Embed(
-                    title="錯誤：沒有片段",
-                    description="此影片在Holodex中沒有標記任何片段。",
-                    color=error_color,
-                )
-                embed.add_field(
-                    name="想下載整部影片嗎？",
-                    value="請使用</musicdl:1195621958218420245>",
-                    inline=False,
-                )
-                embed.add_field(
-                    name="來源影片", value=f"[{video.get_title()}]({url})", inline=False
-                )
-                embed.set_image(url=video.get_thumbnail())
-            else:
-                embed = Embed(
-                    title="選擇片段", description="請從下拉式選單選擇要下載的片段。", color=default_color
-                )
-                embed.add_field(
-                    name="來源影片", value=f"[{video.get_title()}]({url})", inline=False
-                )
-                embed.add_field(
-                    name="片段數量", value=f"`{len(section_list)}`個", inline=False
-                )
-                embed.set_image(url=video.get_thumbnail())
-                view = self.section_selection(ctx.author, video, bitrate, section_list)
-        except Exception as e:
-            embed = Embed(
-                title="錯誤：連結不是YouTube連結",
-                description="你所提供的連結不是YouTube的連結。請提供有效的YouTube連結。",
-                color=error_color,
-            )
-            embed.add_field(name="錯誤訊息", value=f"```{str(e)}```", inline=False)
+                embed.add_field(name="錯誤訊息", value=f"```{str(e)}```", inline=False)
         await ctx.respond(embed=embed, view=view)
 
 
