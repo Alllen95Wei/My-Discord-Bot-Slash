@@ -43,6 +43,17 @@ exp_report_template = {
     "activity_bonus": 0,
 }
 
+EXCLUDE_CHANNELS = [
+    1035754607286169631,
+]
+MUSIC_CMD_CHANNELS = [
+    891665312028713001,  # 貓娘實驗室/音樂指令區
+    1114523541312897034,  # FRC7636/指令區
+    1248646014798397491,  # 野人集中營/music
+    1249352023615344671,  # 損友俱樂部/丟song
+]
+EXCLUDE_CHANNELS += MUSIC_CMD_CHANNELS
+
 
 class Basics(commands.Cog):
     def __init__(self, bot: commands.Bot, real_logger: logger.CreateLogger):
@@ -1351,17 +1362,7 @@ class Events(commands.Cog):
             await message.channel.send(embed=embed)
             return
         msg_in = message.content
-        exclude_channels = [
-            1035754607286169631,
-        ]
-        music_cmd_channels = [
-            891665312028713001,  # 貓娘實驗室/音樂指令區
-            1114523541312897034,  # FRC7636/指令區
-            1248646014798397491,  # 野人集中營/music
-            1249352023615344671,  # 損友俱樂部/丟song
-        ]
-        exclude_channels += music_cmd_channels
-        if message.channel.id in music_cmd_channels and (
+        if message.channel.id in MUSIC_CMD_CHANNELS and (
             msg_in.startswith("https://www.youtube.com")
             or msg_in.startswith("https://youtu.be")
             or msg_in.startswith("https://m.youtube.com")
@@ -1397,7 +1398,7 @@ class Events(commands.Cog):
                     ap_cmd = "ap!p " + msg_in
                     await message.channel.send(ap_cmd, delete_after=0.5)
                     await message.add_reaction("✅")
-        if message.channel.id in exclude_channels:
+        if message.channel.id in EXCLUDE_CHANNELS:
             return
         member_obj = json_assistant.User(message.author.id)
         time_delta = time.time() - member_obj.get_last_active_time()
