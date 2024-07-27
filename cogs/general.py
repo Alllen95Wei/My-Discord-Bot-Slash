@@ -189,19 +189,26 @@ class Basics(commands.Cog):
 
         @staticmethod
         def youtube_start_download(
-            video_instance: yt_download.Video, metadata: dict, bit_rate: int, file_name=None, section=None
+            video_instance: yt_download.Video,
+            metadata: dict,
+            bit_rate: int,
+            file_name=None,
+            section=None,
         ) -> discord.File:
             if file_name is None:
                 file_name = video_instance.get_id() + "_" + str(bit_rate)
             mp3_file_name = f"{file_name}.mp3"
             mp3_file_path = os.path.join(parent_dir, "ytdl", mp3_file_name)
-            if main_dl(
-                video_instance=video_instance,
-                mp3_path=mp3_file_path,
-                metadata=metadata,
-                section=section,
-                bit_rate=bit_rate
-            ) == "finished":
+            if (
+                main_dl(
+                    video_instance=video_instance,
+                    mp3_path=mp3_file_path,
+                    metadata=metadata,
+                    section=section,
+                    bit_rate=bit_rate,
+                )
+                == "finished"
+            ):
                 return discord.File(mp3_file_path)
 
     class MP3MetadataEditor(Modal):
@@ -702,7 +709,7 @@ class Basics(commands.Cog):
                 }
             else:
                 metadata = {}
-            limit_length = 209715200 / (bitrate*1000)
+            limit_length = 209715200 / (bitrate * 1000)
             if length > limit_length:
                 embed = discord.Embed(
                     title="影片長度過長",
@@ -1009,7 +1016,9 @@ class Events(commands.Cog):
             year_to_sec = 31622400
         else:
             year_to_sec = 31536000
-        jun_1st = datetime.datetime(year=current_year, month=1, day=1, tzinfo=now_tz).timestamp()
+        jun_1st = datetime.datetime(
+            year=current_year, month=1, day=1, tzinfo=now_tz
+        ).timestamp()
         year_process_sec = time.time() - jun_1st
         year_process = floor((year_process_sec / year_to_sec) * 10000) / 100
         return year_process
@@ -1380,8 +1389,6 @@ class Events(commands.Cog):
                 await message.channel.send(embed=embed)
             elif isinstance(check_vc_result, discord.VoiceChannel):
                 self.real_logger.debug(f"已連線至語音頻道：{check_vc_result.name}")
-                for m in check_vc_result.members:
-                    print(m.name)
                 if message.author in check_vc_result.members:
                     if "&list=" in msg_in:
                         msg_in = msg_in[: msg_in.find("&list=")]
