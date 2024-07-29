@@ -170,7 +170,7 @@ class Holodex(commands.Cog):
             int,
             name="位元率",
             description="下載後，轉換為MP3時所使用的位元率，會影響檔案的大小與品質",
-            choices=[96, 128, 160, 192, 256, 320],
+            choices=[96, 128, 160],
             required=False,
         ) = 128,
         add_to_musicbot_queue: Option(
@@ -232,7 +232,11 @@ class Holodex(commands.Cog):
                     )
                     embed.set_image(url=video.get_thumbnail())
                     view = self.section_selection(
-                        ctx.author, video, bitrate, section_list, add_to_musicbot_queue
+                        ctx.author,
+                        video,
+                        bitrate if not add_to_musicbot_queue else 128,
+                        section_list,
+                        add_to_musicbot_queue,
                     )
             except Exception as e:
                 embed = Embed(
