@@ -6,8 +6,9 @@ import os
 import zoneinfo
 from pathlib import Path
 from dotenv import load_dotenv
-import holodex_api
+import time
 
+import holodex_api
 import logger
 import youtube_download
 from cogs.general import Basics, Events, MUSIC_CMD_CHANNELS
@@ -94,6 +95,15 @@ class Holodex(commands.Cog):
                     ),
                     inline=False,
                 )
+                embed.add_field(
+                    name="預估下載時間(依片段長度粗估)",
+                    value="約 `%d`~`%d` 秒"
+                    % (
+                        (sect["end"] - sect["start"]) / 1.5,
+                        (sect["end"] - sect["start"]) / 1.9,
+                    ),
+                    inline=False,
+                )
                 if section["art"] is not None:
                     embed.set_thumbnail(url=section["art"])
                 embed.set_footer(text="請注意，下載時間可能會比/musicdl還要久。請在數分鐘後回來查看。")
@@ -112,6 +122,7 @@ class Holodex(commands.Cog):
                 file_name = (
                     f"{video_instance.get_id()}_{section['id'][-12:]}_{bit_rate}"
                 )
+                start_time = time.time()
                 result = await Basics.run_blocking(
                     self.bot,
                     Basics.ConfirmDownload.youtube_start_download,
@@ -121,7 +132,12 @@ class Holodex(commands.Cog):
                     file_name,
                     [section["start"], section["end"]],
                 )
-                message = await interaction.edit_original_response(file=result)
+                end_time = time.time()
+                time_delta = end_time - start_time
+                message = await interaction.edit_original_response(
+                    content=f"下載共花了 `{time_delta} 秒 ({(sect['end'] - sect['start'])/time_delta} x)",
+                    file=result,
+                )
                 if add_to_musicbot_queue:
                     file_url = message.attachments[0].url
                     check_vc_result = await Events.check_voice_channel(
@@ -240,8 +256,8 @@ class Holodex(commands.Cog):
                     )
             except Exception as e:
                 embed = Embed(
-                    title="錯誤：連結不是YouTube連結",
-                    description="你所提供的連結不是YouTube的連結。請提供有效的YouTube連結。",
+                    title="錯誤",
+                    description="發生未知錯誤。",
                     color=error_color,
                 )
                 embed.add_field(name="錯誤訊息", value=f"```{str(e)}```", inline=False)
