@@ -99,8 +99,8 @@ class Holodex(commands.Cog):
                     name="預估下載時間(依片段長度粗估)",
                     value="約 `%d`~`%d` 秒"
                     % (
-                        (sect["end"] - sect["start"]) / 1.5,
                         (sect["end"] - sect["start"]) / 1.9,
+                        (sect["end"] - sect["start"]) / 1.5,
                     ),
                     inline=False,
                 )
