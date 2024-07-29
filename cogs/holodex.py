@@ -135,7 +135,8 @@ class Holodex(commands.Cog):
                 end_time = time.time()
                 time_delta = end_time - start_time
                 message = await interaction.edit_original_response(
-                    content=f"下載共花了 `{time_delta} 秒 ({(sect['end'] - sect['start'])/time_delta} x)",
+                    content=f"下載共花了 `{round(time_delta, 3)}` 秒 "
+                            f"(`{round((sect['end'] - sect['start'])/time_delta, 3)}` x)",
                     file=result,
                 )
                 if add_to_musicbot_queue:
