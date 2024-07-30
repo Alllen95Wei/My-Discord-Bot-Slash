@@ -100,7 +100,7 @@ class Holodex(commands.Cog):
                     value="約 `%d`~`%d` 秒"
                     % (
                         (sect["end"] - sect["start"]) / 1.9,
-                        (sect["end"] - sect["start"]) / 1.5,
+                        (sect["end"] - sect["start"]) / 1.2,
                     ),
                     inline=False,
                 )
