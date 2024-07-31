@@ -1187,7 +1187,11 @@ class Events(commands.Cog):
                     embed.set_footer(
                         text="目前此功能測試中。如要停用此功能，請使用/user_info set_voice_exp_report指令。"
                     )
-                    await member.send(embed=embed)
+                    try:
+                        await member.send(embed=embed)
+                    except Exception as e:
+                        self.real_logger.warning("無法傳送經驗值報告給" + member.name)
+                        self.real_logger.warning("錯誤訊息：" + str(e))
             elif (
                 before.channel is not None and before.channel.id != after.channel.id
             ):  # 加入其他頻道
