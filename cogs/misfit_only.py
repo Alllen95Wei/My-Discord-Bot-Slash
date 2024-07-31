@@ -50,7 +50,7 @@ class Misfit(commands.Cog):
         before: discord.VoiceState,
         after: discord.VoiceState,
     ):
-        if after.channel.guild.id == 1030069819199991838:  # 損友俱樂部
+        if after.channel is not None and after.channel.guild.id == 1030069819199991838:  # 損友俱樂部
             if (before.channel is not None and before.channel != after.channel) and (
                 after.self_mute or after.self_deaf
             ):
