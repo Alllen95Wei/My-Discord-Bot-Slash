@@ -1,12 +1,11 @@
 # coding=utf-8
-import datetime
-
 import discord
 from discord.ext import commands
 from discord import Embed
 import os
 import zoneinfo
 from pathlib import Path
+import datetime
 
 import logger
 
@@ -43,6 +42,18 @@ class Misfit(commands.Cog):
                 title="錯誤", description="此指令僅允許在「損友俱樂部」使用！", color=error_color
             )
             await ctx.respond(embed=embed, ephemeral=True)
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(
+            self,
+            member: discord.Member,
+            before: discord.VoiceState,
+            after: discord.VoiceState,
+    ):
+        if after.channel.guild.id == 1030069819199991838:  # 損友俱樂部
+            if after.self_mute or after.self_deaf:
+                msg = member.mention + " ，你目前__**沒有開啟麥克風**__，其他人將無法聽到你的發言。"
+                await after.channel.send(msg)
 
     # @commands.Cog.listener()
     # async def on_message(self, message: discord.Message):
