@@ -45,13 +45,15 @@ class Misfit(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(
-            self,
-            member: discord.Member,
-            before: discord.VoiceState,
-            after: discord.VoiceState,
+        self,
+        member: discord.Member,
+        before: discord.VoiceState,
+        after: discord.VoiceState,
     ):
         if after.channel.guild.id == 1030069819199991838:  # 損友俱樂部
-            if (before.channel != after.channel) and (after.self_mute or after.self_deaf):
+            if (before.channel is not None and before.channel != after.channel) and (
+                after.self_mute or after.self_deaf
+            ):
                 msg = member.mention + " ，你目前__**沒有開啟麥克風**__，其他人將無法聽到你的發言。"
                 await after.channel.send(msg)
 
