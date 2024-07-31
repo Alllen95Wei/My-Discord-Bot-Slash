@@ -53,7 +53,7 @@ class Misfit(commands.Cog):
         if (not member.bot) and (after.channel is not None) and (after.channel.guild.id == 1030069819199991838):  # 損友俱樂部
             if (before.channel != after.channel) and (after.self_mute or after.self_deaf):
                 msg = member.mention + " ，你目前__**沒有開啟麥克風**__，其他人將無法聽到你的發言。"
-                await after.channel.send(msg)
+                await after.channel.send(msg, tts=True)
 
     # @commands.Cog.listener()
     # async def on_message(self, message: discord.Message):
