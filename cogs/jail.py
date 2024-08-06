@@ -84,6 +84,18 @@ class Jail(commands.Cog):
             )
             await ctx.respond(embed=embed, ephemeral=True)
 
+    @JAIL_CMDS.command(
+        name="list", description="看看現在監獄有誰？", guild_ids=[1030069819199991838]
+    )
+    async def list_jail(self, ctx):
+        embed = Embed(title="目前的監獄名單", description="下列的可憐兒被關在監獄中:astonished:", color=default_color)
+        if len(prison) == 0:
+            embed.add_field(name="", value="沒有任何一人在監獄中！")
+        else:
+            for member in prison.keys():
+                embed.add_field(name="", value=f"<@{member}> - 在{prison[member].mention}", inline=False)
+        await ctx.respond(embed=embed)
+
     @commands.Cog.listener()
     async def on_voice_state_update(
         self,
