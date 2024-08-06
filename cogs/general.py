@@ -1093,7 +1093,7 @@ class Events(commands.Cog):
                                     embed.set_footer(
                                         text="關於經驗值計算系統，請輸入/user_info about"
                                     )
-                                    await member.send(embed=embed)
+                                    await channel.send(embed=embed)
                             for m in active_human_members:
                                 if (
                                     m.id not in exp_report["partners"]
