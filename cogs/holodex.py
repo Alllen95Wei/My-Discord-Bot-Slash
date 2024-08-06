@@ -37,7 +37,7 @@ class Holodex(commands.Cog):
         sections_list: list,
         add_to_musicbot_queue: bool = False,
     ) -> ui.View:
-        view = ui.View()
+        view = ui.View(disable_on_timeout=True)
         # generate sections
         selections = []
         for sect in sections_list:
