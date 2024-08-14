@@ -10,18 +10,18 @@ base_dir = os.path.abspath(os.path.dirname(__file__))
 
 class User:
     INIT_DATA = {
-                    "join_date": None,
-                    "exp": {"voice": 0, "text": 0},
-                    "level": {"voice": 0, "text": 0},
-                    "notify_threshold": {
-                        "voice": 5,
-                        "text": 1,
-                    },
-                    "last_notify": {"voice": 0, "text": 0},
-                    "voice_exp_report_enabled": False,
-                    "last_active_time": 0,
-                    "last_daily_reward_claimed": 0,
-                }
+        "join_date": None,
+        "exp": {"voice": 0, "text": 0},
+        "level": {"voice": 0, "text": 0},
+        "notify_threshold": {
+            "voice": 5,
+            "text": 1,
+        },
+        "last_notify": {"voice": 0, "text": 0},
+        "voice_exp_report_enabled": False,
+        "last_active_time": 0,
+        "last_daily_reward_claimed": 0,
+    }
 
     def __init__(self, user_id: [int, str]):
         self.user_id = user_id
