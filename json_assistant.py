@@ -496,3 +496,48 @@ class MusicbotError:
 
     def get_solution(self) -> str:
         return self.solution
+
+
+class SoundboardIndex:
+    INIT_DATA = {
+        "sounds": [
+            # {"display_name": "", "description": "", "file_path": ""}
+        ]
+    }
+
+    def __init__(self, guild_id: int):
+        self.guild_id = guild_id
+
+    def get_raw_info(self) -> dict:
+        file = os.path.join(base_dir, "soundboard_data", str(self.guild_id), "index.json")
+        if os.path.exists(file):
+            with open(file, "r", encoding="utf-8") as f:
+                soundboard_info = json.loads(f.read())
+                return soundboard_info
+        else:
+            return self.INIT_DATA
+
+    def write_raw_info(self, data):
+        file = os.path.join(base_dir, "soundboard_data", str(self.guild_id), "index.json")
+        with open(file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+
+    def get_sounds(self) -> list:
+        data = self.get_raw_info()
+        return data["sounds"]
+
+    def add_sound(self, display_name: str, file_path: str, description: str = ""):
+        data = self.get_raw_info()
+        sounds_list = data["sounds"]
+        sounds_list.append({
+            "display_name": display_name,
+            "description": description,
+            "file_path": file_path,
+        })
+        self.write_raw_info(data)
+
+    def remove_sound(self, index: int):
+        data = self.get_raw_info()
+        sounds_list: list = data["sounds"]
+        sounds_list.pop(index)
+        self.write_raw_info(data)
