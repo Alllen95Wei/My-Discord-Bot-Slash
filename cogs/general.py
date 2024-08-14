@@ -1339,9 +1339,11 @@ class Events(commands.Cog):
 
     @staticmethod
     async def check_voice_channel(
-        instance, server: discord.Guild
+        instance, server: discord.Guild, target_user_id: list[int] = None, connect_when_found: bool = True
     ) -> discord.VoiceChannel | str:
         # 列出所有語音頻道
+        if target_user_id is None:
+            target_user_id = [885723595626676264, 657519721138094080]
         voice_channel_lists = []
         for channel in server.channels:
             if channel.type == discord.ChannelType.voice:
@@ -1351,21 +1353,20 @@ class Events(commands.Cog):
                 # 列出所有語音頻道的成員
                 for member in members:
                     instance.real_logger.debug(f"   ⌊{member.name}")
-                    if (
-                        member.id == 885723595626676264
-                        or member.id == 657519721138094080
-                    ):
-                        # 若找到Allen Music Bot或Allen Why，則嘗試加入該語音頻道
+                    if member.id in target_user_id:
                         try:
-                            await channel.guild.change_voice_state(
-                                channel=channel, self_mute=True, self_deaf=True
-                            )
+                            if connect_when_found:
+                                await channel.guild.change_voice_state(
+                                    channel=channel, self_mute=True, self_deaf=True
+                                )
+                                instance.real_logger.debug(f"已連線至語音頻道：{channel.name}")
                             return channel
                         except Exception as e:
                             if str(e) == "Already connected to a voice channel.":
                                 return "已經連線至語音頻道。"
                             else:
                                 return str(e)
+        return "使用者未在任何語音頻道內。"
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -1395,7 +1396,6 @@ class Events(commands.Cog):
                 embed.add_field(name="錯誤訊息", value=check_vc_result)
                 await message.channel.send(embed=embed)
             elif isinstance(check_vc_result, discord.VoiceChannel):
-                self.real_logger.debug(f"已連線至語音頻道：{check_vc_result.name}")
                 if message.author in check_vc_result.members:
                     if "&list=" in msg_in:
                         msg_in = msg_in[: msg_in.find("&list=")]
