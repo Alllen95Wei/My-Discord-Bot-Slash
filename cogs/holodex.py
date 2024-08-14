@@ -151,7 +151,6 @@ class Holodex(commands.Cog):
                         embed.add_field(name="錯誤訊息", value=check_vc_result)
                         await interaction.followup.send(embed=embed)
                     elif isinstance(check_vc_result, discord.VoiceChannel):
-                        self.real_logger.debug(f"已連線至語音頻道：{check_vc_result.name}")
                         if interaction.user in check_vc_result.members:
                             await interaction.channel.send(
                                 "ap!p " + file_url, delete_after=0.5
