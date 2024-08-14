@@ -29,7 +29,9 @@ class Soundboard(commands.Cog):
         self.real_logger = real_logger
 
         for guild in bot.guilds:
-            os.mkdir(os.path.join(sound_dir, str(guild.id)))
+            path = os.path.join(sound_dir, str(guild.id))
+            self.real_logger.info("新增資料夾：" + path)
+            os.mkdir(path)
 
     def soundboard_selection(self, ctx) -> ui.View:
         view = ui.View(timeout=300, disable_on_timeout=True)
