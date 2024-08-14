@@ -853,7 +853,10 @@ class Basics(commands.Cog):
         私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa: PEP 3131
     ):
         try:
-            await ctx.guild.change_voice_state(channel=None)
+            for vc in self.bot.voice_clients:
+                if vc.channel.guild.id == ctx.guild.id:
+                    await vc.disconnect(force=False)
+                    break
             embed = discord.Embed(
                 title="已斷開連接", description="已經從語音頻道中斷連接。", color=default_color
             )
