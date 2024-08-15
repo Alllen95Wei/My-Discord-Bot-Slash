@@ -808,6 +808,7 @@ class Basics(commands.Cog):
         頻道: Option(discord.VoiceChannel, "指定要加入的頻道", required=False),  # noqa: PEP 3131
         私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa: PEP 3131
     ):
+        await ctx.defer(ephemeral=私人訊息)
         if 頻道 is None:
             result = await Events.check_voice_channel(self, ctx.guild)
             if isinstance(result, discord.VoiceChannel):
@@ -815,10 +816,6 @@ class Basics(commands.Cog):
                     title="已加入頻道",
                     description=f"已經自動加入了 {result.mention}！",
                     color=default_color,
-                )
-            elif isinstance(result, str):
-                embed = discord.Embed(
-                    title="錯誤", description=f"發生錯誤：`{result}`", color=error_color
                 )
             elif result is None:
                 embed = discord.Embed(
@@ -830,6 +827,7 @@ class Basics(commands.Cog):
                 embed = discord.Embed(
                     title="錯誤", description="發生未知錯誤。", color=error_color
                 )
+                embed.add_field(name="錯誤訊息", value="```" + result + "```")
         else:
             try:
                 await 頻道.guild.change_voice_state(
@@ -1339,7 +1337,10 @@ class Events(commands.Cog):
 
     @staticmethod
     async def check_voice_channel(
-        instance, server: discord.Guild, target_user_id: list[int] = None, connect_when_found: bool = True
+        instance,
+        server: discord.Guild,
+        target_user_id: list[int] = None,
+        connect_when_found: bool = True,
     ) -> discord.VoiceChannel | str:
         # 列出所有語音頻道
         if target_user_id is None:
@@ -1356,8 +1357,9 @@ class Events(commands.Cog):
                     if member.id in target_user_id:
                         try:
                             if connect_when_found:
+                                await channel.connect()
                                 await channel.guild.change_voice_state(
-                                    channel=channel, self_mute=True, self_deaf=True
+                                    channel=channel, self_mute=False, self_deaf=True
                                 )
                                 instance.real_logger.debug(f"已連線至語音頻道：{channel.name}")
                             return channel
