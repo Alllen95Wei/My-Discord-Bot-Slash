@@ -273,9 +273,12 @@ class Soundboard(commands.Cog):
         ) = False,
     ):
         await ctx.defer()
+        description = "從下方的選單選取要播放的音效。\n播放結束後，如果還要播放其他音效，請取消選取原本的選擇再重新選取即可。"
+        if is_general:
+            description += "\n⚠️**注意：目前為通用音效！**"
         embed = Embed(
             title="選取音效",
-            description="從下方的選單選取要播放的音效。\n播放結束後，如果還要播放其他音效，請取消選取原本的選擇再重新選取即可。",
+            description=description,
             color=default_color,
         )
         embed.set_footer(text="本功能目前測試中，可能不會正常運作。")
