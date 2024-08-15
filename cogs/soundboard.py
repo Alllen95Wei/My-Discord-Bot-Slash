@@ -299,9 +299,12 @@ class Soundboard(commands.Cog):
             )
             await ctx.respond(embed=embed, ephemeral=True)
         else:
+            description = "取得音檔URL後，點擊下方按鈕以新增音效。"
+            if is_general:
+                description += "\n⚠️**注意：你即將上傳為通用音效！**"
             embed = Embed(
                 title="新增音效",
-                description="取得音檔URL後，點擊下方按鈕以在這個伺服器新增音效。",
+                description=description,
                 color=default_color,
             )
             embed.add_field(
