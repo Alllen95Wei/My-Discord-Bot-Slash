@@ -137,6 +137,15 @@ class Soundboard(commands.Cog):
 
         async def window_callback(interaction: discord.Interaction):
             await interaction.response.defer()
+            soundboard_index = SoundboardIndex(interaction.guild.id)
+            if window.children[0].value in soundboard_index.get_sound_display_name():
+                embed = Embed(
+                    title="錯誤：名稱重複",
+                    description=f"你所提供的音效名稱(`{window.children[0].value}`)已經存在。",
+                    color=error_color,
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
             file_url = window.children[2].value
             if file_url.startswith("https://cdn.discordapp.com/attachments/"):
                 async with aiohttp.ClientSession() as session:
@@ -156,9 +165,6 @@ class Soundboard(commands.Cog):
                                 audio_file = audioread.audio_open(file_path)
                                 length = audio_file.duration
                                 if length <= 15:
-                                    soundboard_index = SoundboardIndex(
-                                        interaction.guild.id
-                                    )
                                     soundboard_index.add_sound(
                                         display_name=window.children[0].value,
                                         description=window.children[1].value,

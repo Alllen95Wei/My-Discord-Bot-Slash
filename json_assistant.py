@@ -526,6 +526,13 @@ class SoundboardIndex:
         data = self.get_raw_info()
         return data["sounds"]
 
+    def get_sound_display_name(self) -> list:
+        sounds = self.get_sounds()
+        names = []
+        for sound in sounds:
+            names.append(sound["display_name"])
+        return names
+
     def add_sound(self, display_name: str, file_path: str, description: str = ""):
         data = self.get_raw_info()
         sounds_list = data["sounds"]
