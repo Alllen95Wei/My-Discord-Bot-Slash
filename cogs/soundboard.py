@@ -290,16 +290,15 @@ class Soundboard(commands.Cog):
             bool, name="上傳通用音效", description="是否要上傳為通用音效，而非伺服器音效", required=False
         ) = False,
     ):
-        view = None
         await ctx.defer(ephemeral=True)
-        if is_general and ctx.author.id != self.bot.owner_id:
+        if is_general and ctx.author.id != 657519721138094080:
             embed = Embed(
                 title="錯誤：非機器人擁有者",
-                description=f"僅有 <@{self.bot.owner_id}> 可上傳通用音效。",
+                description="僅有 <@657519721138094080> 可上傳通用音效。",
                 color=error_color,
             )
+            await ctx.respond(embed=embed, ephemeral=True)
         else:
-            view = self.add_sound_window(is_general)
             embed = Embed(
                 title="新增音效",
                 description="取得音檔URL後，點擊下方按鈕以在這個伺服器新增音效。",
@@ -312,7 +311,7 @@ class Soundboard(commands.Cog):
             )
             embed.add_field(name="2. 複製連結", value="對音檔點擊右鍵，並點擊「複製連結」。", inline=False)
             embed.add_field(name="3. 開啟上傳視窗", value="點擊下方按鈕，繼續新增音效流程。", inline=False)
-        await ctx.respond(embed=embed, view=view, ephemeral=True)
+            await ctx.respond(embed=embed, view=self.add_sound_window(is_general), ephemeral=True)
 
     @SOUNDBOARD_CMDS.command(name="remove", description="移除音效。")
     @commands.has_permissions(manage_guild=True)
