@@ -177,7 +177,7 @@ class Soundboard(commands.Cog):
                             file_name = "".join(random_char_list) + ".snd"
                             file_path = os.path.join(
                                 sound_dir,
-                                str(interaction.guild.id),
+                                "general" if is_general else str(interaction.guild.id),
                                 file_name,
                             )
                             file = await aiofiles.open(file_path, mode="wb")
