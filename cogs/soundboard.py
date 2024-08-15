@@ -7,6 +7,7 @@ import zoneinfo
 from pathlib import Path
 import aiohttp
 import aiofiles
+import audioread
 from random import choice
 from string import hexdigits
 
@@ -151,29 +152,59 @@ class Soundboard(commands.Cog):
                             file = await aiofiles.open(file_path, mode="wb")
                             await file.write(await response.read())
                             await file.close()
-                            soundboard_index = SoundboardIndex(interaction.guild.id)
-                            soundboard_index.add_sound(
-                                display_name=window.children[0].value,
-                                description=window.children[1].value,
-                                file_path=file_path,
-                            )
-                            embed = Embed(
-                                title="新增成功！",
-                                description="你的音效已上傳完成，現已能透過機器人使用。",
-                                color=default_color,
-                            )
-                            embed.add_field(
-                                name="音效名稱",
-                                value=window.children[0].value,
-                                inline=False,
-                            )
-                            embed.add_field(
-                                name="說明",
-                                value=window.children[1].value
-                                if window.children[1].value
-                                else "(無說明)",
-                                inline=False,
-                            )
+                            try:
+                                audio_file = audioread.audio_open(file_path)
+                                length = audio_file.duration
+                                if length <= 15:
+                                    soundboard_index = SoundboardIndex(
+                                        interaction.guild.id
+                                    )
+                                    soundboard_index.add_sound(
+                                        display_name=window.children[0].value,
+                                        description=window.children[1].value,
+                                        file_path=file_path,
+                                    )
+                                    embed = Embed(
+                                        title="新增成功！",
+                                        description="你的音效已上傳完成，現已能透過機器人使用。",
+                                        color=default_color,
+                                    )
+                                    embed.add_field(
+                                        name="音效名稱",
+                                        value=window.children[0].value,
+                                        inline=False,
+                                    )
+                                    embed.add_field(
+                                        name="說明",
+                                        value=window.children[1].value
+                                        if window.children[1].value
+                                        else "(無說明)",
+                                        inline=False,
+                                    )
+                                else:
+                                    embed = Embed(
+                                        title="錯誤：音檔長度超過限制",
+                                        description=f"你所上傳的音檔長度(`{length}` 秒)超過15秒限制。",
+                                        color=error_color,
+                                    )
+                                    os.remove(file_path)
+                            except audioread.exceptions.NoBackendError:
+                                embed = Embed(
+                                    title="錯誤：非音檔",
+                                    description="機器人解碼檔案時失敗，可能是檔案類型錯誤造成。",
+                                    color=error_color,
+                                )
+                                os.remove(file_path)
+                            except Exception as e:
+                                embed = Embed(
+                                    title="錯誤",
+                                    description="發生未知錯誤。",
+                                    color=error_color,
+                                )
+                                embed.add_field(
+                                    name="錯誤訊息", value=f"```{str(e)}```", inline=False
+                                )
+                                os.remove(file_path)
                         else:
                             embed = Embed(
                                 title=f"錯誤：HTTP {response.status}",
