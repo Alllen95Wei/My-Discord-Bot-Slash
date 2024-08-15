@@ -11,5 +11,6 @@ mutagen
 pillow>10.2.0
 python-magic
 yt-dlp-youtube-oauth2 @ https://github.com/coletdjnz/yt-dlp-youtube-oauth2/archive/refs/heads/master.zip
-aiohttp
+aiohttp>3.8.4
 aiofiles
+audioread
