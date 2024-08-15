@@ -38,9 +38,12 @@ class Soundboard(commands.Cog):
         except OSError:
             self.real_logger.debug(path + " 已存在，不須新增")
 
-    def soundboard_selection(self, ctx) -> ui.View:
+    def soundboard_selection(
+        self, ctx, is_general: bool, removing: bool = False
+    ) -> ui.View:
         view = ui.View(timeout=300, disable_on_timeout=True)
-        sounds = SoundboardIndex(ctx.guild.id).get_sounds()
+        soundboard = SoundboardIndex(None if is_general else ctx.guild.id)
+        sounds = soundboard.get_sounds()
         selections = []
         menu = ui.Select(
             placeholder="選取音效",
@@ -69,55 +72,67 @@ class Soundboard(commands.Cog):
             if len(menu.values) == 0:
                 return
             selected_sound = sounds[int(menu.values[0])]
-            check_vc_result = await Events.check_voice_channel(
-                self, ctx.guild, [ctx.author.id], connect_when_found=False
-            )
-            embed = Embed(
-                title="This is a dummy",
-                description="This is a dummy embed. You shouldn't see this.",
-            )
-            if isinstance(check_vc_result, str):
-                embed = Embed(
-                    title="錯誤", description="機器人自動加入語音頻道時失敗。", color=error_color
+            if not removing:
+                check_vc_result = await Events.check_voice_channel(
+                    self, ctx.guild, [ctx.author.id], connect_when_found=False
                 )
-                embed.add_field(name="錯誤訊息", value=check_vc_result)
-            elif isinstance(check_vc_result, discord.VoiceChannel):
-                try:
-                    vc_client = None
-                    for vc in self.bot.voice_clients:
-                        if vc.channel.id == check_vc_result.id:  # noqa
-                            vc_client = vc
-                    if vc_client is None:
-                        vc_client = await check_vc_result.connect()
-                    vc_client.play(FFmpegPCMAudio(source=selected_sound["file_path"]))
+                if isinstance(check_vc_result, str):
                     embed = Embed(
-                        title="播放完成！", description="已播放所選取的音效。", color=default_color
+                        title="錯誤", description="機器人自動加入語音頻道時失敗。", color=error_color
                     )
-                    embed.add_field(name="名稱", value=selected_sound["display_name"])
-                except discord.errors.ClientException as e:
-                    if str(e) == "Already playing audio.":
-                        embed = Embed(
-                            title="錯誤：目前播放中",
-                            description="目前已在播放其他音效。",
-                            color=error_color,
+                    embed.add_field(name="錯誤訊息", value=check_vc_result)
+                    await interaction.followup.send(embed=embed, ephemeral=True)
+                elif isinstance(check_vc_result, discord.VoiceChannel):
+                    try:
+                        vc_client = None
+                        for vc in self.bot.voice_clients:
+                            if vc.channel.id == check_vc_result.id:  # noqa
+                                vc_client = vc
+                        if vc_client is None:
+                            vc_client = await check_vc_result.connect()
+                        vc_client.play(
+                            FFmpegPCMAudio(source=selected_sound["file_path"])
                         )
-                    else:
                         embed = Embed(
-                            title="錯誤：未連接至語音頻道",
-                            description="機器人自動加入語音頻道時失敗。",
+                            title="播放完成！", description="已播放所選取的音效。", color=default_color
+                        )
+                        embed.add_field(name="名稱", value=selected_sound["display_name"])
+                    except discord.errors.ClientException as e:
+                        if str(e) == "Already playing audio.":
+                            embed = Embed(
+                                title="錯誤：目前播放中",
+                                description="目前已在播放其他音效。",
+                                color=error_color,
+                            )
+                        else:
+                            embed = Embed(
+                                title="錯誤：未連接至語音頻道",
+                                description="機器人自動加入語音頻道時失敗。",
+                                color=error_color,
+                            )
+                            embed.add_field(
+                                name="錯誤訊息", value=f"```{str(e)}```", inline=False
+                            )
+                    except Exception as e:
+                        embed = Embed(
+                            title="錯誤",
+                            description="發生未知錯誤。",
                             color=error_color,
                         )
                         embed.add_field(
                             name="錯誤訊息", value=f"```{str(e)}```", inline=False
                         )
-                except Exception as e:
-                    embed = Embed(
-                        title="錯誤",
-                        description="發生未知錯誤。",
-                        color=error_color,
-                    )
-                    embed.add_field(name="錯誤訊息", value=f"```{str(e)}```", inline=False)
-            await interaction.followup.send(embed=embed, ephemeral=True)
+                    await interaction.followup.send(embed=embed, ephemeral=True)
+            else:
+                soundboard.remove_sound(sounds.index(selected_sound))
+                embed = Embed(
+                    title="已移除音效",
+                    description=f"已從 {interaction.guild.name} 移除了音效 「{selected_sound['display_name']}」。",
+                    color=default_color,
+                )
+                await interaction.edit_original_response(
+                    embed=embed, view=None
+                )
 
         menu.callback = callback
 
@@ -249,6 +264,9 @@ class Soundboard(commands.Cog):
     async def soundboard_play(
         self,
         ctx: discord.ApplicationContext,
+        is_general: Option(
+            bool, name="使用通用音效", description="是否要使用通用音效，而非伺服器音效", required=False
+        ),
     ):
         await ctx.defer()
         embed = Embed(
@@ -256,8 +274,8 @@ class Soundboard(commands.Cog):
             description="從下方的選單選取要播放的音效。\n播放結束後，如果還要播放其他音效，請取消選取原本的選擇再重新選取即可。",
             color=default_color,
         )
-        embed.set_footer(text="本功能目前測試中。")
-        await ctx.respond(embed=embed, view=self.soundboard_selection(ctx))
+        embed.set_footer(text="本功能目前測試中，可能不會正常運作。")
+        await ctx.respond(embed=embed, view=self.soundboard_selection(ctx, is_general))
 
     @SOUNDBOARD_CMDS.command(name="add", description="新增音效。")
     @commands.has_permissions(manage_guild=True)
@@ -277,6 +295,22 @@ class Soundboard(commands.Cog):
         embed.add_field(name="2. 複製連結", value="對音檔點擊右鍵，並點擊「複製連結」。", inline=False)
         embed.add_field(name="3. 開啟上傳視窗", value="點擊下方按鈕，繼續新增音效流程。", inline=False)
         await ctx.respond(embed=embed, view=self.add_sound_window(), ephemeral=True)
+
+    @SOUNDBOARD_CMDS.command(name="remove", description="移除音效。")
+    @commands.has_permissions(manage_guild=True)
+    async def soundboard_remove(
+        self,
+        ctx: discord.ApplicationContext,
+    ):
+        await ctx.defer(ephemeral=True)
+        embed = Embed(
+            title="移除音效",
+            description="從下方的選單選取要移除的音效。\n**注意：音效移除後即無法復原！**",
+            color=default_color,
+        )
+        await ctx.respond(
+            embed=embed, view=self.soundboard_selection(ctx, False, True), ephemeral=True
+        )
 
 
 def setup(bot):
