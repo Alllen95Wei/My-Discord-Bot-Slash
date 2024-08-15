@@ -90,6 +90,9 @@ class Soundboard(commands.Cog):
                                 vc_client = vc
                         if vc_client is None:
                             vc_client = await check_vc_result.connect()
+                            await check_vc_result.guild.change_voice_state(
+                                channel=check_vc_result, self_mute=False, self_deaf=True
+                            )
                         vc_client.play(
                             FFmpegPCMAudio(source=selected_sound["file_path"])
                         )
