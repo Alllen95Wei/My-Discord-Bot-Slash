@@ -130,9 +130,7 @@ class Soundboard(commands.Cog):
                     description=f"已從 {interaction.guild.name} 移除了音效 「{selected_sound['display_name']}」。",
                     color=default_color,
                 )
-                await interaction.edit_original_response(
-                    embed=embed, view=None
-                )
+                await interaction.edit_original_response(embed=embed, view=None)
 
         menu.callback = callback
 
@@ -140,7 +138,7 @@ class Soundboard(commands.Cog):
         return view
 
     @staticmethod
-    def add_sound_window() -> ui.View:
+    def add_sound_window(is_general: bool) -> ui.View:
         view = ui.View(disable_on_timeout=True)
         btn = ui.Button(label="已取得URL，新增音效", style=ButtonStyle.green)
         window = ui.Modal(
@@ -155,7 +153,10 @@ class Soundboard(commands.Cog):
 
         async def window_callback(interaction: discord.Interaction):
             await interaction.response.defer()
-            soundboard_index = SoundboardIndex(interaction.guild.id)
+            if is_general:
+                soundboard_index = SoundboardIndex()
+            else:
+                soundboard_index = SoundboardIndex(interaction.guild.id)
             if window.children[0].value in soundboard_index.get_sound_display_name():
                 embed = Embed(
                     title="錯誤：名稱重複",
@@ -266,7 +267,7 @@ class Soundboard(commands.Cog):
         ctx: discord.ApplicationContext,
         is_general: Option(
             bool, name="使用通用音效", description="是否要使用通用音效，而非伺服器音效", required=False
-        ),
+        ) = False,
     ):
         await ctx.defer()
         embed = Embed(
@@ -282,19 +283,33 @@ class Soundboard(commands.Cog):
     async def soundboard_add(
         self,
         ctx: discord.ApplicationContext,
+        is_general: Option(
+            bool, name="上傳通用音效", description="是否要上傳為通用音效，而非伺服器音效", required=False
+        ) = False,
     ):
+        view = None
         await ctx.defer(ephemeral=True)
-        embed = Embed(
-            title="新增音效", description="取得音檔URL後，點擊下方按鈕以在這個伺服器新增音效。", color=default_color
-        )
-        embed.add_field(
-            name="1. 在Discord上傳音效",
-            value="在Discord的任一頻道上傳音檔。\n__**(注意：務必在Discord上傳音檔！)**__",
-            inline=False,
-        )
-        embed.add_field(name="2. 複製連結", value="對音檔點擊右鍵，並點擊「複製連結」。", inline=False)
-        embed.add_field(name="3. 開啟上傳視窗", value="點擊下方按鈕，繼續新增音效流程。", inline=False)
-        await ctx.respond(embed=embed, view=self.add_sound_window(), ephemeral=True)
+        if is_general and ctx.author.id != self.bot.owner_id:
+            embed = Embed(
+                title="錯誤：非機器人擁有者",
+                description=f"僅有 <@{self.bot.owner_id}> 可上傳通用音效。",
+                color=error_color,
+            )
+        else:
+            view = self.add_sound_window(is_general)
+            embed = Embed(
+                title="新增音效",
+                description="取得音檔URL後，點擊下方按鈕以在這個伺服器新增音效。",
+                color=default_color,
+            )
+            embed.add_field(
+                name="1. 在Discord上傳音效",
+                value="在Discord的任一頻道上傳音檔。\n__**(注意：務必在Discord上傳音檔！)**__",
+                inline=False,
+            )
+            embed.add_field(name="2. 複製連結", value="對音檔點擊右鍵，並點擊「複製連結」。", inline=False)
+            embed.add_field(name="3. 開啟上傳視窗", value="點擊下方按鈕，繼續新增音效流程。", inline=False)
+        await ctx.respond(embed=embed, view=view, ephemeral=True)
 
     @SOUNDBOARD_CMDS.command(name="remove", description="移除音效。")
     @commands.has_permissions(manage_guild=True)
@@ -309,7 +324,9 @@ class Soundboard(commands.Cog):
             color=default_color,
         )
         await ctx.respond(
-            embed=embed, view=self.soundboard_selection(ctx, False, True), ephemeral=True
+            embed=embed,
+            view=self.soundboard_selection(ctx, False, True),
+            ephemeral=True,
         )
 
 

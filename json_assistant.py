@@ -505,11 +505,14 @@ class SoundboardIndex:
         ]
     }
 
-    def __init__(self, guild_id: int):
-        self.guild_id = guild_id
+    def __init__(self, guild_id: int = None):
+        if guild_id is not None:
+            self.guild_id = str(guild_id)
+        else:
+            self.guild_id = "general"
 
     def get_raw_info(self) -> dict:
-        file = os.path.join(base_dir, "soundboard_data", str(self.guild_id), "index.json")
+        file = os.path.join(base_dir, "soundboard_data", self.guild_id, "index.json")
         if os.path.exists(file):
             with open(file, "r", encoding="utf-8") as f:
                 soundboard_info = json.loads(f.read())
@@ -518,7 +521,7 @@ class SoundboardIndex:
             return self.INIT_DATA
 
     def write_raw_info(self, data):
-        file = os.path.join(base_dir, "soundboard_data", str(self.guild_id), "index.json")
+        file = os.path.join(base_dir, "soundboard_data", self.guild_id, "index.json")
         with open(file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
 
