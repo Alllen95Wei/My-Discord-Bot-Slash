@@ -16,8 +16,6 @@ now_tz = zoneinfo.ZoneInfo("Asia/Taipei")
 base_dir = os.path.abspath(os.path.dirname(__file__))
 parent_dir = str(Path(__file__).parent.parent.absolute())
 
-prison: dict[int, discord.VoiceChannel] = {}
-
 
 class Misfit(commands.Cog):
     def __init__(self, bot: commands.Bot, real_logger: logger.CreateLogger):
