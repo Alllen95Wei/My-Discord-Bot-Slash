@@ -122,7 +122,7 @@ class Soundboard(commands.Cog):
 
     @staticmethod
     def add_sound_window() -> ui.View:
-        view = ui.View()
+        view = ui.View(disable_on_timeout=True)
         btn = ui.Button(label="已取得URL，新增音效", style=ButtonStyle.green)
         window = ui.Modal(
             ui.InputText(label="音效名稱", max_length=20),
