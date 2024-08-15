@@ -32,8 +32,11 @@ class Soundboard(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_available(self, guild: discord.Guild):
         path = os.path.join(sound_dir, str(guild.id))
-        self.real_logger.info("新增資料夾：" + path)
-        os.mkdir(path)
+        try:
+            os.mkdir(path)
+            self.real_logger.info("新增資料夾：" + path)
+        except OSError:
+            self.real_logger.debug(path + " 已存在，不須新增")
 
     def soundboard_selection(self, ctx) -> ui.View:
         view = ui.View(timeout=300, disable_on_timeout=True)
