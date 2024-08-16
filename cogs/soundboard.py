@@ -358,7 +358,11 @@ class Soundboard(commands.Cog):
                 description=description,
                 color=default_color,
             )
-            embed.add_field(name="音效額度", value=f"已使用 {len(soundboard.get_sounds())} / 25 個", inline=False)
+            embed.add_field(
+                name="音效額度",
+                value=f"已使用 {len(soundboard.get_sounds())} / 25 個",
+                inline=False,
+            )
             embed.add_field(
                 name="1. 在Discord上傳音效",
                 value="在Discord的任一頻道上傳音檔。\n__**(注意：務必在Discord上傳音檔！)**__",
@@ -393,36 +397,47 @@ class Soundboard(commands.Cog):
     async def soundboard_copy(
         self,
         ctx: discord.ApplicationContext,
-        target_guild_id: Option(
-            int, name="伺服器id", description="欲複製音效的伺服器ID", required=True
-        ),
+        # target_guild_id: Option(
+        #     str, name="伺服器id", description="欲複製音效的伺服器ID", required=True
+        # ),
+        target_guild_id: str,
     ):
-        if target_guild_id == ctx.guild.id:
+        await ctx.defer(ephemeral=True)
+        if not target_guild_id.isdigit():
             embed = Embed(
-                title="錯誤：同伺服器",
-                description=f"ID`{target_guild_id}`是目前伺服器的ID。你不能在同一伺服器中複製音效。",
+                title="錯誤：ID無效",
+                description=f"你所輸入的ID`{target_guild_id}`無效。",
                 color=error_color,
             )
             await ctx.respond(embed=embed)
         else:
-            copy_server = self.bot.get_guild(target_guild_id)
-            if copy_server is None:
+            target_guild_id = int(target_guild_id)
+            if target_guild_id == ctx.guild.id:
                 embed = Embed(
-                    title="錯誤：無法取得伺服器",
-                    description=f"無法透過ID`{target_guild_id}`取得伺服器。",
+                    title="錯誤：同伺服器",
+                    description=f"ID`{target_guild_id}`是目前伺服器的ID。你不能在同一伺服器中複製音效。",
                     color=error_color,
                 )
                 await ctx.respond(embed=embed)
             else:
-                embed = Embed(
-                    title="複製音效",
-                    description=f"從下方的選單選取要從「{copy_server.name}」複製的音效。",
-                    color=default_color,
-                )
-                await ctx.respond(
-                    embed=embed,
-                    view=self.soundboard_selection(ctx, False, "copy", copy_server),
-                )
+                copy_server = self.bot.get_guild(target_guild_id)
+                if copy_server is None:
+                    embed = Embed(
+                        title="錯誤：無法取得伺服器",
+                        description=f"無法透過ID`{target_guild_id}`取得伺服器。",
+                        color=error_color,
+                    )
+                    await ctx.respond(embed=embed)
+                else:
+                    embed = Embed(
+                        title="複製音效",
+                        description=f"從下方的選單選取要從「{copy_server.name}」複製的音效。",
+                        color=default_color,
+                    )
+                    await ctx.respond(
+                        embed=embed,
+                        view=self.soundboard_selection(ctx, False, "copy", copy_server),
+                    )
 
 
 def setup(bot):
