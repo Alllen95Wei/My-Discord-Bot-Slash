@@ -1,7 +1,7 @@
 # coding=utf-8
 import discord
 from discord.ext import commands
-from discord import Embed, Option, ui, SelectOption, ButtonStyle, FFmpegPCMAudio
+from discord import Embed, Option, ui, SelectOption, ButtonStyle, FFmpegPCMAudio, PCMVolumeTransformer
 import os
 import zoneinfo
 from pathlib import Path
@@ -94,7 +94,7 @@ class Soundboard(commands.Cog):
                                 channel=check_vc_result, self_mute=False, self_deaf=True
                             )
                         vc_client.play(
-                            discord.PCMVolumeTransformer(
+                            PCMVolumeTransformer(
                                 original=FFmpegPCMAudio(source=selected_sound["file_path"]),
                                 volume=0.6,
                             )
