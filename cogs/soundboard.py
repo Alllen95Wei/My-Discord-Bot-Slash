@@ -397,10 +397,9 @@ class Soundboard(commands.Cog):
     async def soundboard_copy(
         self,
         ctx: discord.ApplicationContext,
-        # target_guild_id: Option(
-        #     str, name="伺服器id", description="欲複製音效的伺服器ID", required=True
-        # ),
-        target_guild_id: str,
+        target_guild_id: Option(
+            str, name="伺服器id", description="欲複製音效的伺服器ID", required=True
+        ),
     ):
         await ctx.defer(ephemeral=True)
         if not target_guild_id.isdigit():
