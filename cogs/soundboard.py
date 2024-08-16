@@ -290,7 +290,7 @@ class Soundboard(commands.Cog):
         if is_general:
             description += "\n⚠️**注意：目前為通用音效！**"
         embed = Embed(
-            title="選取音效",
+            title="播放音效",
             description=description,
             color=default_color,
         )
@@ -307,6 +307,7 @@ class Soundboard(commands.Cog):
         ) = False,
     ):
         await ctx.defer(ephemeral=True)
+        soundboard = SoundboardIndex(None if is_general else ctx.guild.id)
         if is_general and ctx.author.id != 657519721138094080:
             embed = Embed(
                 title="錯誤：非機器人擁有者",
@@ -314,9 +315,7 @@ class Soundboard(commands.Cog):
                 color=error_color,
             )
             await ctx.respond(embed=embed, ephemeral=True)
-        elif (is_general and (len(SoundboardIndex().get_sounds()) >= 25)) or (
-            not is_general and (len(SoundboardIndex(ctx.guild.id).get_sounds()) >= 25)
-        ):
+        elif len(soundboard.get_sounds()) >= 25:
             embed = Embed(
                 title="錯誤：已達音效數量限制", description="已經達到25個音效的限制。", color=error_color
             )
@@ -330,6 +329,7 @@ class Soundboard(commands.Cog):
                 description=description,
                 color=default_color,
             )
+            embed.add_field(name="音效額度", value=f"已使用 {len(soundboard.get_sounds())} / 25 個", inline=False)
             embed.add_field(
                 name="1. 在Discord上傳音效",
                 value="在Discord的任一頻道上傳音檔。\n__**(注意：務必在Discord上傳音檔！)**__",
