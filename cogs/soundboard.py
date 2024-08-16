@@ -94,7 +94,10 @@ class Soundboard(commands.Cog):
                                 channel=check_vc_result, self_mute=False, self_deaf=True
                             )
                         vc_client.play(
-                            FFmpegPCMAudio(source=selected_sound["file_path"])
+                            discord.PCMVolumeTransformer(
+                                original=FFmpegPCMAudio(source=selected_sound["file_path"]),
+                                volume=0.6,
+                            )
                         )
                         embed = Embed(
                             title="播放完成！", description="已播放所選取的音效。", color=default_color
