@@ -1,7 +1,15 @@
 # coding=utf-8
 import discord
 from discord.ext import commands
-from discord import Embed, Option, ui, SelectOption, ButtonStyle, FFmpegPCMAudio, PCMVolumeTransformer
+from discord import (
+    Embed,
+    Option,
+    ui,
+    SelectOption,
+    ButtonStyle,
+    FFmpegPCMAudio,
+    PCMVolumeTransformer,
+)
 import os
 import zoneinfo
 from pathlib import Path
@@ -95,7 +103,9 @@ class Soundboard(commands.Cog):
                             )
                         vc_client.play(
                             PCMVolumeTransformer(
-                                original=FFmpegPCMAudio(source=selected_sound["file_path"]),
+                                original=FFmpegPCMAudio(
+                                    source=selected_sound["file_path"]
+                                ),
                                 volume=0.6,
                             )
                         )
@@ -304,6 +314,13 @@ class Soundboard(commands.Cog):
                 color=error_color,
             )
             await ctx.respond(embed=embed, ephemeral=True)
+        elif (is_general and (len(SoundboardIndex().get_sounds()) >= 25)) or (
+            not is_general and (len(SoundboardIndex(ctx.guild.id).get_sounds()) >= 25)
+        ):
+            embed = Embed(
+                title="錯誤：已達音效數量限制", description="已經達到25個音效的限制。", color=error_color
+            )
+            await ctx.respond(embed=embed, ephemeral=True)
         else:
             description = "取得音檔URL後，點擊下方按鈕以新增音效。"
             if is_general:
@@ -320,7 +337,9 @@ class Soundboard(commands.Cog):
             )
             embed.add_field(name="2. 複製連結", value="對音檔點擊右鍵，並點擊「複製連結」。", inline=False)
             embed.add_field(name="3. 開啟上傳視窗", value="點擊下方按鈕，繼續新增音效流程。", inline=False)
-            await ctx.respond(embed=embed, view=self.add_sound_window(is_general), ephemeral=True)
+            await ctx.respond(
+                embed=embed, view=self.add_sound_window(is_general), ephemeral=True
+            )
 
     @SOUNDBOARD_CMDS.command(name="remove", description="移除音效。")
     @commands.has_permissions(manage_guild=True)
