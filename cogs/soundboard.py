@@ -133,7 +133,7 @@ class Soundboard(commands.Cog):
                 soundboard.remove_sound(sounds.index(selected_sound))
                 embed = Embed(
                     title="已移除音效",
-                    description=f"已從 {interaction.guild.name} 移除了音效 「{selected_sound['display_name']}」。",
+                    description=f"已從「{interaction.guild.name}」移除了音效「{selected_sound['display_name']}」。",
                     color=default_color,
                 )
                 await interaction.edit_original_response(embed=embed, view=None)
