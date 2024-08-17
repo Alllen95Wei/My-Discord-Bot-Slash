@@ -109,8 +109,8 @@ class Soundboard(commands.Cog):
                             if vc.channel.id == check_vc_result.id:  # noqa
                                 vc_client = vc
                             elif (
-                                vc.channel.guild.id == check_vc_result.guild.id
-                            ):  # noqa
+                                vc.channel.guild.id == check_vc_result.guild.id  # noqa
+                            ):
                                 await vc.disconnect(force=False)
                                 break
                         if vc_client is None:
