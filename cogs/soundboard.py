@@ -123,7 +123,7 @@ class Soundboard(commands.Cog):
                                 original=FFmpegPCMAudio(
                                     source=selected_sound["file_path"]
                                 ),
-                                volume=0.6,
+                                volume=0.3,
                             )
                         )
                         embed = Embed(
