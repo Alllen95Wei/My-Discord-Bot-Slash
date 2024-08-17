@@ -55,6 +55,7 @@ class Soundboard(commands.Cog):
         copy_server: discord.Guild = None,
     ) -> ui.View:
         view = ui.View(timeout=300, disable_on_timeout=True)
+        replay_btn = ui.Button(emoji="🔄", label="重播", style=ButtonStyle.green, disabled=True)
         if mode == "play":
             soundboard = SoundboardIndex(None if is_general else ctx.guild.id)
         elif mode == "remove":
@@ -87,7 +88,7 @@ class Soundboard(commands.Cog):
             menu.disabled = True
         menu.options = selections
 
-        async def callback(interaction: discord.Interaction):
+        async def menu_callback(interaction: discord.Interaction):
             await interaction.response.defer()
             if len(menu.values) == 0:
                 return
@@ -126,10 +127,12 @@ class Soundboard(commands.Cog):
                                 volume=0.3,
                             )
                         )
+                        replay_btn.disabled = False
                         embed = Embed(
                             title="播放完成！", description="已播放所選取的音效。", color=default_color
                         )
                         embed.add_field(name="名稱", value=selected_sound["display_name"])
+                        await interaction.edit_original_response(view=view)
                     except discord.errors.ClientException as e:
                         if str(e) == "Already playing audio.":
                             embed = Embed(
@@ -182,9 +185,18 @@ class Soundboard(commands.Cog):
                 )
                 await interaction.edit_original_response(embed=embed, view=None)
 
-        menu.callback = callback
+        async def btn_callback(interaction: discord.Interaction):
+            if len(menu.values) == 0:
+                embed = Embed(title="錯誤：未選取音效", description="你尚未在選單中選取音效，因此無法重播。", color=error_color)
+                await interaction.followup.send(embed=embed, ephemeral=True)
+            else:
+                await menu_callback(interaction)
+
+        menu.callback = menu_callback
+        replay_btn.callback = btn_callback
 
         view.add_item(menu)
+        view.add_item(replay_btn)
         return view
 
     def add_sound_window(self, is_general: bool) -> ui.View:
