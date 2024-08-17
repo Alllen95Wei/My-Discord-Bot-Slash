@@ -852,7 +852,7 @@ class Basics(commands.Cog):
     ):
         try:
             for vc in self.bot.voice_clients:
-                if vc.channel.guild.id == ctx.guild.id:
+                if vc.channel.guild.id == ctx.guild.id:  # noqa
                     await vc.disconnect(force=False)
                     break
             embed = discord.Embed(
