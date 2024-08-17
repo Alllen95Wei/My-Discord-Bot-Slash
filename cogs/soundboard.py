@@ -108,6 +108,9 @@ class Soundboard(commands.Cog):
                         for vc in self.bot.voice_clients:
                             if vc.channel.id == check_vc_result.id:  # noqa
                                 vc_client = vc
+                            elif vc.channel.guild.id == channel.guild.id:  # noqa
+                                await vc.disconnect(force=False)
+                                break
                         if vc_client is None:
                             vc_client = await check_vc_result.connect()
                             await check_vc_result.guild.change_voice_state(
