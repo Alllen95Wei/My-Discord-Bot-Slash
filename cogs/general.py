@@ -1357,6 +1357,13 @@ class Events(commands.Cog):
                     if member.id in target_user_id:
                         try:
                             if connect_when_found:
+                                bot: commands.Bot = instance.bot
+                                for vc in bot.voice_clients:
+                                    if vc.channel.id == channel.id: # noqa
+                                        return channel
+                                    elif vc.channel.guild.id == channel.guild.id: # noqa
+                                        await vc.disconnect(force=False)
+                                        break
                                 await channel.connect()
                                 await channel.guild.change_voice_state(
                                     channel=channel, self_mute=False, self_deaf=True
@@ -1391,7 +1398,7 @@ class Events(commands.Cog):
             or msg_in.startswith("https://cdn.discordapp.com/attachments/")
         ):
             check_vc_result = await self.check_voice_channel(self, message.guild)
-            if isinstance(check_vc_result, str):
+            if isinstance(check_vc_result, str) and check_vc_result != "已經連線至語音頻道。":
                 embed = discord.Embed(
                     title="錯誤", description="機器人自動加入語音頻道時失敗。", color=error_color
                 )
