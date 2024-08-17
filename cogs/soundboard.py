@@ -54,7 +54,7 @@ class Soundboard(commands.Cog):
         mode: str = "play",
         copy_server: discord.Guild = None,
     ) -> ui.View:
-        view = ui.View(timeout=300, disable_on_timeout=True)
+        view = ui.View(timeout=600, disable_on_timeout=True)
         replay_btn = ui.Button(emoji="🔄", label="重播", style=ButtonStyle.green, disabled=True)
         if mode == "play":
             soundboard = SoundboardIndex(None if is_general else ctx.guild.id)
