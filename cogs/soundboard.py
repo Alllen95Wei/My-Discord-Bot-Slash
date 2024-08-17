@@ -108,7 +108,9 @@ class Soundboard(commands.Cog):
                         for vc in self.bot.voice_clients:
                             if vc.channel.id == check_vc_result.id:  # noqa
                                 vc_client = vc
-                            elif vc.channel.guild.id == check_vc_result.guild.id:  # noqa
+                            elif (
+                                vc.channel.guild.id == check_vc_result.guild.id
+                            ):  # noqa
                                 await vc.disconnect(force=False)
                                 break
                         if vc_client is None:
@@ -185,8 +187,7 @@ class Soundboard(commands.Cog):
         view.add_item(menu)
         return view
 
-    @staticmethod
-    def add_sound_window(is_general: bool) -> ui.View:
+    def add_sound_window(self, is_general: bool) -> ui.View:
         view = ui.View(disable_on_timeout=True)
         btn = ui.Button(label="已取得URL，新增音效", style=ButtonStyle.green, emoji="🔗")
         window = ui.Modal(
@@ -232,6 +233,16 @@ class Soundboard(commands.Cog):
                                 audio_file = audioread.audio_open(file_path)
                                 length = audio_file.duration
                                 if length <= 15:
+                                    self.real_logger.info(
+                                        f"{interaction.user.name} 新增了音效"
+                                    )
+                                    self.real_logger.info(
+                                        "   ⌊伺服器：" + interaction.guild.name
+                                    )
+                                    self.real_logger.info(
+                                        "   ⌊音效名稱：" + window.children[0].value
+                                    )
+                                    self.real_logger.info("   ⌊音效檔案路徑：" + file_path)
                                     soundboard_index.add_sound(
                                         display_name=window.children[0].value,
                                         description=window.children[1].value,
@@ -430,6 +441,13 @@ class Soundboard(commands.Cog):
                         color=error_color,
                     )
                     await ctx.respond(embed=embed)
+                elif len(SoundboardIndex(target_guild_id).get_sounds()) >= 25:
+                    embed = Embed(
+                        title="錯誤：已達音效數量限制",
+                        description="已經達到25個音效的限制。",
+                        color=error_color,
+                    )
+                    await ctx.respond(embed=embed, ephemeral=True)
                 else:
                     embed = Embed(
                         title="複製音效",
