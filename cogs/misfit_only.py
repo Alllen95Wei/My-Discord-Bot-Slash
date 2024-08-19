@@ -60,7 +60,7 @@ class Misfit(commands.Cog):
             emoji="🙋‍♂️",
         )
         async def btn_callback(self, button, interaction: discord.Interaction):
-            member_obj = self.outer_instance.get_guild(1030069819199991838).get_member(interaction.user.id)
+            member_obj = self.outer_instance.bot.get_guild(1030069819199991838).get_member(interaction.user.id)
             if member_obj.timed_out:
                 await interaction.response.send_modal(Misfit.AppealWindow(self.outer_instance))
             else:
