@@ -1,7 +1,7 @@
 # coding=utf-8
 import discord
 from discord.ext import commands
-from discord import Embed
+from discord import Embed, ui, ButtonStyle, InputTextStyle
 import os
 import zoneinfo
 from pathlib import Path
@@ -22,6 +22,54 @@ class Misfit(commands.Cog):
         self.bot = bot
         self.real_logger = real_logger
 
+    class AppealWindow(ui.Modal):
+        def __init__(self, outer_instance):
+            super().__init__(
+                ui.InputText(
+                    label="申訴內文",
+                    style=InputTextStyle.long,
+                    required=True,
+                ),
+                title="提交申訴",
+                timeout=None,
+            )
+            self.outer_instance = outer_instance
+
+        async def callback(self, interaction: discord.Interaction):
+            await interaction.response.defer()
+            appeal_channel = self.outer_instance.get_channel(1275005711373570098)
+            appeal_embed = Embed(
+                title="新的申訴",
+                description=f"{interaction.user.mention}因為遭到禁言，傳送了申訴。",
+                color=default_color,
+            )
+            appeal_embed.add_field(name="申訴內容", value=self.children[0].value)
+            await appeal_channel.send(embed=appeal_embed)
+            embed = Embed(title="已送出申訴", description="已送出你的申訴。", color=default_color)
+            appeal_embed.add_field(name="申訴內容", value=self.children[0].value)
+            await interaction.edit_original_response(embed=embed, view=None)
+
+    class AppealView(ui.View):
+        def __init__(self, outer_instance):
+            super().__init__(timeout=None)
+            self.outer_instance = outer_instance
+
+        @ui.button(
+            label="提交申訴",
+            style=ButtonStyle.blurple,
+            emoji="🙋‍♂️",
+        )
+        async def btn_callback(self, button, interaction: discord.Interaction):
+            if interaction.user.timed_out:
+                await interaction.response.send_modal(Misfit.AppealWindow(self.outer_instance))
+            else:
+                embed = Embed(
+                    title="錯誤：未被禁言",
+                    description="你目前未被禁言，因此無法使用此功能。",
+                    color=error_color,
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+
     @discord.user_command(name="600他")
     @commands.has_permissions(moderate_members=True)
     async def ten_mins_ban(self, ctx, user: discord.Member | discord.User):
@@ -34,12 +82,25 @@ class Misfit(commands.Cog):
                 description=f"{user.mention}已經被600了w",
                 color=default_color,
             )
-            await ctx.respond(embed=embed)
+            await ctx.respond(embed=embed, ephemeral=True)
         else:
             embed = Embed(
                 title="錯誤", description="此指令僅允許在「損友俱樂部」使用！", color=error_color
             )
             await ctx.respond(embed=embed, ephemeral=True)
+
+    @commands.Cog.listener()
+    async def on_member_update(self, before: discord.Member, after: discord.Member):
+        if not before.timed_out and after.timed_out:
+            embed = Embed(
+                title="申訴",
+                description="你似乎遭到禁言。如果需要，你可以點擊下方的按鈕開始申訴。\n你的申訴內容僅會被<@&1123952631207968948>看到。",
+                color=default_color,
+            )
+            try:
+                await after.send(embed=embed, view=self.AppealView(self))
+            except discord.Forbidden or discord.HTTPException:
+                self.real_logger.warning(f"私訊給 {after.name} 時發生錯誤。")
 
     @commands.Cog.listener()
     async def on_voice_state_update(
