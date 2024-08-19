@@ -37,7 +37,7 @@ class Misfit(commands.Cog):
 
         async def callback(self, interaction: discord.Interaction):
             await interaction.response.defer()
-            appeal_channel = self.outer_instance.get_channel(1275005711373570098)
+            appeal_channel = self.outer_instance.bot.get_channel(1275005711373570098)
             appeal_embed = Embed(
                 title="新的申訴",
                 description=f"{interaction.user.mention}因為遭到禁言，傳送了申訴。",
