@@ -60,7 +60,8 @@ class Misfit(commands.Cog):
             emoji="🙋‍♂️",
         )
         async def btn_callback(self, button, interaction: discord.Interaction):
-            if interaction.user.timed_out:
+            member_obj = self.outer_instance.get_guild(1030069819199991838).get_member(interaction.user.id)
+            if member_obj.timed_out:
                 await interaction.response.send_modal(Misfit.AppealWindow(self.outer_instance))
             else:
                 embed = Embed(
@@ -72,7 +73,7 @@ class Misfit(commands.Cog):
 
     @discord.user_command(name="600他")
     @commands.has_permissions(moderate_members=True)
-    async def ten_mins_ban(self, ctx, user: discord.Member | discord.User):
+    async def ten_mins_ban(self, ctx: discord.ApplicationContext, user: discord.Member | discord.User):
         if ctx.guild.id == 1030069819199991838:
             current_time = datetime.datetime.now(tz=now_tz)
             timeout_time = current_time + datetime.timedelta(minutes=10)
@@ -91,7 +92,7 @@ class Misfit(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member):
-        if not before.timed_out and after.timed_out:
+        if (after.guild.id == 1030069819199991838) and (not before.timed_out and after.timed_out):
             embed = Embed(
                 title="申訴",
                 description="你似乎遭到禁言。如果需要，你可以點擊下方的按鈕開始申訴。\n你的申訴內容僅會被<@&1123952631207968948>看到。",
