@@ -37,14 +37,24 @@ class Misfit(commands.Cog):
 
         async def callback(self, interaction: discord.Interaction):
             await interaction.response.defer()
-            appeal_channel = self.outer_instance.bot.get_channel(1275005711373570098)
+            appeal_channel: discord.TextChannel = self.outer_instance.bot.get_channel(
+                1275005711373570098
+            )
             appeal_embed = Embed(
                 title="新的申訴",
                 description=f"{interaction.user.mention}因為遭到禁言，傳送了申訴。",
                 color=default_color,
             )
             appeal_embed.add_field(name="申訴內容", value=self.children[0].value)
-            await appeal_channel.send(embed=appeal_embed)
+            await appeal_channel.send(
+                embed=appeal_embed,
+                view=Misfit.ReviewView(
+                    self.outer_instance,
+                    self.outer_instance.bot.get_guild(1030069819199991838).get_member(
+                        interaction.user.id
+                    ),
+                ),
+            )
             embed = Embed(title="已送出申訴", description="已送出你的申訴。", color=default_color)
             appeal_embed.add_field(name="申訴內容", value=self.children[0].value)
             await interaction.edit_original_response(embed=embed, view=None)
@@ -74,6 +84,59 @@ class Misfit(commands.Cog):
                     color=error_color,
                 )
                 await interaction.followup.send(embed=embed, ephemeral=True)
+
+    class ReviewView(ui.View):
+        def __init__(self, outer_instance, timed_out_member: discord.Member):
+            super().__init__(timeout=None)
+            self.outer_instance = outer_instance
+            self.timed_out_member = timed_out_member
+
+        @ui.button(label="通過，解除禁言", style=ButtonStyle.green)
+        async def allow_callback(self, button, interaction: discord.Interaction):
+            if not self.timed_out_member.timed_out:
+                embed = Embed(
+                    title="錯誤：使用者未被禁言",
+                    description=f"{self.timed_out_member.mention}似乎已被解除禁言。",
+                    color=error_color,
+                )
+            else:
+                await self.timed_out_member.timeout(
+                    until=None, reason=f"{interaction.user.name} 審核後解除禁言"
+                )
+                embed = Embed(
+                    title="已解除禁言",
+                    description=f"{interaction.user.mention}已解除了{self.timed_out_member.mention}的禁言。",
+                )
+                notify_embed = Embed(
+                    title="好消息：申訴通過！",
+                    description=f"你的申訴經過{interaction.user.mention}的許可，因此你的禁言已解除。",
+                    color=default_color,
+                )
+                await self.timed_out_member.send(embed=notify_embed)
+            self.disable_all_items()
+            await interaction.edit_original_response(embed=embed, view=self)
+
+        @ui.button(label="未通過，繼續禁言", style=ButtonStyle.red)
+        async def disallow_callback(self, button, interaction: discord.Interaction):
+            if not self.timed_out_member.timed_out:
+                embed = Embed(
+                    title="錯誤：使用者未被禁言",
+                    description=f"{self.timed_out_member.mention}似乎已被解除禁言。",
+                    color=error_color,
+                )
+            else:
+                embed = Embed(
+                    title="已退回申訴",
+                    description=f"{interaction.user.mention}已退回了{self.timed_out_member.mention}的申訴。禁言將繼續。",
+                )
+                notify_embed = Embed(
+                    title="申訴未通過",
+                    description=f"你的申訴經過{interaction.user.mention}檢查後遭到拒絕，因此你的禁言將繼續。",
+                    color=default_color,
+                )
+                await self.timed_out_member.send(embed=notify_embed)
+            self.disable_all_items()
+            await interaction.edit_original_response(embed=embed, view=self)
 
     @discord.user_command(name="600他")
     @commands.has_permissions(moderate_members=True)
