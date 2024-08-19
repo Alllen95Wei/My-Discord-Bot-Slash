@@ -70,6 +70,7 @@ class Misfit(commands.Cog):
             emoji="🙋‍♂️",
         )
         async def btn_callback(self, button, interaction: discord.Interaction):
+            await interaction.response.defer()
             member_obj = self.outer_instance.bot.get_guild(
                 1030069819199991838
             ).get_member(interaction.user.id)
@@ -93,6 +94,7 @@ class Misfit(commands.Cog):
 
         @ui.button(label="通過，解除禁言", style=ButtonStyle.green)
         async def allow_callback(self, button, interaction: discord.Interaction):
+            await interaction.response.defer()
             if not self.timed_out_member.timed_out:
                 embed = Embed(
                     title="錯誤：使用者未被禁言",
@@ -118,6 +120,7 @@ class Misfit(commands.Cog):
 
         @ui.button(label="未通過，繼續禁言", style=ButtonStyle.red)
         async def disallow_callback(self, button, interaction: discord.Interaction):
+            await interaction.response.defer()
             if not self.timed_out_member.timed_out:
                 embed = Embed(
                     title="錯誤：使用者未被禁言",
@@ -179,7 +182,7 @@ class Misfit(commands.Cog):
                     color=default_color,
                 )
                 try:
-                    await after.send(embed=embed, view=self.AppealView(self))
+                    await after.send(embed=embed)
                 except discord.Forbidden or discord.HTTPException:
                     self.real_logger.warning(f"私訊給 {after.name} 時發生錯誤。")
 
