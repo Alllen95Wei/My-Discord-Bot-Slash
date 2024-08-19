@@ -70,7 +70,6 @@ class Misfit(commands.Cog):
             emoji="🙋‍♂️",
         )
         async def btn_callback(self, button, interaction: discord.Interaction):
-            await interaction.response.defer()
             member_obj = self.outer_instance.bot.get_guild(
                 1030069819199991838
             ).get_member(interaction.user.id)
