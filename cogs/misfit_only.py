@@ -107,6 +107,7 @@ class Misfit(commands.Cog):
                 embed = Embed(
                     title="已解除禁言",
                     description=f"{interaction.user.mention}已解除了{self.timed_out_member.mention}的禁言。",
+                    color=default_color,
                 )
                 notify_embed = Embed(
                     title="好消息：申訴通過！",
@@ -114,8 +115,7 @@ class Misfit(commands.Cog):
                     color=default_color,
                 )
                 await self.timed_out_member.send(embed=notify_embed)
-            self.disable_all_items()
-            await interaction.edit_original_response(embed=embed, view=self)
+            await interaction.edit_original_response(embed=embed, view=None)
 
         @ui.button(label="未通過，繼續禁言", style=ButtonStyle.red)
         async def disallow_callback(self, button, interaction: discord.Interaction):
@@ -130,6 +130,7 @@ class Misfit(commands.Cog):
                 embed = Embed(
                     title="已退回申訴",
                     description=f"{interaction.user.mention}已退回了{self.timed_out_member.mention}的申訴。禁言將繼續。",
+                    color=default_color,
                 )
                 notify_embed = Embed(
                     title="申訴未通過",
@@ -137,8 +138,7 @@ class Misfit(commands.Cog):
                     color=default_color,
                 )
                 await self.timed_out_member.send(embed=notify_embed)
-            self.disable_all_items()
-            await interaction.edit_original_response(embed=embed, view=self)
+            await interaction.edit_original_response(embed=embed, view=None)
 
     @discord.user_command(name="600他")
     @commands.has_permissions(moderate_members=True)
