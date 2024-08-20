@@ -53,6 +53,7 @@ class Misfit(commands.Cog):
                     self.outer_instance.bot.get_guild(1030069819199991838).get_member(
                         interaction.user.id
                     ),
+                    self.children[0].value,
                 ),
             )
             embed = Embed(title="已送出申訴", description="已送出你的申訴。", color=default_color)
@@ -86,10 +87,13 @@ class Misfit(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
 
     class ReviewView(ui.View):
-        def __init__(self, outer_instance, timed_out_member: discord.Member):
+        def __init__(
+            self, outer_instance, timed_out_member: discord.Member, appeal_content: str
+        ):
             super().__init__(timeout=None)
             self.outer_instance = outer_instance
             self.timed_out_member = timed_out_member
+            self.appeal_content = appeal_content
 
         @ui.button(label="通過，解除禁言", style=ButtonStyle.green)
         async def allow_callback(self, button, interaction: discord.Interaction):
@@ -109,6 +113,7 @@ class Misfit(commands.Cog):
                     description=f"{interaction.user.mention}已解除了{self.timed_out_member.mention}的禁言。",
                     color=default_color,
                 )
+                embed.add_field(name="申訴內容", value=self.appeal_content)
                 notify_embed = Embed(
                     title="好消息：申訴通過！",
                     description=f"你的申訴經過{interaction.user.mention}的許可，因此你的禁言已解除。",
@@ -132,6 +137,7 @@ class Misfit(commands.Cog):
                     description=f"{interaction.user.mention}已退回了{self.timed_out_member.mention}的申訴。禁言將繼續。",
                     color=default_color,
                 )
+                embed.add_field(name="申訴內容", value=self.appeal_content)
                 notify_embed = Embed(
                     title="申訴未通過",
                     description=f"你的申訴經過{interaction.user.mention}檢查後遭到拒絕，因此你的禁言將繼續。",
