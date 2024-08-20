@@ -1185,8 +1185,14 @@ class Events(commands.Cog):
                         value=f"`{floor(report['activity_bonus']*10)/10}` 點",
                         inline=False,
                     )
+                    if report["join_at"] == 0:
+                        embed.add_field(
+                            name="注意：由於資料遺失，此報告的數值可能有誤。",
+                            value="機器人似乎在你進行語音階段的期間重啟，因此遺失了資料。",
+                            inline=False,
+                        )
                     embed.set_footer(
-                        text="目前此功能測試中。如要停用此功能，請使用/user_info set_voice_exp_report指令。"
+                        text="如要停用此功能，請使用/user_info set_voice_exp_report指令。"
                     )
                     try:
                         await member.send(embed=embed)
@@ -1200,7 +1206,8 @@ class Events(commands.Cog):
                     f"{member.name} 加入了其他頻道：{before.channel.name} -> {after.channel.name}"
                 )
                 report = exp_reports_list.get(member.id, deepcopy(exp_report_template))
-                report["channels"].append(after.channel.id)
+                if after.channel.id not in report["channel"]:
+                    report["channels"].append(after.channel.id)
                 exp_reports_list[member.id] = report
             elif before.channel is None and after.channel is not None:  # 開始語音階段
                 self.real_logger.debug(f"{member.name} 開始了語音階段：{after.channel.name}")
