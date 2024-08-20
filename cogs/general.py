@@ -329,7 +329,25 @@ class Basics(commands.Cog):
         self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa
     ):
         embed = discord.Embed(title="PONG!✨", color=default_color)
-        embed.add_field(name="PING值", value=f"`{round(self.bot.latency * 1000)}` ms")
+        embed.add_field(
+            name="PING值", value=f"`{round(self.bot.latency * 1000)}` ms", inline=False
+        )
+        for vc in self.bot.voice_clients:
+            vc: discord.VoiceClient
+            try:
+                embed.add_field(
+                    name=f"{vc.guild.name}/{vc.channel.name}",
+                    value=f"端點：`{vc.endpoint.split('.')[0]}`\n"
+                    f"PING值：`{round(vc.average_latency * 1000)}` ms",
+                    inline=False,
+                )
+            except OverflowError:
+                embed.add_field(
+                    name=f"{vc.guild.name}/{vc.channel.name}",
+                    value=f"端點：`{vc.endpoint.split('.')[0]}`\n"
+                    "PING值：(暫時不可用)",
+                    inline=False,
+                )
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
     @discord.slash_command(name="help", description="提供指令協助。")
@@ -1368,7 +1386,9 @@ class Events(commands.Cog):
                                 for vc in bot.voice_clients:
                                     if vc.channel.id == channel.id:  # noqa
                                         return channel
-                                    elif vc.channel.guild.id == channel.guild.id: # noqa
+                                    elif (
+                                        vc.channel.guild.id == channel.guild.id  # noqa
+                                    ):
                                         await vc.disconnect(force=False)
                                         break
                                 await channel.connect()
