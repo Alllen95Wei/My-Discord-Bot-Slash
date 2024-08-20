@@ -831,7 +831,7 @@ class Basics(commands.Cog):
         else:
             try:
                 await 頻道.guild.change_voice_state(
-                    channel=頻道, self_deaf=True, self_mute=True
+                    channel=頻道, self_deaf=False, self_mute=True
                 )
                 embed = discord.Embed(
                     title="已加入頻道",
