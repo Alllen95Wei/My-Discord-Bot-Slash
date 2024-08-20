@@ -831,7 +831,7 @@ class Basics(commands.Cog):
         else:
             try:
                 await 頻道.guild.change_voice_state(
-                    channel=頻道, self_deaf=False, self_mute=True
+                    channel=頻道, self_deaf=True, self_mute=False
                 )
                 embed = discord.Embed(
                     title="已加入頻道",
@@ -1366,7 +1366,7 @@ class Events(commands.Cog):
                             if connect_when_found:
                                 bot: commands.Bot = instance.bot
                                 for vc in bot.voice_clients:
-                                    if vc.channel.id == channel.id: # noqa
+                                    if vc.channel.id == channel.id:  # noqa
                                         return channel
                                     elif vc.channel.guild.id == channel.guild.id: # noqa
                                         await vc.disconnect(force=False)
