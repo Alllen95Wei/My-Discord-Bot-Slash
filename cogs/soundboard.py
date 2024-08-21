@@ -1,4 +1,6 @@
 # coding=utf-8
+import time
+import datetime
 import discord
 from discord.ext import commands
 from discord import (
@@ -32,6 +34,8 @@ base_dir = os.path.abspath(os.path.dirname(__file__))
 parent_dir = str(Path(__file__).parent.parent.absolute())
 sound_dir = os.path.join(parent_dir, "soundboard_data")
 
+HISTORY: list[dict] = []
+
 
 class Soundboard(commands.Cog):
     def __init__(self, bot: commands.Bot, real_logger: logger.CreateLogger):
@@ -55,7 +59,9 @@ class Soundboard(commands.Cog):
         copy_server: discord.Guild = None,
     ) -> ui.View:
         view = ui.View(timeout=600, disable_on_timeout=True)
-        replay_btn = ui.Button(emoji="🔄", label="重播", style=ButtonStyle.green, disabled=True)
+        replay_btn = ui.Button(
+            emoji="🔄", label="重播", style=ButtonStyle.green, disabled=True
+        )
         if mode == "play":
             soundboard = SoundboardIndex(None if is_general else ctx.guild.id)
         elif mode == "remove":
@@ -127,6 +133,14 @@ class Soundboard(commands.Cog):
                                 volume=0.3,
                             )
                         )
+                        HISTORY.append(
+                            {
+                                "timestamp": time.time(),
+                                "user_id": interaction.user.id,
+                                "vc_id": check_vc_result.id,
+                                "sound_display_name": selected_sound["display_name"],
+                            }
+                        )
                         replay_btn.disabled = False
                         embed = Embed(
                             title="播放完成！", description="已播放所選取的音效。", color=default_color
@@ -187,7 +201,11 @@ class Soundboard(commands.Cog):
 
         async def btn_callback(interaction: discord.Interaction):
             if len(menu.values) == 0:
-                embed = Embed(title="錯誤：未選取音效", description="你尚未在選單中選取音效，因此無法重播。", color=error_color)
+                embed = Embed(
+                    title="錯誤：未選取音效",
+                    description="你尚未在選單中選取音效，因此無法重播。",
+                    color=error_color,
+                )
                 await interaction.followup.send(embed=embed, ephemeral=True)
             else:
                 await menu_callback(interaction)
@@ -470,6 +488,24 @@ class Soundboard(commands.Cog):
                         embed=embed,
                         view=self.soundboard_selection(ctx, False, "copy", copy_server),
                     )
+
+    @SOUNDBOARD_CMDS.command(name="history", description="顯示最近25次的音效播放紀錄。")
+    async def soundboard_history(self, ctx):
+        latest_25_history = HISTORY
+        if len(HISTORY) > 25:
+            latest_25_history = HISTORY[:25]
+        embed = Embed(
+            title="音效播放紀錄", description="下方列出了最近25次的音效播放紀錄。", color=default_color
+        )
+        for record in latest_25_history:
+            embed.add_field(
+                name=datetime.datetime.fromtimestamp(record["timestamp"]).strftime("%y/%m/%d %H:%M:%S"),
+                value=f"使用者：<@{record['user_id']}>\n"
+                      f"語音頻道：<#{record['vc_id']}>\n"
+                      f"播放音效：{record['sound_display_name']}",
+                inline=False
+            )
+        await ctx.respond(embed=embed)
 
 
 def setup(bot):
