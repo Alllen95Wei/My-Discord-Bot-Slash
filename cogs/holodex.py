@@ -7,6 +7,7 @@ import zoneinfo
 from pathlib import Path
 from dotenv import load_dotenv
 import time
+from math import ceil
 
 import holodex_api
 import logger
@@ -136,7 +137,7 @@ class Holodex(commands.Cog):
                 time_delta = end_time - start_time
                 message = await interaction.edit_original_response(
                     content=f"下載共花了 `{round(time_delta, 3)}` 秒 "
-                            f"(`{round((sect['end'] - sect['start'])/time_delta, 3)}` x)",
+                    f"(`{round((sect['end'] - sect['start'])/time_delta, 3)}` x)",
                     file=result,
                 )
                 if add_to_musicbot_queue:
@@ -182,6 +183,13 @@ class Holodex(commands.Cog):
         self,
         ctx,
         url: Option(str, name="直播連結", description="欲抓取時間軸的直播連結(僅限YouTube)"),
+        page: Option(
+            int,
+            name="頁數",
+            description="若時間軸的片段數量超過25個，則會自動分頁",
+            min_value=1,
+            required=False,
+        ) = 1,
         bitrate: Option(
             int,
             name="位元率",
@@ -247,11 +255,27 @@ class Holodex(commands.Cog):
                         name="片段數量", value=f"`{len(section_list)}`個", inline=False
                     )
                     embed.set_image(url=video.get_thumbnail())
+                    if len(section_list) > 25:
+                        split_section_list = []
+                        split_count = ceil(len(section_list) / 25)
+                        for i in range(split_count):
+                            split_section_list.append(
+                                section_list[
+                                    i * 25 : min((i + 1) * 25, len(section_list))
+                                ]
+                            )
+                        selected_page_no = min(page, split_count + 1)
+                        selected_page = split_section_list[
+                            selected_page_no - 1
+                        ]
+                        embed.add_field(name="頁數", value=f"第 {selected_page_no} / {split_count} 頁", inline=False)
+                    else:
+                        selected_page = section_list
                     view = self.section_selection(
                         ctx.author,
                         video,
                         bitrate if not add_to_musicbot_queue else 128,
-                        section_list,
+                        selected_page,
                         add_to_musicbot_queue,
                     )
             except Exception as e:
