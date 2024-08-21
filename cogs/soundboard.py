@@ -497,14 +497,17 @@ class Soundboard(commands.Cog):
         embed = Embed(
             title="音效播放紀錄", description="下方列出了最近25次的音效播放紀錄。", color=default_color
         )
-        for record in latest_25_history:
-            embed.add_field(
-                name=datetime.datetime.fromtimestamp(record["timestamp"]).strftime("%Y/%m/%d %H:%M:%S"),
-                value=f"使用者：<@{record['user_id']}>\n"
-                      f"語音頻道：<#{record['vc_id']}>\n"
-                      f"播放音效：{record['sound_display_name']}",
-                inline=False
-            )
+        if len(latest_25_history) != 0:
+            for record in latest_25_history:
+                embed.add_field(
+                    name=datetime.datetime.fromtimestamp(record["timestamp"]).strftime("%Y/%m/%d %H:%M:%S"),
+                    value=f"使用者：<@{record['user_id']}>\n"
+                          f"語音頻道：<#{record['vc_id']}>\n"
+                          f"播放音效：{record['sound_display_name']}",
+                    inline=False
+                )
+        else:
+            embed.add_field(name=" ", value="(無紀錄)", inline=False)
         await ctx.respond(embed=embed)
 
 
