@@ -499,7 +499,7 @@ class Soundboard(commands.Cog):
         )
         for record in latest_25_history:
             embed.add_field(
-                name=datetime.datetime.fromtimestamp(record["timestamp"]).strftime("%y/%m/%d %H:%M:%S"),
+                name=datetime.datetime.fromtimestamp(record["timestamp"]).strftime("%Y/%m/%d %H:%M:%S"),
                 value=f"使用者：<@{record['user_id']}>\n"
                       f"語音頻道：<#{record['vc_id']}>\n"
                       f"播放音效：{record['sound_display_name']}",
