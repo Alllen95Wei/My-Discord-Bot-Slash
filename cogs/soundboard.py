@@ -493,7 +493,7 @@ class Soundboard(commands.Cog):
     async def soundboard_history(self, ctx):
         latest_25_history = HISTORY
         if len(HISTORY) > 25:
-            latest_25_history = HISTORY[:25]
+            latest_25_history = HISTORY[-25:]
         embed = Embed(
             title="音效播放紀錄", description="下方列出了最近25次的音效播放紀錄。", color=default_color
         )
