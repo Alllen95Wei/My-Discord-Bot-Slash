@@ -477,7 +477,7 @@ class Soundboard(commands.Cog):
                         description="已經達到25個音效的限制。",
                         color=error_color,
                     )
-                    await ctx.respond(embed=embed, ephemeral=True)
+                    await ctx.respond(embed=embed)
                 else:
                     embed = Embed(
                         title="複製音效",
