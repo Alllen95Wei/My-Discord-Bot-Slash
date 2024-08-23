@@ -532,11 +532,11 @@ class Basics(commands.Cog):
     async def random(
         self,
         ctx,
-        range_min: Option(name="min", description="最小值", required=True, input_type=int),
-        range_max: Option(name="max", description="最大值", required=True, input_type=int),
+        range_min: Option(int, name="範圍1", description="隨機取數的範圍", required=True),
+        range_max: Option(int, name="範圍2", description="隨機取數的範圍", required=True),
         私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
     ):
-        ans = randint(int(range_min), int(range_max))
+        ans = randint(min(range_min, range_max), max(range_min, range_max))
         embed = discord.Embed(
             title="隨機", description=f"數字範圍：{range_min}~{range_max}", color=default_color
         )
