@@ -458,7 +458,6 @@ class Basics(commands.Cog):
             "您撥的電話無人接聽，嘟聲後開始計費。",
             "對不起，您播的號碼是空號，請查明後再撥。",
         )
-
         ans_b = (
             "不可能",
             "否定的",
@@ -1087,6 +1086,9 @@ class Events(commands.Cog):
                         if len(active_human_members) > 1:  # 若語音頻道人數大於1
                             value = 1 + len(active_human_members) / 10
                             exp_report["time_exp"] += value
+                            if member.voice.self_stream:
+                                value += 0.1
+                                exp_report["activity_bonus"] += 0.1
                             for a in member.activities:
                                 if isinstance(a, discord.Activity):
                                     value += 0.1
