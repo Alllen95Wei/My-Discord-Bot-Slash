@@ -662,7 +662,7 @@ class Basics(commands.Cog):
                     color=default_color,
                 )
                 lvl_up_embed.set_thumbnail(url=receiver.display_avatar)
-                await ctx.respond(embed=lvl_up_embed)
+                await ctx.respond(embed=lvl_up_embed, ephemeral=私人訊息)
         daily_reward_prob_raw_data = json_assistant.get_daily_reward_probability()
         sum_of_rewards = 0
         rewards_list = []
