@@ -74,7 +74,7 @@ class Basics(commands.Cog):
             giver: discord.User | discord.Member,
             real_logger: logger.CreateLogger,
         ):
-            super().__init__(timeout=3600 * 3)
+            super().__init__(timeout=3600 * 3, disable_on_timeout=True)
             self.giver = giver
             self.real_logger = real_logger
 
