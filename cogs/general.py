@@ -572,9 +572,7 @@ class Basics(commands.Cog):
         last_claimed_time_str = datetime.datetime.fromtimestamp(
             last_claimed_time, tz=now_tz
         ).strftime("%Y-%m-%d")
-        now_time_str = datetime.datetime.fromtimestamp(time.time(), tz=now_tz).strftime(
-            "%Y-%m-%d"
-        )
+        now_time_str = datetime.datetime.now(tz=now_tz).strftime("%Y-%m-%d")
         if now_time_str == last_claimed_time_str:
             embed = discord.Embed(
                 title="每日簽到",
