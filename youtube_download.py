@@ -94,6 +94,8 @@ class Video:
     def is_live(self) -> bool:
         info_dict = self.full_info
         try:
+            if info_dict["is_live"] is None:
+                return False
             return info_dict["is_live"]
         except KeyError:
             return False
