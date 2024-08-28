@@ -1301,7 +1301,7 @@ async def test(ctx):
 @commands.is_owner()
 async def reload(
     ctx,
-    cog_name: Option(str, "指定cog", description="僅重新載入指定的cog", required=False) = None,
+    cog_name: Option(str, name="指定cog", description="僅重新載入指定的cog", required=False) = None,
 ):
     extension_list = list(bot.extensions) if cog_name is None else ["cogs." + cog_name]
     embed = discord.Embed(title="重新載入", description="重新載入結果如下：", color=0x5FE1EA)
