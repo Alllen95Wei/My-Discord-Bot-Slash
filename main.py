@@ -1,5 +1,6 @@
 # coding: utf-8
 import discord
+from discord import Option
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
@@ -1298,14 +1299,27 @@ async def test(ctx):
 
 @bot.slash_command(name="reload", description="重新載入所有extension以套用最新變更。(請先使用「/update」)")
 @commands.is_owner()
-async def reload(ctx):
-    extension_list = list(bot.extensions)
-    response_context = "已經重新載入以下extension：\n"
-    embed = discord.Embed(title="重新載入", color=0x5FE1EA)
+async def reload(
+    ctx,
+    cog_name: Option(str, "指定cog", description="僅重新載入指定的cog", required=False) = None,
+):
+    extension_list = list(bot.extensions) if cog_name is None else ["cogs." + cog_name]
+    embed = discord.Embed(title="重新載入", description="重新載入結果如下：", color=0x5FE1EA)
+    success, fail, success_str, fail_str = [], [], "", ""
     for extension in extension_list:
-        bot.reload_extension(extension)
-        response_context += extension + "\n"
-    embed.description = response_context
+        try:
+            bot.reload_extension(extension)
+            success.append(extension)
+        except (
+            discord.ExtensionNotLoaded,
+            discord.ExtensionNotFound,
+            discord.NoEntryPointError,
+            discord.ExtensionFailed,
+        ) as e:
+            fail.append(f"{extension} (`{type(e).__name__}`)")
+    success_str, fail_str = "\n".join(success), "\n".join(fail)
+    embed.add_field(name="成功", value=success_str if success_str else "(無)", inline=False)
+    embed.add_field(name="失敗", value=fail_str if fail_str else "(無)", inline=False)
     await ctx.respond(embed=embed)
 
 
@@ -1369,8 +1383,18 @@ async def reload(ctx):
 #             await message.channel.send(embed=embed, delete_after=5)
 
 
-bot.load_extensions("cogs.general", "cogs.exp_sys", "cogs.anonymous", "cogs.dev_only", "cogs.announcement",
-                    "cogs.rewards", "cogs.misfit_only", "cogs.backup_sys", "cogs.jail", "cogs.holodex",
-                    "cogs.soundboard")
+bot.load_extensions(
+    "cogs.general",
+    "cogs.exp_sys",
+    "cogs.anonymous",
+    "cogs.dev_only",
+    "cogs.announcement",
+    "cogs.rewards",
+    "cogs.misfit_only",
+    "cogs.backup_sys",
+    "cogs.jail",
+    "cogs.holodex",
+    "cogs.soundboard",
+)
 
 bot.run(TOKEN)
