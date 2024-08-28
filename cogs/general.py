@@ -330,7 +330,7 @@ class Basics(commands.Cog):
     ):
         embed = discord.Embed(title="PONG!✨", color=default_color)
         embed.add_field(
-            name="PING值", value=f"`{round(self.bot.latency * 1000)}` ms", inline=False
+            name="API PING值", value=f"`{round(self.bot.latency * 1000)}` ms", inline=False
         )
         for vc in self.bot.voice_clients:
             vc: discord.VoiceClient
