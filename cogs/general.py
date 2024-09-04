@@ -330,7 +330,9 @@ class Basics(commands.Cog):
     ):
         embed = discord.Embed(title="PONG!✨", color=default_color)
         embed.add_field(
-            name="API PING值", value=f"`{round(self.bot.latency * 1000)}` ms", inline=False
+            name="API PING值",
+            value=f"`{round(self.bot.latency * 1000)}` ms",
+            inline=False,
         )
         for vc in self.bot.voice_clients:
             vc: discord.VoiceClient
@@ -344,8 +346,7 @@ class Basics(commands.Cog):
             except OverflowError:
                 embed.add_field(
                     name=f"{vc.guild.name}/{vc.channel.name}",
-                    value=f"端點：`{vc.endpoint.split('.')[0]}`\n"
-                    "PING值：(暫時不可用)",
+                    value=f"端點：`{vc.endpoint.split('.')[0]}`\n" "PING值：(暫時不可用)",
                     inline=False,
                 )
         await ctx.respond(embed=embed, ephemeral=私人訊息)
@@ -925,6 +926,76 @@ class Basics(commands.Cog):
             embed = discord.Embed(
                 title="錯誤", description="此訊息 **不是** 由 MusicBot 傳送。", color=error_color
             )
+        await ctx.respond(embed=embed, ephemeral=True)
+
+    @discord.user_command(name="預覽語音經驗值報告")
+    async def preview_exp_report(self, ctx, user: discord.Member):
+        if user.id not in exp_reports_list:
+            embed = discord.Embed(
+                title="錯誤：未找到經驗值報告",
+                description="該使用者可能不在語音階段中，或是已停用「語音經驗值報告」功能。",
+                color=error_color,
+            )
+        else:
+            embed = discord.Embed(
+                title="預覽語音經驗值報告",
+                description=f"{user.mention} 的語音經驗值報告預覽：",
+                color=default_color,
+            )
+            report = exp_reports_list[user.id]
+            time_delta = int(time.time()) - report["join_at"]
+            embed.add_field(
+                name="開始於",
+                value=f"<t:{report['join_at']}>" if report["join_at"] != 0 else "(不適用)",
+                inline=True,
+            )
+            embed.add_field(name="結束於 (以目前時間估計)", value=f"<t:{int(time.time())}>", inline=True)
+            embed.add_field(
+                name="總時長 (以目前時間估計)",
+                value=self.convert_seconds(time_delta)
+                if report["join_at"] != 0
+                else "(不適用)",
+                inline=True,
+            )
+            channel_str, partner_str = "", ""
+            for c in report["channels"]:
+                c = "<#" + str(c) + ">"
+                channel_str += c
+            channel_str = channel_str.replace("><", ">\n<")
+            if user.id in report["partners"]:
+                report["partners"].remove(user.id)
+            for m in report["partners"]:
+                if m == user.id:
+                    continue
+                m = "<@" + str(m) + ">"
+                partner_str += m
+            partner_str = partner_str.replace("><", ">\n<")
+            embed.add_field(
+                name=f"加入過的頻道 (共{len(report['channels'])}個)",
+                value=channel_str,
+                inline=False,
+            )
+            embed.add_field(
+                name=f"與你互動過的使用者 (共{len(report['partners'])}位)",
+                value=partner_str,
+                inline=False,
+            )
+            embed.add_field(
+                name="時間點數 (因待在語音頻道而獲得的點數)",
+                value=f"`{floor(report['time_exp']*10)/10}` 點",
+                inline=False,
+            )
+            embed.add_field(
+                name="活動加成 (因進行遊戲、聆聽Spotify等而額外獲得的點數)",
+                value=f"`{floor(report['activity_bonus']*10)/10}` 點",
+                inline=False,
+            )
+            if report["join_at"] == 0:
+                embed.add_field(
+                    name="注意：由於資料遺失，此報告的數值可能有誤。",
+                    value="機器人似乎在進行語音階段的期間重啟，因此遺失了資料。",
+                    inline=False,
+                )
         await ctx.respond(embed=embed, ephemeral=True)
 
 
