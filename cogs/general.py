@@ -976,7 +976,7 @@ class Basics(commands.Cog):
                 inline=False,
             )
             embed.add_field(
-                name=f"與你互動過的使用者 (共{len(report['partners'])}位)",
+                name=f"互動過的使用者 (共{len(report['partners'])}位)",
                 value=partner_str,
                 inline=False,
             )
