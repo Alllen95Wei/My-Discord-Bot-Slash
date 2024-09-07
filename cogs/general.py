@@ -952,7 +952,7 @@ class Basics(commands.Cog):
             embed.add_field(name="結束於 (以目前時間估計)", value=f"<t:{int(time.time())}>", inline=True)
             embed.add_field(
                 name="總時長 (以目前時間估計)",
-                value=self.convert_seconds(time_delta)
+                value=Events.convert_seconds(time_delta)
                 if report["join_at"] != 0
                 else "(不適用)",
                 inline=True,
