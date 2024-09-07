@@ -61,6 +61,29 @@ class Video:
         with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
 
+    def download_section_in_mp4(self, file_path: str, start_time: int, end_time: int):
+        dl_opts = {
+            "merge_output_format": "mp4",
+            "final_ext": "mp4",
+            "format": "bestaudio+bestvideo/best",
+            "outtmpl": file_path,
+            "restrictfilenames": True,
+            "noplaylist": True,
+            "nocheckcertificate": True,
+            "logtostderr": False,
+            "default_search": "auto",
+            "usenetrc": False,
+            "fixup": "detect_or_warn",
+            "external_downloader": "ffmpeg",
+            "external_downloader_args": {
+                "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
+            },
+            "username": "oauth2",
+            "password": "",
+        }
+        with yt_dlp.YoutubeDL(dl_opts) as ydl:
+            return ydl.download([self.url])
+
     def get_id(self):
         info_dict = self.full_info
         vid = info_dict["id"]
@@ -110,4 +133,4 @@ class Video:
 if __name__ == "__main__":
     # youtube_download(url=input("請貼上要下載的連結："), file_name=input("請輸入下載後的檔案名稱："))
     v = Video(url=input("請貼上要下載的連結："))
-    v.download_section("test.wav", 0, 10)
+    v.download_section_in_mp4("test.mp4", 0, 10)
