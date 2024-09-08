@@ -64,7 +64,7 @@ def clear_mp3_metadata(mp3_path: str):
 
 
 def save_thumbnail_from_url(url: str):
-    image_data = requests.get(url).content
+    image_data = requests.get(url, timeout=10).content
     try:
         image = Image.open(io.BytesIO(image_data)).convert("RGB")
     except PIL.UnidentifiedImageError as e:
