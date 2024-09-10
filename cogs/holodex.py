@@ -30,6 +30,22 @@ class Holodex(commands.Cog):
         self.bot = bot
         self.real_logger = real_logger
 
+    @staticmethod
+    def slice_section_list(
+        section_list: list, page_no: int
+    ) -> tuple[tuple, list]:
+        if len(section_list) <= 25:
+            return (1, 1), section_list
+        split_section_list = []
+        split_count = ceil(len(section_list) / 25)
+        for i in range(split_count):
+            split_section_list.append(
+                section_list[i * 25 : min((i + 1) * 25, len(section_list))]
+            )
+        selected_page_no = min(page_no, split_count + 1)
+        selected_page = split_section_list[selected_page_no - 1]
+        return (selected_page_no, split_count), selected_page
+
     def section_selection(
         self,
         author: discord.Member | discord.User,
@@ -256,19 +272,12 @@ class Holodex(commands.Cog):
                     )
                     embed.set_image(url=video.get_thumbnail())
                     if len(section_list) > 25:
-                        split_section_list = []
-                        split_count = ceil(len(section_list) / 25)
-                        for i in range(split_count):
-                            split_section_list.append(
-                                section_list[
-                                    i * 25 : min((i + 1) * 25, len(section_list))
-                                ]
-                            )
-                        selected_page_no = min(page, split_count + 1)
-                        selected_page = split_section_list[
-                            selected_page_no - 1
-                        ]
-                        embed.add_field(name="頁數", value=f"第 {selected_page_no} / {split_count} 頁", inline=False)
+                        selected_page_no, selected_page = self.slice_section_list(section_list, page)
+                        embed.add_field(
+                            name="頁數",
+                            value=f"第 {selected_page_no[0]} / {selected_page_no[1]} 頁",
+                            inline=False,
+                        )
                     else:
                         selected_page = section_list
                     view = self.section_selection(
