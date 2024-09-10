@@ -195,6 +195,8 @@ Holodex API：https://docs.holodex.net/
                             embed.add_field(
                                 name="錯誤訊息", value=f"```{e}```", inline=False
                             )
+                    finally:
+                        os.remove(file_path)
                     await interaction.edit_original_response(embed=embed)
                 else:
                     embed.add_field(
