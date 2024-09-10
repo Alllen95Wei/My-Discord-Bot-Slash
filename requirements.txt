@@ -14,3 +14,7 @@ yt-dlp-youtube-oauth2 @ https://github.com/coletdjnz/yt-dlp-youtube-oauth2/archi
 aiohttp>3.8.4
 aiofiles
 audioread
+google-api-python-client
+google-auth
+google-auth-httplib2
+google-auth-oauthlib
