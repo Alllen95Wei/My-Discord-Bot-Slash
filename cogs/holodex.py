@@ -149,7 +149,7 @@ class Holodex(commands.Cog):
                     yt_uploader = youtube_uploader.YouTubeUploader(
                         file_path=file_path,
                         title=f"【{video_instance.full_info['channel']}】{section['name']} / {section['original_artist']}"
-                              "【純剪輯-測試中】",
+                        "【純剪輯-測試中】",
                         description=f"""
 原直播：{video_instance.url}
                         
@@ -172,6 +172,11 @@ Holodex API：https://docs.holodex.net/
                         embed.add_field(
                             name="連結",
                             value="https://youtu.be/" + video_info["id"],
+                            inline=False,
+                        )
+                        embed.add_field(
+                            name="影片無法觀看？",
+                            value="影片在剛上傳時，YouTube需要將其進一步處理才會發布。請稍待幾分鐘再回來。",
                             inline=False,
                         )
                     except KeyError:
