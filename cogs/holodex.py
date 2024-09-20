@@ -152,7 +152,8 @@ class Holodex(commands.Cog):
                         )
                         yt_uploader = youtube_uploader.YouTubeUploader(
                             file_path=file_path,
-                            title=f"【{video_instance.full_info['channel']}】{section['name']} / {section['original_artist']}"
+                            title=
+                            f"【{video_instance.full_info['channel']}】{section['name']} / {section['original_artist']}"
                             "【純剪輯-測試中】",
                             description=f"""
 原直播：{video_instance.url}
