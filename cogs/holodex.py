@@ -20,6 +20,7 @@ from math import ceil
 
 import holodex_api
 import logger
+from json_assistant import ClipsRecord
 import youtube_download
 import youtube_uploader
 from cogs.general import Basics, Events, MUSIC_CMD_CHANNELS
@@ -126,83 +127,98 @@ class Holodex(commands.Cog):
                     embed.set_thumbnail(url=section["art"])
                 if upload_to_youtube:
                     await interaction.edit_original_response(embed=embed, view=None)
-                    file_path = os.path.join(
-                        parent_dir,
-                        "ytdl",
-                        f"{video_instance.get_id()}_{section['id'][-12:]}.mp4",
-                    )
-                    await Basics.run_blocking(
-                        self.bot,
-                        video_instance.download_section_in_mp4,
-                        file_path,
-                        section["start"],
-                        section["end"],
-                    )
-                    end_time = time.time()
-                    time_delta = end_time - start_time
-                    await interaction.edit_original_response(
-                        content=f"下載共花了 `{round(time_delta, 3)}` 秒 "
-                        f"(`{round((section['end'] - section['start'])/time_delta, 3)}` x)",
-                        embed=embed,
-                        view=None,
-                    )
-                    yt_uploader = youtube_uploader.YouTubeUploader(
-                        file_path=file_path,
-                        title=f"【{video_instance.full_info['channel']}】{section['name']} / {section['original_artist']}"
-                        "【純剪輯-測試中】",
-                        description=f"""
+                    file_name = f"{video_instance.get_id()}_{section['id'][-12:]}.mp4"
+                    existed_id = ClipsRecord().get_youtube_id(file_name)
+                    if existed_id is None:
+                        file_path = os.path.join(
+                            parent_dir,
+                            "ytdl",
+                            file_name,
+                        )
+                        await Basics.run_blocking(
+                            self.bot,
+                            video_instance.download_section_in_mp4,
+                            file_path,
+                            section["start"],
+                            section["end"],
+                        )
+                        end_time = time.time()
+                        time_delta = end_time - start_time
+                        await interaction.edit_original_response(
+                            content=f"下載共花了 `{round(time_delta, 3)}` 秒 "
+                            f"(`{round((section['end'] - section['start'])/time_delta, 3)}` x)",
+                            embed=embed,
+                            view=None,
+                        )
+                        yt_uploader = youtube_uploader.YouTubeUploader(
+                            file_path=file_path,
+                            title=f"【{video_instance.full_info['channel']}】{section['name']} / {section['original_artist']}"
+                            "【純剪輯-測試中】",
+                            description=f"""
 原直播：{video_instance.url}
                         
 此剪輯片段由Allen Bot產生，使用Holodex API取得時間軸資料。
 本功能仍在測試中，且可能隨時下線並不另行通知。
 Holodex API：https://docs.holodex.net/
-                        """,
-                    )
-                    try:
-                        yt_uploader.setup_credentials()
-                        video_info = await Basics.run_blocking(
-                            self.bot,
-                            yt_uploader.upload,
+                            """,
                         )
+                        try:
+                            yt_uploader.setup_credentials()
+                            video_info = await Basics.run_blocking(
+                                self.bot,
+                                yt_uploader.upload,
+                            )
+                            ClipsRecord().add_clip(file_name=file_name, youtube_id=video_info["id"])
+                            embed = Embed(
+                                title="上傳完成！",
+                                description=f"片段 **{section['name']}** 已經上傳至YouTube！",
+                                color=default_color,
+                            )
+                            embed.add_field(
+                                name="連結",
+                                value="https://youtu.be/" + video_info["id"],
+                                inline=False,
+                            )
+                            embed.add_field(
+                                name="影片無法觀看？",
+                                value="影片在剛上傳時，YouTube需要將其進一步處理才會發布。請稍待幾分鐘再回來。",
+                                inline=False,
+                            )
+                        except KeyError:
+                            embed = Embed(
+                                title="錯誤：沒有Refresh Token",
+                                description="尚未有Refresh Token儲存在機器人內，因此無法上傳YouTube。\n"
+                                "請使用`/holodex update_token`更新Refresh Token。",
+                                color=error_color,
+                            )
+                        except Exception as e:
+                            if "Refresh token has expired or invalid." in str(e):
+                                embed = Embed(
+                                    title="錯誤：Refresh Token無效",
+                                    description="機器人所儲存的Refresh Token似乎已過期或失效。\n"
+                                    "請使用`/holodex update_token`更新Refresh Token。",
+                                    color=error_color,
+                                )
+                            else:
+                                embed = Embed(
+                                    title="錯誤", description="發生未知錯誤。", color=error_color
+                                )
+                                embed.add_field(
+                                    name="錯誤訊息", value=f"```{e}```", inline=False
+                                )
+                        finally:
+                            os.remove(file_path)
+                    else:
                         embed = Embed(
-                            title="上傳完成！",
-                            description=f"片段 **{section['name']}** 已經上傳至YouTube！",
+                            title="此片段已在YouTube上！",
+                            description=f"片段 **{section['name']}** 已可在YouTube上觀看！",
                             color=default_color,
                         )
                         embed.add_field(
                             name="連結",
-                            value="https://youtu.be/" + video_info["id"],
+                            value="https://youtu.be/" + existed_id,
                             inline=False,
                         )
-                        embed.add_field(
-                            name="影片無法觀看？",
-                            value="影片在剛上傳時，YouTube需要將其進一步處理才會發布。請稍待幾分鐘再回來。",
-                            inline=False,
-                        )
-                    except KeyError:
-                        embed = Embed(
-                            title="錯誤：沒有Refresh Token",
-                            description="尚未有Refresh Token儲存在機器人內，因此無法上傳YouTube。\n"
-                            "請使用`/holodex update_token`更新Refresh Token。",
-                            color=error_color,
-                        )
-                    except Exception as e:
-                        if "Refresh token has expired or invalid." in str(e):
-                            embed = Embed(
-                                title="錯誤：Refresh Token無效",
-                                description="機器人所儲存的Refresh Token似乎已過期或失效。\n"
-                                "請使用`/holodex update_token`更新Refresh Token。",
-                                color=error_color,
-                            )
-                        else:
-                            embed = Embed(
-                                title="錯誤", description="發生未知錯誤。", color=error_color
-                            )
-                            embed.add_field(
-                                name="錯誤訊息", value=f"```{e}```", inline=False
-                            )
-                    finally:
-                        os.remove(file_path)
                     await interaction.edit_original_response(embed=embed)
                 else:
                     embed.add_field(

@@ -551,3 +551,29 @@ class SoundboardIndex:
         sounds_list: list = data["sounds"]
         sounds_list.pop(index)
         self.write_raw_info(data)
+
+
+class ClipsRecord:
+    INIT_DATA = {
+        # "file_name": "youtube_id",
+    }
+    FILE = os.path.join(base_dir, "clips.json")
+
+    @staticmethod
+    def get_raw_info() -> dict:
+        with open(file=ClipsRecord.FILE, mode="r", encoding="utf-8") as f:
+            return json.loads(f.read())
+
+    @staticmethod
+    def write_raw_info(data: dict):
+        with open(ClipsRecord.FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+
+    def get_youtube_id(self, file_name: str) -> str | None:
+        data = self.get_raw_info()
+        return data.get(file_name, None)
+
+    def add_clip(self, file_name: str, youtube_id: str):
+        data = self.get_raw_info()
+        data[file_name] = youtube_id
+        self.write_raw_info(data)
