@@ -70,9 +70,9 @@ class Basics(commands.Cog):
 
     class GiftInTurn(discord.ui.View):
         def __init__(
-            self,
-            giver: discord.User | discord.Member,
-            real_logger: logger.CreateLogger,
+                self,
+                giver: discord.User | discord.Member,
+                real_logger: logger.CreateLogger,
         ):
             super().__init__(timeout=3600 * 3, disable_on_timeout=True)
             self.giver = giver
@@ -82,7 +82,7 @@ class Basics(commands.Cog):
             label="回送10點作為感謝(不會扣除你的經驗值！)", style=discord.ButtonStyle.blurple, emoji="🎁"
         )
         async def gift_btn(
-            self, button: discord.ui.Button, interaction: discord.Interaction
+                self, button: discord.ui.Button, interaction: discord.Interaction
         ):
             button.disabled = True
             json_assistant.User(self.giver.id).add_exp("text", 10)
@@ -107,11 +107,11 @@ class Basics(commands.Cog):
 
     class ConfirmDownload(discord.ui.View):
         def __init__(
-            self,
-            outer_instance,
-            video_instance: yt_download.Video,
-            metadata: dict,
-            bit_rate: int = 128,
+                self,
+                outer_instance,
+                video_instance: yt_download.Video,
+                metadata: dict,
+                bit_rate: int = 128,
         ):
             super().__init__()
             self.outer_instance = outer_instance
@@ -121,7 +121,7 @@ class Basics(commands.Cog):
 
         @discord.ui.button(style=discord.ButtonStyle.blurple, label="確認下載", emoji="✅")
         async def yes_btn(
-            self, button: discord.ui.Button, interaction: discord.Interaction
+                self, button: discord.ui.Button, interaction: discord.Interaction
         ):
             await interaction.response.defer()
             button.disabled = True
@@ -170,7 +170,7 @@ class Basics(commands.Cog):
                 embed.add_field(
                     name="為何會出現這則訊息？",
                     value="由於你使用指令時，將`加入後設資料`設為`True`。\n"
-                    "如要忽略此步驟，請將`加入後設資料`設為`False`。",
+                          "如要忽略此步驟，請將`加入後設資料`設為`False`。",
                 )
                 await interaction.edit_original_response(
                     embed=embed,
@@ -181,7 +181,7 @@ class Basics(commands.Cog):
 
         @discord.ui.button(style=discord.ButtonStyle.red, label="取消下載", emoji="❌")
         async def no_btn(
-            self, button: discord.ui.Button, interaction: discord.Interaction
+                self, button: discord.ui.Button, interaction: discord.Interaction
         ):
             button.disabled = True
             embed = discord.Embed(title="取消下載", description="已取消下載。", color=error_color)
@@ -189,35 +189,35 @@ class Basics(commands.Cog):
 
         @staticmethod
         def youtube_start_download(
-            video_instance: yt_download.Video,
-            metadata: dict,
-            bit_rate: int,
-            file_name=None,
-            section=None,
+                video_instance: yt_download.Video,
+                metadata: dict,
+                bit_rate: int,
+                file_name=None,
+                section=None,
         ) -> discord.File:
             if file_name is None:
                 file_name = video_instance.get_id() + "_" + str(bit_rate)
             mp3_file_name = f"{file_name}.mp3"
             mp3_file_path = os.path.join(parent_dir, "ytdl", mp3_file_name)
             if (
-                main_dl(
-                    video_instance=video_instance,
-                    mp3_path=mp3_file_path,
-                    metadata=metadata,
-                    section=section,
-                    bit_rate=bit_rate,
-                )
-                == "finished"
+                    main_dl(
+                        video_instance=video_instance,
+                        mp3_path=mp3_file_path,
+                        metadata=metadata,
+                        section=section,
+                        bit_rate=bit_rate,
+                    )
+                    == "finished"
             ):
                 return discord.File(mp3_file_path)
 
     class MP3MetadataEditor(Modal):
         def __init__(
-            self,
-            outer_instance,
-            video: yt_download.Video,
-            bit_rate: int,
-            prefill_metadata: dict,
+                self,
+                outer_instance,
+                video: yt_download.Video,
+                bit_rate: int,
+                prefill_metadata: dict,
         ):
             super().__init__(title="後設資料編輯器")
             self.bot = outer_instance.bot
@@ -296,11 +296,11 @@ class Basics(commands.Cog):
 
     class MP3MetadataEditorView(discord.ui.View):
         def __init__(
-            self,
-            outer_instance,
-            video: yt_download.Video,
-            bit_rate: int,
-            prefill_metadata: dict,
+                self,
+                outer_instance,
+                video: yt_download.Video,
+                bit_rate: int,
+                prefill_metadata: dict,
         ):
             super().__init__(timeout=300)
 
@@ -311,7 +311,7 @@ class Basics(commands.Cog):
 
         @discord.ui.button(label="點此編輯後設資料", style=discord.ButtonStyle.green, emoji="📝")
         async def editor_btn(
-            self, button: discord.ui.Button, interaction: discord.Interaction
+                self, button: discord.ui.Button, interaction: discord.Interaction
         ):
             await interaction.response.send_modal(
                 Basics.MP3MetadataEditor(
@@ -326,7 +326,7 @@ class Basics(commands.Cog):
 
     @discord.slash_command(name="ping", description="查詢機器人PING值(ms)。")
     async def ping(
-        self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa
+            self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa
     ):
         embed = discord.Embed(title="PONG!✨", color=default_color)
         embed.add_field(
@@ -340,7 +340,7 @@ class Basics(commands.Cog):
                 embed.add_field(
                     name=f"{vc.guild.name}/{vc.channel.name}",
                     value=f"端點：`{vc.endpoint.split('.')[0]}`\n"
-                    f"PING值：`{round(vc.average_latency * 1000)}` ms",
+                          f"PING值：`{round(vc.average_latency * 1000)}` ms",
                     inline=False,
                 )
             except OverflowError:
@@ -353,28 +353,28 @@ class Basics(commands.Cog):
 
     @discord.slash_command(name="help", description="提供指令協助。")
     async def help_cmd(
-        self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa
+            self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa
     ):
         embed = discord.Embed(title="指令協助", color=default_color)
         embed.add_field(
             name="想要知道如何使用本機器人？",
             value="請參閱在GitHub上的[Wiki]"
-            "(https://github.com/Alllen95Wei/My-Discord-Bot-Slash/wiki/)。",
+                  "(https://github.com/Alllen95Wei/My-Discord-Bot-Slash/wiki/)。",
         )
         await ctx.respond(embed=embed, ephemeral=私人訊息)
 
     @discord.slash_command(name="about", description="提供關於這隻機器人的資訊。")
     async def about(
-        self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa
+            self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa
     ):
         embed = discord.Embed(title="關於", color=default_color)
         embed.set_thumbnail(url=self.bot.user.display_avatar)
         embed.add_field(
             name="程式碼與授權",
             value="本機器人由<@657519721138094080>維護，使用[Py-cord]"
-            "(https://github.com/Pycord-Development/pycord)進行開發。\n"
-            "本機器人的程式碼及檔案皆可在[這裡]"
-            "(https://github.com/Alllen95Wei/My-Discord-Bot-Slash)查看。",
+                  "(https://github.com/Pycord-Development/pycord)進行開發。\n"
+                  "本機器人的程式碼及檔案皆可在[這裡]"
+                  "(https://github.com/Alllen95Wei/My-Discord-Bot-Slash)查看。",
             inline=True,
         )
         embed.add_field(
@@ -417,7 +417,7 @@ class Basics(commands.Cog):
 
     @discord.slash_command(name="dps", description="查詢伺服器電腦的CPU及記憶體使用率。")
     async def dps(
-        self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa
+            self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa
     ):
         embed = discord.Embed(title="伺服器電腦資訊", color=default_color)
         embed.add_field(name="CPU使用率", value=f"{detect_pc_status.get_cpu_usage()}%")
@@ -428,10 +428,10 @@ class Basics(commands.Cog):
 
     @discord.slash_command(name="ama", description="就是8號球，給你這個問題的隨機回答。")
     async def ama(
-        self,
-        ctx,
-        問題: Option(str, "你要問的問題", required=True),  # noqa
-        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
+            self,
+            ctx,
+            問題: Option(str, "你要問的問題", required=True),  # noqa
+            私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
     ):
         ans1 = ("g", "s", "b")
         ans_g = (
@@ -492,18 +492,18 @@ class Basics(commands.Cog):
     @discord.slash_command(name="bullshit", description="唬爛。")
     # @commands.cooldown(1, 60, commands.BucketType.user)
     async def bullshit_cmd(
-        self,
-        ctx,
-        關鍵字: Option(str, "想要唬爛的關鍵字", required=True),  # noqa: PEP 3131
-        字數: Option(  # noqa
-            int,
-            "想要唬爛的字數(最多1000)",
-            min_value=1,
-            max_value=1000,
-            required=False,
-        ) = 200,
-        顯著標示關鍵字: Option(bool, "是否顯著標示關鍵字", required=False) = True,  # noqa: PEP 3131
-        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
+            self,
+            ctx,
+            關鍵字: Option(str, "想要唬爛的關鍵字", required=True),  # noqa: PEP 3131
+            字數: Option(  # noqa
+                int,
+                "想要唬爛的字數(最多1000)",
+                min_value=1,
+                max_value=1000,
+                required=False,
+            ) = 200,
+            顯著標示關鍵字: Option(bool, "是否顯著標示關鍵字", required=False) = True,  # noqa: PEP 3131
+            私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
     ):
         await ctx.defer(ephemeral=私人訊息)
         content = ""
@@ -530,11 +530,11 @@ class Basics(commands.Cog):
 
     @discord.slash_command(name="random", description="在指定數字範圍隨機取得一數。")
     async def random(
-        self,
-        ctx,
-        range_min: Option(int, name="範圍1", description="隨機取數的範圍", required=True),
-        range_max: Option(int, name="範圍2", description="隨機取數的範圍", required=True),
-        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
+            self,
+            ctx,
+            range_min: Option(int, name="範圍1", description="隨機取數的範圍", required=True),
+            range_max: Option(int, name="範圍2", description="隨機取數的範圍", required=True),
+            私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
     ):
         ans = randint(min(range_min, range_max), max(range_min, range_max))
         embed = discord.Embed(
@@ -545,10 +545,10 @@ class Basics(commands.Cog):
 
     @discord.slash_command(name="qrcode", description="將輸入的文字轉為QR Code。")
     async def qrcode(
-        self,
-        ctx,
-        內容: Option(str, "要轉換的文字", required=True),  # noqa
-        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
+            self,
+            ctx,
+            內容: Option(str, "要轉換的文字", required=True),  # noqa
+            私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
     ):
         text = urllib.parse.quote(內容)
         url = f"https://quickchart.io/chart?cht=qr&chs=500x500&choe=UTF-8&chld=H|1&chl={text}"
@@ -560,10 +560,10 @@ class Basics(commands.Cog):
 
     @discord.slash_command(name="daily", description="每日簽到！")
     async def daily(
-        self,
-        ctx,
-        贈與使用者: Option(discord.User, "要贈與每日獎勵的對象", required=False) = None,  # noqa
-        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
+            self,
+            ctx,
+            贈與使用者: Option(discord.User, "要贈與每日獎勵的對象", required=False) = None,  # noqa
+            私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
     ):
         last_claimed_time = json_assistant.User(
             ctx.author.id
@@ -649,7 +649,7 @@ class Basics(commands.Cog):
             )
             json_assistant.add_daily_reward_probability(reward)
             if receiver_obj.level_calc(
-                "text"
+                    "text"
             ) and receiver_obj.notify_threshold_reached("text"):
                 self.real_logger.info(
                     f"等級提升：{receiver.name} 文字等級達到 {receiver_obj.get_level('text')} 等"
@@ -657,7 +657,7 @@ class Basics(commands.Cog):
                 lvl_up_embed = discord.Embed(
                     title="等級提升",
                     description=f":tada:恭喜 {receiver.mention} *文字*等級升級到 "
-                    f"**{receiver_obj.get_level('text')}** 等！",
+                                f"**{receiver_obj.get_level('text')}** 等！",
                     color=default_color,
                 )
                 lvl_up_embed.set_thumbnail(url=receiver.display_avatar)
@@ -676,7 +676,7 @@ class Basics(commands.Cog):
             embed.add_field(
                 name=f"{j}點",
                 value=f"{daily_reward_prob_raw_data[str(j)]} 次 "
-                f"({round(daily_reward_prob_raw_data[str(j)] / sum_of_rewards * 100, 1)} %)",
+                      f"({round(daily_reward_prob_raw_data[str(j)] / sum_of_rewards * 100, 1)} %)",
                 inline=False,
             )
         embed.add_field(name="已領取獎勵數量", value=f"{sum_of_rewards} 次", inline=False)
@@ -688,19 +688,19 @@ class Basics(commands.Cog):
         name="musicdl", description="將影片下載為mp3。由於Discord有檔案大小限制，因此有時可能會失敗。"
     )
     async def dl(
-        self,
-        ctx,
-        連結: Option(str, "欲下載的影片網址", required=True),  # noqa: PEP 3131
-        加入後設資料: Option(  # noqa: PEP 3131
-            bool, "是否在檔案中加入影片標題、作者與縮圖，會影響檔案的大小", required=False
-        ) = False,
-        bitrate: Option(  # noqa: PEP 3131
-            int,
-            name="位元率",
-            description="下載後，轉換為MP3時所使用的位元率，會影響檔案的大小與品質",
-            choices=[96, 128, 160, 192, 256, 320],
-            required=False,
-        ) = 128,
+            self,
+            ctx,
+            連結: Option(str, "欲下載的影片網址", required=True),  # noqa: PEP 3131
+            加入後設資料: Option(  # noqa: PEP 3131
+                bool, "是否在檔案中加入影片標題、作者與縮圖，會影響檔案的大小", required=False
+            ) = False,
+            bitrate: Option(  # noqa: PEP 3131
+                int,
+                name="位元率",
+                description="下載後，轉換為MP3時所使用的位元率，會影響檔案的大小與品質",
+                choices=[96, 128, 160, 192, 256, 320],
+                required=False,
+            ) = 128,
     ):
         await ctx.defer()
         m_video = yt_download.Video(連結)
@@ -754,7 +754,7 @@ class Basics(commands.Cog):
                     embed.add_field(
                         name="為何會出現這則訊息？",
                         value="由於你使用指令時，將`加入後設資料`設為`True`。\n"
-                        "如要忽略此步驟，請將`加入後設資料`設為`False`。",
+                              "如要忽略此步驟，請將`加入後設資料`設為`False`。",
                     )
                     await ctx.respond(
                         embed=embed,
@@ -819,10 +819,10 @@ class Basics(commands.Cog):
         name="rc", description="重新連接至語音頻道。可指定頻道，否則將自動檢測音樂機器人及Allen Why在哪個頻道並加入。"
     )
     async def rc(
-        self,
-        ctx,
-        頻道: Option(discord.VoiceChannel, "指定要加入的頻道", required=False),  # noqa: PEP 3131
-        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa: PEP 3131
+            self,
+            ctx,
+            頻道: Option(discord.VoiceChannel, "指定要加入的頻道", required=False),  # noqa: PEP 3131
+            私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa: PEP 3131
     ):
         await ctx.defer(ephemeral=私人訊息)
         if 頻道 is None:
@@ -862,9 +862,9 @@ class Basics(commands.Cog):
 
     @discord.slash_command(name="dc", description="從目前的語音頻道中斷連接。")
     async def dc(
-        self,
-        ctx,
-        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa: PEP 3131
+            self,
+            ctx,
+            私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa: PEP 3131
     ):
         try:
             for vc in self.bot.voice_clients:
@@ -900,7 +900,7 @@ class Basics(commands.Cog):
                     embed = discord.Embed(
                         title="Music Bot 錯誤訊息分析",
                         description="已在資料庫中搜尋到此問題的說明。\n"
-                        f"問題關鍵字：```{musicbot_error.exact_problem}```",
+                                    f"問題關鍵字：```{musicbot_error.exact_problem}```",
                         color=default_color,
                     )
                     embed.add_field(
@@ -982,12 +982,12 @@ class Basics(commands.Cog):
             )
             embed.add_field(
                 name="時間點數 (因待在語音頻道而獲得的點數)",
-                value=f"`{floor(report['time_exp']*10)/10}` 點",
+                value=f"`{floor(report['time_exp'] * 10) / 10}` 點",
                 inline=False,
             )
             embed.add_field(
                 name="活動加成 (因進行遊戲、聆聽Spotify等而額外獲得的點數)",
-                value=f"`{floor(report['activity_bonus']*10)/10}` 點",
+                value=f"`{floor(report['activity_bonus'] * 10) / 10}` 點",
                 inline=False,
             )
             if report["join_at"] == 0:
@@ -1015,7 +1015,7 @@ class Events(commands.Cog):
             label="取得臨時身分組", style=discord.ButtonStyle.blurple, emoji="✨"
         )
         async def confirm(
-            self, button: discord.ui.Button, interaction: discord.Interaction
+                self, button: discord.ui.Button, interaction: discord.Interaction
         ):
             self.real_logger.debug(f"{interaction.user.name} 按下了「取得臨時身分組」按鈕")
             server = self.bot.get_guild(857996539262402570)
@@ -1087,7 +1087,7 @@ class Events(commands.Cog):
 
         @discord.ui.button(label="點此開始審核", style=discord.ButtonStyle.green, emoji="📝")
         async def button_callback(
-            self, button: discord.ui.Button, interaction: discord.Interaction
+                self, button: discord.ui.Button, interaction: discord.Interaction
         ):
             await interaction.response.send_modal(
                 self.outer_instance.GetRealName(self.outer_instance)
@@ -1136,16 +1136,16 @@ class Events(commands.Cog):
         for server in self.bot.guilds:
             for channel in server.channels:
                 if (
-                    channel.type == discord.ChannelType.voice
-                    and channel.id not in exclude_channel
+                        channel.type == discord.ChannelType.voice
+                        and channel.id not in exclude_channel
                 ):
                     members = channel.members
                     active_human_members = []
                     for member in members:  # 將機器人、靜音/拒聽的成員排除
                         if (
-                            not member.bot
-                            and not member.voice.self_mute
-                            and not member.voice.self_deaf
+                                not member.bot
+                                and not member.voice.self_mute
+                                and not member.voice.self_deaf
                         ):
                             active_human_members.append(member)
                     for member in active_human_members:
@@ -1175,8 +1175,8 @@ class Events(commands.Cog):
                                     embed = discord.Embed(
                                         title="等級提升",
                                         description=f":tada:恭喜 <@{member.id}> *語音*等級升級到 "
-                                        f"**{member_obj.get_level('voice')}**"
-                                        f" 等！",
+                                                    f"**{member_obj.get_level('voice')}**"
+                                                    f" 等！",
                                         color=default_color,
                                     )
                                     embed.set_thumbnail(url=member.display_avatar)
@@ -1186,8 +1186,8 @@ class Events(commands.Cog):
                                     await channel.send(embed=embed)
                             for m in active_human_members:
                                 if (
-                                    m.id not in exp_report["partners"]
-                                    and m.id != member.id
+                                        m.id not in exp_report["partners"]
+                                        and m.id != member.id
                                 ):
                                     exp_report["partners"].append(m.id)
                             if member_obj.get_exp_report_enabled():
@@ -1203,10 +1203,10 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(
-        self,
-        member: discord.Member,
-        before: discord.VoiceState,
-        after: discord.VoiceState,
+            self,
+            member: discord.Member,
+            before: discord.VoiceState,
+            after: discord.VoiceState,
     ):
         if json_assistant.User(member.id).get_exp_report_enabled():
             if after.channel is None:  # 中斷語音連線
@@ -1266,12 +1266,12 @@ class Events(commands.Cog):
                     )
                     embed.add_field(
                         name="時間點數 (因待在語音頻道而獲得的點數)",
-                        value=f"`{floor(report['time_exp']*10)/10}` 點",
+                        value=f"`{floor(report['time_exp'] * 10) / 10}` 點",
                         inline=False,
                     )
                     embed.add_field(
                         name="活動加成 (因進行遊戲、聆聽Spotify等而額外獲得的點數)",
-                        value=f"`{floor(report['activity_bonus']*10)/10}` 點",
+                        value=f"`{floor(report['activity_bonus'] * 10) / 10}` 點",
                         inline=False,
                     )
                     if report["join_at"] == 0:
@@ -1289,7 +1289,7 @@ class Events(commands.Cog):
                         self.real_logger.warning("無法傳送經驗值報告給" + member.name)
                         self.real_logger.warning("錯誤訊息：" + str(e))
             elif (
-                before.channel is not None and before.channel.id != after.channel.id
+                    before.channel is not None and before.channel.id != after.channel.id
             ):  # 加入其他頻道
                 self.real_logger.debug(
                     f"{member.name} 加入了其他頻道：{before.channel.name} -> {after.channel.name}"
@@ -1377,9 +1377,9 @@ class Events(commands.Cog):
             embed.add_field(name="錯誤內容", value="```" + str(error) + "```", inline=False)
             await ctx.respond(embed=embed, ephemeral=True)
         elif (
-            isinstance(error, commands.NotOwner)
-            or isinstance(error, commands.MissingPermissions)
-            or isinstance(error, commands.MissingRole)
+                isinstance(error, commands.NotOwner)
+                or isinstance(error, commands.MissingPermissions)
+                or isinstance(error, commands.MissingRole)
         ):
             embed = discord.Embed(
                 title="錯誤", description="你沒有權限使用此指令。", color=error_color
@@ -1387,7 +1387,7 @@ class Events(commands.Cog):
             embed.add_field(name="錯誤內容", value="```" + str(error) + "```", inline=False)
             await ctx.respond(embed=embed, ephemeral=True)
         elif isinstance(error, discord.errors.Forbidden) or isinstance(
-            error, discord.errors.HTTPException
+                error, discord.errors.HTTPException
         ):
             self.real_logger.warning("無法傳送贈禮通知給對方，因為該用戶已關閉私人訊息。")
             embed = discord.Embed(
@@ -1398,8 +1398,8 @@ class Events(commands.Cog):
             embed.add_field(
                 name="疑難排解",
                 value="請參考[這則文章]"
-                "(https://support.discord.com/hc/zh-tw/articles/7924992471191-"
-                "%E8%A8%8A%E6%81%AF%E8%AB%8B%E6%B1%82)來解決此問題後重試。",
+                      "(https://support.discord.com/hc/zh-tw/articles/7924992471191-"
+                      "%E8%A8%8A%E6%81%AF%E8%AB%8B%E6%B1%82)來解決此問題後重試。",
             )
             await ctx.respond(embed=embed, ephemeral=True)
         else:
@@ -1420,7 +1420,6 @@ class Events(commands.Cog):
         )
         self.give_voice_exp.start()
         self.set_presence_as_year_process.start()
-        # await check_voice_channel()
 
     @commands.Cog.listener()
     async def on_application_command(self, ctx):
@@ -1433,10 +1432,10 @@ class Events(commands.Cog):
 
     @staticmethod
     async def check_voice_channel(
-        instance,
-        server: discord.Guild,
-        target_user_id: list[int] = None,
-        connect_when_found: bool = True,
+            instance,
+            server: discord.Guild,
+            target_user_id: list[int] = None,
+            connect_when_found: bool = True,
     ) -> discord.VoiceChannel | str:
         # 列出所有語音頻道
         if target_user_id is None:
@@ -1458,7 +1457,7 @@ class Events(commands.Cog):
                                     if vc.channel.id == channel.id:  # noqa
                                         return channel
                                     elif (
-                                        vc.channel.guild.id == channel.guild.id  # noqa
+                                            vc.channel.guild.id == channel.guild.id  # noqa
                                     ):
                                         await vc.disconnect(force=False)
                                         break
@@ -1487,13 +1486,13 @@ class Events(commands.Cog):
             return
         msg_in = message.content
         if message.channel.id in MUSIC_CMD_CHANNELS and (
-            msg_in.startswith("https://www.youtube.com")
-            or msg_in.startswith("https://youtu.be")
-            or msg_in.startswith("https://m.youtube.com")
-            or msg_in.startswith("https://youtube.com")
-            or msg_in.startswith("https://open.spotify.com")
-            or msg_in.startswith("https://music.youtube.com")
-            or msg_in.startswith("https://cdn.discordapp.com/attachments/")
+                msg_in.startswith("https://www.youtube.com")
+                or msg_in.startswith("https://youtu.be")
+                or msg_in.startswith("https://m.youtube.com")
+                or msg_in.startswith("https://youtube.com")
+                or msg_in.startswith("https://open.spotify.com")
+                or msg_in.startswith("https://music.youtube.com")
+                or msg_in.startswith("https://cdn.discordapp.com/attachments/")
         ):
             check_vc_result = await self.check_voice_channel(self, message.guild)
             if isinstance(check_vc_result, str) and check_vc_result != "已經連線至語音頻道。":
@@ -1538,7 +1537,7 @@ class Events(commands.Cog):
                 )
         member_obj.set_last_active_time(time.time())
         if member_obj.level_calc("text") and member_obj.notify_threshold_reached(
-            "text"
+                "text"
         ):
             self.real_logger.info(
                 f"等級提升：{message.author.name} 文字等級"
@@ -1547,7 +1546,7 @@ class Events(commands.Cog):
             embed = discord.Embed(
                 title="等級提升",
                 description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
-                f"**{member_obj.get_level('text')}** 等！",
+                            f"**{member_obj.get_level('text')}** 等！",
                 color=default_color,
             )
             embed.set_thumbnail(url=message.author.display_avatar)
