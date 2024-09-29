@@ -22,7 +22,7 @@ import holodex_api
 import logger
 from json_assistant import ClipsRecord
 import youtube_download
-import youtube_uploader
+import youtube_api
 from cogs.general import Basics, Events, MUSIC_CMD_CHANNELS
 
 
@@ -150,14 +150,14 @@ class Holodex(commands.Cog):
                             embed=embed,
                             view=None,
                         )
-                        yt_uploader = youtube_uploader.YouTubeUploader(
+                        yt_uploader = youtube_api.YouTubeUploader(
                             file_path=file_path,
                             title=
                             f"【{video_instance.full_info['channel']}】{section['name']} / {section['original_artist']}"
                             "【純剪輯-測試中】",
                             description=f"""
 原直播：{video_instance.url}
-                        
+
 此剪輯片段由Allen Bot產生，使用Holodex API取得時間軸資料。
 本功能仍在測試中，且可能隨時下線並不另行通知。
 Holodex API：https://docs.holodex.net/
@@ -316,7 +316,7 @@ Holodex API：https://docs.holodex.net/
         async def callback(self, interaction: discord.Interaction):
             await interaction.response.defer(ephemeral=True)
             token = self.children[0].value
-            if youtube_uploader.YouTubeUploader.refresh_token_is_valid(token):
+            if youtube_api.YouTubeUploader.refresh_token_is_valid(token):
                 with open(
                     os.path.join(parent_dir, "google_client_secret.json"),
                     "r",
