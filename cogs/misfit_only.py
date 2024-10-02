@@ -120,7 +120,7 @@ class Misfit(commands.Cog):
                     color=default_color,
                 )
                 await self.timed_out_member.send(embed=notify_embed)
-            await interaction.response.send_modal(Misfit.FeedbackView(self.outer_instance, self.timed_out_member))
+            await interaction.followup.send_modal(Misfit.FeedbackView(self.outer_instance, self.timed_out_member))
             await interaction.edit_original_response(embed=embed, view=None)
 
         @ui.button(label="未通過，繼續禁言", style=ButtonStyle.red)
@@ -145,7 +145,7 @@ class Misfit(commands.Cog):
                     color=default_color,
                 )
                 await self.timed_out_member.send(embed=notify_embed)
-            await interaction.response.send_modal(Misfit.FeedbackView(self.outer_instance, self.timed_out_member))
+            await interaction.followup.send_modal(Misfit.FeedbackView(self.outer_instance, self.timed_out_member))
             await interaction.edit_original_response(embed=embed, view=None)
 
     class FeedbackView(ui.Modal):
