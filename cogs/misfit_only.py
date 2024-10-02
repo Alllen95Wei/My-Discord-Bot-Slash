@@ -1,7 +1,7 @@
 # coding=utf-8
 import discord
 from discord.ext import commands
-from discord import Embed, ui, ButtonStyle, InputTextStyle
+from discord import Embed, ui, ButtonStyle, InputTextStyle, Interaction
 import os
 import zoneinfo
 from pathlib import Path
@@ -120,6 +120,7 @@ class Misfit(commands.Cog):
                     color=default_color,
                 )
                 await self.timed_out_member.send(embed=notify_embed)
+            await interaction.response.send_modal(Misfit.FeedbackView(self.outer_instance, self.timed_out_member))
             await interaction.edit_original_response(embed=embed, view=None)
 
         @ui.button(label="未通過，繼續禁言", style=ButtonStyle.red)
@@ -144,7 +145,41 @@ class Misfit(commands.Cog):
                     color=default_color,
                 )
                 await self.timed_out_member.send(embed=notify_embed)
+            await interaction.response.send_modal(Misfit.FeedbackView(self.outer_instance, self.timed_out_member))
             await interaction.edit_original_response(embed=embed, view=None)
+
+    class FeedbackView(ui.Modal):
+        def __init__(self, outer_instance, timed_out_member: discord.Member):
+            super().__init__(title="提供對方回應")
+            self.outer_instance = outer_instance
+            self.timed_out_member = timed_out_member
+            self.add_item(
+                ui.InputText(
+                    style=InputTextStyle.long,
+                    label="回應",
+                    placeholder="若無回應，可直接關閉此視窗",
+                    max_length=1000,
+                    required=False,
+                )
+            )
+
+        async def callback(self, interaction: Interaction):
+            provided_reason = self.children[0].value
+            if provided_reason is not None:
+                embed = Embed(
+                    title="已送出回應",
+                    description=f"已傳送你的回應給{self.timed_out_member.mention}。",
+                    color=default_color
+                )
+                embed.add_field(name="你的回應", value=provided_reason)
+                await interaction.followup.send(embed=embed)
+                response_embed = Embed(
+                    title="管理員提供了回應",
+                    description=f"{interaction.user.mention}回應了以下內容。",
+                    color=default_color,
+                )
+                response_embed.add_field(name="回應內容", value=provided_reason)
+                await self.timed_out_member.send(embed=response_embed)
 
     @discord.user_command(name="600他")
     @commands.has_permissions(moderate_members=True)
