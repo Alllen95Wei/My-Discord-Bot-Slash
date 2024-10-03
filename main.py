@@ -1395,7 +1395,7 @@ bot.load_extensions(
     "cogs.jail",
     "cogs.holodex",
     "cogs.soundboard",
-    "cogs.suspension_fetcher",
+    # "cogs.suspension_fetcher",
 )
 
 bot.run(TOKEN)
