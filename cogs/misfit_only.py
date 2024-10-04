@@ -120,8 +120,12 @@ class Misfit(commands.Cog):
                     color=default_color,
                 )
                 await self.timed_out_member.send(embed=notify_embed)
-            await interaction.followup.send_modal(Misfit.FeedbackView(self.outer_instance, self.timed_out_member))
-            await interaction.edit_original_response(embed=embed, view=None)
+            await interaction.edit_original_response(
+                embed=embed,
+                view=Misfit.FeedbackView(
+                    self.outer_instance, self.timed_out_member, interaction.user
+                ),
+            )
 
         @ui.button(label="未通過，繼續禁言", style=ButtonStyle.red)
         async def disallow_callback(self, button, interaction: discord.Interaction):
@@ -145,33 +149,74 @@ class Misfit(commands.Cog):
                     color=default_color,
                 )
                 await self.timed_out_member.send(embed=notify_embed)
-            await interaction.followup.send_modal(Misfit.FeedbackView(self.outer_instance, self.timed_out_member))
-            await interaction.edit_original_response(embed=embed, view=None)
+            await interaction.edit_original_response(
+                embed=embed,
+                view=Misfit.FeedbackView(
+                    self.outer_instance, self.timed_out_member, interaction.user
+                ),
+            )
 
-    class FeedbackView(ui.Modal):
-        def __init__(self, outer_instance, timed_out_member: discord.Member):
+    class FeedbackView(ui.View):
+        def __init__(
+            self,
+            outer_instance,
+            timed_out_member: discord.Member,
+            operator: discord.User | discord.Member,
+        ):
+            super().__init__(disable_on_timeout=True)
+            self.outer_instance = outer_instance
+            self.timed_out_member = timed_out_member
+            self.operator = operator
+
+        @ui.button(label="提供回應", style=ButtonStyle.blurple, emoji="🗨️")
+        async def btn_callback(self, button, interaction: discord.Interaction):
+            await interaction.response.defer()
+            await interaction.response.send_modal(
+                Misfit.FeedbackWindow(
+                    self.outer_instance,
+                    self.timed_out_member,
+                    self.operator,
+                )
+            )
+
+    class FeedbackWindow(ui.Modal):
+        def __init__(
+            self,
+            outer_instance,
+            timed_out_member: discord.Member,
+            operator: discord.User | discord.Member,
+        ):
             super().__init__(title="提供對方回應")
             self.outer_instance = outer_instance
             self.timed_out_member = timed_out_member
+            self.operator = operator
             self.add_item(
                 ui.InputText(
                     style=InputTextStyle.long,
                     label="回應",
-                    placeholder="若無回應，可直接關閉此視窗",
                     max_length=1000,
-                    required=False,
+                    required=True,
                 )
             )
 
         async def callback(self, interaction: Interaction):
+            await interaction.response.defer()
             provided_reason = self.children[0].value
-            if provided_reason is not None:
+            if interaction.user.id != self.operator.id:
+                embed = Embed(
+                    title="錯誤：非原始操作者",
+                    description=f"你不是審核此要求的使用者。{self.operator.mention}才能使用此按鈕。",
+                    color=error_color,
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
+            elif provided_reason is not None:
                 embed = Embed(
                     title="已送出回應",
                     description=f"已傳送你的回應給{self.timed_out_member.mention}。",
-                    color=default_color
+                    color=default_color,
                 )
                 embed.add_field(name="你的回應", value=provided_reason)
+                await interaction.edit_original_response(view=None)
                 await interaction.followup.send(embed=embed)
                 response_embed = Embed(
                     title="管理員提供了回應",
