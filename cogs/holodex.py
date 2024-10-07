@@ -150,18 +150,21 @@ class Holodex(commands.Cog):
                             embed=embed,
                             view=None,
                         )
-                        yt_uploader = youtube_api.YouTubeUploader(
-                            file_path=file_path,
-                            title=
+                        clip_title = (
                             f"【{video_instance.full_info['channel']}】{section['name']} / {section['original_artist']}"
-                            "【純剪輯-測試中】",
-                            description=f"""
+                            "【純剪輯】"
+                        )
+                        clip_description = f"""
 原直播：{video_instance.url}
 
 此剪輯片段由Allen Bot產生，使用Holodex API取得時間軸資料。
 本功能仍在測試中，且可能隨時下線並不另行通知。
 Holodex API：https://docs.holodex.net/
-                            """,
+                            """
+                        yt_uploader = youtube_api.YouTubeUploader(
+                            file_path=file_path,
+                            title=clip_title,
+                            description=clip_description,
                         )
                         try:
                             yt_uploader.setup_credentials()
@@ -169,7 +172,9 @@ Holodex API：https://docs.holodex.net/
                                 self.bot,
                                 yt_uploader.upload,
                             )
-                            ClipsRecord().add_clip(file_name=file_name, youtube_id=video_info["id"])
+                            ClipsRecord().add_clip(
+                                file_name=file_name, youtube_id=video_info["id"]
+                            )
                             embed = Embed(
                                 title="上傳完成！",
                                 description=f"片段 **{section['name']}** 已經上傳至YouTube！",
