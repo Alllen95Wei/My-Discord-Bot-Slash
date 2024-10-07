@@ -212,6 +212,16 @@ Holodex API：https://docs.holodex.net/
                                 embed.add_field(
                                     name="錯誤訊息", value=f"```{e}```", inline=False
                                 )
+                                embed.add_field(
+                                    name="Debug: Clip Title",
+                                    value="```" + clip_title + "```",
+                                    inline=False,
+                                )
+                                embed.add_field(
+                                    name="Debug: Clip Description",
+                                    value="```" + clip_description + "```",
+                                    inline=False,
+                                )
                         finally:
                             os.remove(file_path)
                     else:
@@ -492,6 +502,13 @@ Holodex API：https://docs.holodex.net/
         self,
         ctx,
         url: Option(str, name="直播連結", description="欲抓取時間軸的直播連結(僅限YouTube)"),
+        keyword: Option(
+            str,
+            name="關鍵字",
+            description="搜尋曲名或原唱名稱包含關鍵字的片段",
+            max_length=20,
+            required=False,
+        ) = None,
         page: Option(
             int,
             name="頁數",
@@ -539,17 +556,32 @@ Holodex API：https://docs.holodex.net/
                     name="片段數量", value=f"`{len(section_list)}`個", inline=False
                 )
                 embed.set_image(url=video.get_thumbnail())
-                if len(section_list) > 25:
-                    selected_page_no, selected_page = self.slice_section_list(
-                        section_list, page
-                    )
-                    embed.add_field(
-                        name="頁數",
-                        value=f"第 {selected_page_no[0]} / {selected_page_no[1]} 頁",
-                        inline=False,
-                    )
-                else:
-                    selected_page = section_list
+                if keyword is not None:
+                    search_result = []
+                    for s in section_list:
+                        if keyword in s["name"] or keyword in s["original_artist"]:
+                            search_result.append(s)
+                    if len(search_result) == 0:
+                        embed.add_field(
+                            name="⚠️沒有符合關鍵字的片段",
+                            value=f"此影片的時間軸中，沒有任何符合關鍵字 `{keyword}` 的片段。\n目前回傳未經搜尋的結果。",
+                            inline=False,
+                        )
+                    else:
+                        section_list = search_result
+                        embed.add_field(
+                            name="已套用搜尋",
+                            value=f"目前僅列出符合關鍵字 `{keyword}` 的片段。",
+                            inline=False,
+                        )
+                selected_page_no, selected_page = self.slice_section_list(
+                    section_list, page
+                )
+                embed.add_field(
+                    name="頁數",
+                    value=f"第 {selected_page_no[0]} / {selected_page_no[1]} 頁",
+                    inline=False,
+                )
                 view = self.section_selection(
                     ctx.author,
                     video,
