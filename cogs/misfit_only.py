@@ -149,11 +149,11 @@ class Misfit(commands.Cog):
                     color=default_color,
                 )
                 await self.timed_out_member.send(embed=notify_embed)
-            await interaction.edit_original_response(
-                embed=embed,
+            await interaction.edit_original_response(embed=embed)
+            await interaction.followup.send(
                 view=Misfit.FeedbackView(
                     self.outer_instance, self.timed_out_member, interaction.user
-                ),
+                )
             )
 
     class FeedbackView(ui.View):
