@@ -116,15 +116,12 @@ class Video:
 
     def is_live(self) -> bool:
         info_dict = self.full_info
-        try:
-            if info_dict["is_live"] is None:
-                return False
-            return info_dict["is_live"]
-        except KeyError:
+        if info_dict.get("is_live", None) is None:
             return False
+        return info_dict["is_live"]
 
     @staticmethod
-    def get_full_info(url):
+    def get_full_info(url) -> dict:
         with yt_dlp.YoutubeDL(NO_DL_OPTS) as ydl:
             info_dict = ydl.extract_info(url, download=False)
             return info_dict
