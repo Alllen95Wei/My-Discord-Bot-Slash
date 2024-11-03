@@ -217,7 +217,7 @@ class Soundboard(commands.Cog):
         view.add_item(replay_btn)
         return view
 
-    def add_sound_window(self, is_general: bool, file_url: str = None) -> ui.View:
+    def add_sound_window(self, is_general: bool, attachment_url: str = None) -> ui.View:
         view = ui.View(disable_on_timeout=True)
         btn = ui.Button(label="已取得URL，新增音效", style=ButtonStyle.green, emoji="🔗")
         window = ui.Modal(
@@ -226,7 +226,7 @@ class Soundboard(commands.Cog):
             ui.InputText(
                 label="貼上檔案URL",
                 placeholder="https://cdn.discordapp.com/attachments/...",
-                value=file_url if file_url is not None else ""
+                value=attachment_url if attachment_url is not None else "",
             ),
             title="新增音效",
         )
@@ -246,7 +246,11 @@ class Soundboard(commands.Cog):
                 await interaction.followup.send(embed=embed, ephemeral=True)
                 return
             file_url = window.children[2].value
-            if file_url.startswith("https://cdn.discordapp.com/attachments/"):
+            if file_url.startswith(
+                "https://cdn.discordapp.com/attachments/"
+            ) or file_url.startswith(
+                "https://cdn.discordapp.com/ephemeral-attachments/"
+            ):
                 async with aiohttp.ClientSession() as session:
                     async with session.get(file_url) as response:
                         if response.status == 200:
@@ -376,7 +380,9 @@ class Soundboard(commands.Cog):
     async def soundboard_add(
         self,
         ctx: discord.ApplicationContext,
-        audio_file: Option(discord.Attachment, name="音檔", description="直接透過此參數上傳音檔", required=False) = None,
+        audio_file: Option(
+            discord.Attachment, name="音檔", description="直接透過此參數上傳音檔", required=False
+        ) = None,
         is_general: Option(
             bool, name="上傳通用音效", description="是否要上傳為通用音效，而非伺服器音效", required=False
         ) = False,
@@ -418,7 +424,9 @@ class Soundboard(commands.Cog):
             embed.add_field(name="3. 開啟上傳視窗", value="點擊下方按鈕，繼續新增音效流程。", inline=False)
             if isinstance(audio_file, discord.Attachment):
                 await ctx.respond(
-                    embed=embed, view=self.add_sound_window(is_general, audio_file.url), ephemeral=True
+                    embed=embed,
+                    view=self.add_sound_window(is_general, audio_file.url),
+                    ephemeral=True,
                 )
             else:
                 await ctx.respond(
@@ -507,11 +515,13 @@ class Soundboard(commands.Cog):
         if len(latest_25_history) != 0:
             for record in latest_25_history:
                 embed.add_field(
-                    name=datetime.datetime.fromtimestamp(record["timestamp"]).strftime("%Y/%m/%d %H:%M:%S"),
+                    name=datetime.datetime.fromtimestamp(record["timestamp"]).strftime(
+                        "%Y/%m/%d %H:%M:%S"
+                    ),
                     value=f"使用者：<@{record['user_id']}>\n"
-                          f"語音頻道：<#{record['vc_id']}>\n"
-                          f"播放音效：{record['sound_display_name']}",
-                    inline=False
+                    f"語音頻道：<#{record['vc_id']}>\n"
+                    f"播放音效：{record['sound_display_name']}",
+                    inline=False,
                 )
         else:
             embed.add_field(name=" ", value="(無紀錄)", inline=False)
