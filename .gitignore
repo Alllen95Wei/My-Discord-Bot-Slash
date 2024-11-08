@@ -1,5 +1,6 @@
 /TOKEN.env
 /venv
+/.venv
 /user_data
 /ytdl
 /logs
