@@ -1336,24 +1336,24 @@ class Events(commands.Cog):
             #     title="取得臨時身分組", description="在取得正式身分組前，請點擊下方按鈕取得臨時身分組。", color=0x57C2EA
             # )
             # await new_member.send(embed=embed, view=self.GetTmpRole(self))
-        elif guild_joined.id == 1114203090950836284:
-            embed = discord.Embed(
-                title=f"歡迎加入 {member.guild.name} ！",
-                description="在正式加入此伺服器前，請告訴我們你的**真名**，以便我們授予你適當的權限！",
-                color=0x57C2EA,
-            )
-            try:
-                await new_member.send(
-                    embed=embed, view=self.VerificationModalToView(self)
-                )
-            except discord.errors.HTTPException as error:
-                if error.code == 50007:
-                    await guild_joined.system_channel.send(
-                        f"{member.mention}，由於你的私人訊息已關閉，無法透過機器人進行快速審核。\n"
-                        f"請私訊管理員你的**真名**，以便我們授予你適當的身分組！"
-                    )
-                else:
-                    raise error
+        # elif guild_joined.id == 1114203090950836284:
+        #     embed = discord.Embed(
+        #         title=f"歡迎加入 {member.guild.name} ！",
+        #         description="在正式加入此伺服器前，請告訴我們你的**真名**，以便我們授予你適當的權限！",
+        #         color=0x57C2EA,
+        #     )
+        #     try:
+        #         await new_member.send(
+        #             embed=embed, view=self.VerificationModalToView(self)
+        #         )
+        #     except discord.errors.HTTPException as error:
+        #         if error.code == 50007:
+        #             await guild_joined.system_channel.send(
+        #                 f"{member.mention}，由於你的私人訊息已關閉，無法透過機器人進行快速審核。\n"
+        #                 f"請私訊管理員你的**真名**，以便我們授予你適當的身分組！"
+        #             )
+        #         else:
+        #             raise error
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
