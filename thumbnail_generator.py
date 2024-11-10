@@ -38,12 +38,13 @@ class ThumbnailGenerator:
         for f in self.image_sources:
             img = Image.open(f)
             upscale_ratio = 1920 / img.width
-            img = img.resize((int(img.width * upscale_ratio), int(img.height * upscale_ratio)), Image.Resampling.BOX)
+            img = img.resize(
+                (int(img.width * upscale_ratio), int(img.height * upscale_ratio)),
+                Image.Resampling.BOX,
+            )
             canva = ImageDraw.Draw(img)
             font_size = img.height * 0.18
-            font = ImageFont.truetype(
-                "Iansui-Regular.ttf", font_size
-            )
+            font = ImageFont.truetype("Iansui-Regular.ttf", font_size)
             canva.text(
                 xy=(img.width / 2, img.height - font_size * 0.5),
                 text=title,
@@ -52,7 +53,7 @@ class ThumbnailGenerator:
                 anchor="mb",
                 align="center",
                 stroke_width=int(font_size * 0.05),
-                stroke_fill=(255, 255, 255)
+                stroke_fill=(255, 255, 255),
             )
             img.save("test2.jpg")
             img.close()
