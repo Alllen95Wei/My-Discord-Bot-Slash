@@ -37,27 +37,30 @@ class ThumbnailGenerator:
     def write_title(self, title: str, color: int = None):
         for f in self.image_sources:
             img = Image.open(f)
+            upscale_ratio = 1920 / img.width
+            img = img.resize((int(img.width * upscale_ratio), int(img.height * upscale_ratio)), Image.Resampling.BOX)
             canva = ImageDraw.Draw(img)
-            font_size = img.height * 0.2
+            font_size = img.height * 0.18
             font = ImageFont.truetype(
-                "/home/allen95wei/下載/Iansui-Regular.ttf", font_size
+                "Iansui-Regular.ttf", font_size
             )
             canva.text(
-                xy=(img.width / 2, img.height),
+                xy=(img.width / 2, img.height - font_size * 0.5),
                 text=title,
                 font=font,
-                fill=(200, 0, 0),
+                fill=(0, 200, 0),
                 anchor="mb",
                 align="center",
+                stroke_width=int(font_size * 0.05),
+                stroke_fill=(255, 255, 255)
             )
-            img.show()
-            img.save(f)
+            img.save("test2.jpg")
             img.close()
 
 
 if __name__ == "__main__":
-    v_obj = ThumbnailGenerator("maxresdefault.jpg")
+    v_obj = ThumbnailGenerator("test.jpg")
     # v_obj.extract_random_frames(5)
     v_obj.write_title(
-        "test / 測試",
+        "測試/もう少しだけ",
     )
