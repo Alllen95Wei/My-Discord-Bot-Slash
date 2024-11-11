@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
+TEST_FILL_COLOR = (74, 170, 221)
 
 
 class ThumbnailGenerator:
@@ -18,6 +19,15 @@ class ThumbnailGenerator:
         self.image_sources: list[str] = []
         if isinstance(image_source_path, str):
             self.image_sources.append(image_source_path)
+
+    @staticmethod
+    def upscale_to_1080p(img: Image):
+        upscale_ratio = 1920 / img.width
+        img = img.resize(
+            (int(img.width * upscale_ratio), int(img.height * upscale_ratio)),
+            Image.Resampling.BOX,
+        )
+        return img
 
     def extract_random_frames(self, count: int) -> list[str]:
         generated_frames = []
@@ -36,20 +46,15 @@ class ThumbnailGenerator:
 
     def write_title(self, title: str, color: int = None):
         for f in self.image_sources:
-            img = Image.open(f)
-            upscale_ratio = 1920 / img.width
-            img = img.resize(
-                (int(img.width * upscale_ratio), int(img.height * upscale_ratio)),
-                Image.Resampling.BOX,
-            )
+            img = self.upscale_to_1080p(Image.open(f))
             canva = ImageDraw.Draw(img)
             font_size = img.height * 0.18
-            font = ImageFont.truetype("Iansui-Regular.ttf", font_size)
+            font = ImageFont.truetype("jf-openhuninn-2.1.ttf", font_size)
             canva.text(
-                xy=(img.width / 2, img.height - font_size * 0.5),
+                xy=(img.width / 2, img.height - font_size * 0.4),
                 text=title,
                 font=font,
-                fill=(0, 200, 0),
+                fill=TEST_FILL_COLOR,
                 anchor="mb",
                 align="center",
                 stroke_width=int(font_size * 0.05),
@@ -58,10 +63,30 @@ class ThumbnailGenerator:
             img.save("test2.jpg")
             img.close()
 
+    def write_subtitle(self, title: str, color: int = None):
+        for f in self.image_sources:
+            img = self.upscale_to_1080p(Image.open(f))
+            canva = ImageDraw.Draw(img)
+            font_size = img.height * 0.08
+            font = ImageFont.truetype("jf-openhuninn-2.1.ttf", font_size)
+            canva.text(
+                xy=(img.width * 0.01, img.height * 0.075),
+                text=title,
+                font=font,
+                fill=TEST_FILL_COLOR,
+                anchor="lt",
+                align="left",
+                stroke_width=int(font_size * 0.08),
+                stroke_fill=(255, 255, 255),
+            )
+            img.save("test2.jpg")
+            img.close()
+
 
 if __name__ == "__main__":
     v_obj = ThumbnailGenerator("test.jpg")
-    # v_obj.extract_random_frames(5)
-    v_obj.write_title(
-        "測試/もう少しだけ",
-    )
+    # v_obj = ThumbnailGenerator(video_source_path="test.mp4")
+    # v_obj.extract_random_frames(1)
+    v_obj.write_title("もう少しだけ")
+    v_obj.image_sources = ["test2.jpg"]
+    v_obj.write_subtitle("浠Mizuki")
