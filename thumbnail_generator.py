@@ -3,6 +3,8 @@ import random
 import os
 import cv2
 from PIL import Image, ImageDraw, ImageFont
+from uuid import uuid4
+from time import time
 
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
@@ -11,9 +13,10 @@ TEST_FILL_COLOR = (74, 170, 221)
 
 class ThumbnailGenerator:
     def __init__(self, image_source_path: str = None, video_source_path: str = None):
+        self.uuid: str = str(uuid4())
         if image_source_path is None and video_source_path is None:
             raise ValueError(
-                "Either image_source_path or video_source_path should be str, not None"
+                "Either image_source_path or video_source_path should not be None"
             )
         self.video_path = video_source_path
         self.image_sources: list[str] = []
@@ -21,7 +24,7 @@ class ThumbnailGenerator:
             self.image_sources.append(image_source_path)
 
     @staticmethod
-    def upscale_to_1080p(img: Image):
+    def upscale_to_1080p(img: Image) -> Image:
         upscale_ratio = 1920 / img.width
         img = img.resize(
             (int(img.width * upscale_ratio), int(img.height * upscale_ratio)),
@@ -31,9 +34,9 @@ class ThumbnailGenerator:
 
     def extract_random_frames(self, count: int) -> list[str]:
         generated_frames = []
+        video = cv2.VideoCapture(self.video_path)
+        frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
         for i in range(count):
-            video = cv2.VideoCapture(self.video_path)
-            frame_count = video.get(cv2.CAP_PROP_FRAME_COUNT)
             frame_no = random.randint(1, int(frame_count))
             video.set(cv2.CAP_PROP_POS_FRAMES, frame_no)
             success, image = video.read()
