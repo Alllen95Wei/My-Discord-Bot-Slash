@@ -23,6 +23,7 @@ import logger
 from json_assistant import ClipsRecord
 import youtube_download
 import youtube_api
+from thumbnail_generator import ThumbnailGenerator
 from cogs.general import Basics, Events, MUSIC_CMD_CHANNELS
 
 
@@ -160,7 +161,7 @@ class Holodex(commands.Cog):
 此剪輯片段由Allen Bot產生，使用Holodex API取得時間軸資料。
 本功能仍在測試中，且可能隨時下線並不另行通知。
 Holodex API：https://docs.holodex.net/
-                            """
+"""
                         yt_uploader = youtube_api.YouTubeUploader(
                             file_path=file_path,
                             title=clip_title,
@@ -222,8 +223,6 @@ Holodex API：https://docs.holodex.net/
                                     value="```" + clip_description + "```",
                                     inline=False,
                                 )
-                        finally:
-                            os.remove(file_path)
                     else:
                         embed = Embed(
                             title="此片段已在YouTube上！",
@@ -315,6 +314,83 @@ Holodex API：https://docs.holodex.net/
         view.add_item(menu)
 
         return view
+
+    class ThumbnailGeneratorWindow(ui.Modal):
+        def __init__(self, song_name: str, channel_name: str, video_path: str):
+            super().__init__(title="設定縮圖文字")
+            self.add_item(
+                ui.InputText(
+                    style=InputTextStyle.short,
+                    label="主要標題 (圖片正下方)",
+                    value=song_name,
+                    required=True,
+                )
+            )
+            self.add_item(
+                ui.InputText(
+                    style=InputTextStyle.short,
+                    label="小標題 (圖片左上方)",
+                    value=channel_name.replace("Channel", ""),
+                    required=False,
+                )
+            )
+            self.add_item(
+                ui.InputText(
+                    style=InputTextStyle.short,
+                    label="色碼 (HEX)",
+                    value="#FFFFFF",
+                    min_length=7,
+                    max_length=7,
+                    required=True,
+                )
+            )
+            self.video_path = video_path
+
+        async def callback(self, interaction: discord.Interaction):
+            await interaction.response.defer()
+            title = self.children[0].value
+            subtitle = self.children[1].value
+            color = self.children[2].value
+            thumb_gen = ThumbnailGenerator(video_source_path=self.video_path)
+            thumb_gen.extract_random_frames(10)
+            thumb_gen.load_images_to_canvases()
+            thumb_gen.write_title(title, color)
+            thumb_gen.write_subtitle(subtitle, color)
+            output_images = thumb_gen.save_canvases()
+            await interaction.edit_original_response(
+                content="Output test",
+                files=[discord.File(i) for i in output_images],
+            )
+
+    class ThumbnailGeneratorButton(ui.View):
+        def __init__(
+            self,
+            author: discord.User | discord.Member,
+            song_name: str,
+            channel_name: str,
+            video_path: str,
+        ):
+            super().__init__(disable_on_timeout=True)
+            self.author = author
+            self.song_name = song_name
+            self.channel_name = channel_name
+            self.video_path = video_path
+
+        @discord.ui.button(label="製作縮圖", style=ButtonStyle.blurple)
+        async def start_thumb_gen(self, button, interaction: discord.Interaction):
+            if interaction.user.id == self.author.id:
+                await interaction.response.send_modal(
+                    Holodex.ThumbnailGeneratorWindow(
+                        self.song_name, self.channel_name, self.video_path
+                    )
+                )
+            else:
+                embed = Embed(
+                    title="錯誤：非指令使用者",
+                    description=f"你不是指令的使用者。僅有<@{self.author.id}>可使用此選單。",
+                    color=error_color,
+                )
+                await interaction.followup.send(embed=embed, ephemeral=True)
 
     class TokenSubmissionWindow(ui.Modal):
         def __init__(self):
@@ -612,6 +688,11 @@ Holodex API：https://docs.holodex.net/
         await ctx.respond(
             embed=embed, view=self.TokenSubmissionButtons(ctx.author), ephemeral=True
         )
+
+    @commands.is_owner()
+    @HOLODEX_CMDS.command(name="test", description="測試")
+    async def holodex_test(self, ctx):
+        await ctx.respond(view=self.ThumbnailGeneratorButton(ctx.author, "Test", "test", "test.mp4"))
 
 
 def setup(bot):

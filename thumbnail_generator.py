@@ -1,14 +1,14 @@
 # coding=utf-8
 import random
 import os
+from pathlib import Path
 import cv2
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageColor
 from uuid import uuid4
 from time import time
 
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
-TEST_FILL_COLOR = (74, 170, 221)
 
 
 class ThumbnailGenerator:
@@ -18,10 +18,12 @@ class ThumbnailGenerator:
             raise ValueError(
                 "Either image_source_path or video_source_path should not be None"
             )
-        self.video_path = video_source_path
+        self.video_path: str = video_source_path
         self.image_sources: list[str] = []
         if isinstance(image_source_path, str):
             self.image_sources.append(image_source_path)
+
+        self.canvases: dict[str, tuple[Image, ImageDraw]] = {}
 
     @staticmethod
     def upscale_to_1080p(img: Image) -> Image:
@@ -32,6 +34,25 @@ class ThumbnailGenerator:
         )
         return img
 
+    def load_images_to_canvases(self):
+        for f in self.image_sources:
+            img = self.upscale_to_1080p(Image.open(f))
+            canvas = ImageDraw.Draw(img)
+            self.canvases[f] = (img, canvas)
+
+    def save_canvases(self, folder: str = "thumbnails") -> list[str]:
+        output_files = []
+        output_dir = os.path.join(base_dir, folder)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        for f in self.canvases:
+            img, canvas = self.canvases[f]
+            file_path = os.path.join(output_dir, Path(f).name)
+            img.save(file_path)
+            img.close()
+            output_files.append(file_path)
+        return output_files
+
     def extract_random_frames(self, count: int) -> list[str]:
         generated_frames = []
         video = cv2.VideoCapture(self.video_path)
@@ -41,55 +62,60 @@ class ThumbnailGenerator:
             video.set(cv2.CAP_PROP_POS_FRAMES, frame_no)
             success, image = video.read()
             if success:
-                file_path = os.path.join(base_dir, f"frame_{frame_no}.jpg")
+                file_path = os.path.join(base_dir, f"{self.uuid.split('-')[-1]}_{frame_no}.jpg")
                 cv2.imwrite(file_path, image)
                 generated_frames.append(file_path)
         self.image_sources += generated_frames
         return generated_frames
 
-    def write_title(self, title: str, color: int = None):
-        for f in self.image_sources:
-            img = self.upscale_to_1080p(Image.open(f))
-            canva = ImageDraw.Draw(img)
+    def write_title(self, title: str, color: tuple[int, int, int] | str):
+        if isinstance(color, str):
+            color = ImageColor.getrgb(color)
+        for f in self.canvases:
+            img, canvas = self.canvases[f]
             font_size = img.height * 0.18
-            font = ImageFont.truetype("jf-openhuninn-2.1.ttf", font_size)
-            canva.text(
+            font = ImageFont.truetype("fonts/jf-openhuninn-2.1.ttf", font_size)
+            canvas.text(
                 xy=(img.width / 2, img.height - font_size * 0.4),
                 text=title,
                 font=font,
-                fill=TEST_FILL_COLOR,
+                fill=color,
                 anchor="mb",
                 align="center",
                 stroke_width=int(font_size * 0.05),
                 stroke_fill=(255, 255, 255),
             )
-            img.save("test2.jpg")
-            img.close()
 
-    def write_subtitle(self, title: str, color: int = None):
+    def write_subtitle(self, title: str, color: tuple[int, int, int] | str):
+        if isinstance(color, str):
+            color = ImageColor.getrgb(color)
         for f in self.image_sources:
-            img = self.upscale_to_1080p(Image.open(f))
-            canva = ImageDraw.Draw(img)
+            img, canvas = self.canvases[f]
             font_size = img.height * 0.08
-            font = ImageFont.truetype("jf-openhuninn-2.1.ttf", font_size)
-            canva.text(
-                xy=(img.width * 0.01, img.height * 0.075),
+            font = ImageFont.truetype("fonts/jf-openhuninn-2.1.ttf", font_size)
+            canvas.text(
+                xy=(img.width * 0.01, img.height * 0.03),
                 text=title,
                 font=font,
-                fill=TEST_FILL_COLOR,
+                fill=color,
                 anchor="lt",
                 align="left",
                 stroke_width=int(font_size * 0.08),
                 stroke_fill=(255, 255, 255),
             )
-            img.save("test2.jpg")
-            img.close()
 
 
 if __name__ == "__main__":
+    TEST_FILL_COLOR = (101, 166, 181)
+
     v_obj = ThumbnailGenerator("test.jpg")
+    start_time = time()
     # v_obj = ThumbnailGenerator(video_source_path="test.mp4")
-    # v_obj.extract_random_frames(1)
-    v_obj.write_title("もう少しだけ")
-    v_obj.image_sources = ["test2.jpg"]
-    v_obj.write_subtitle("浠Mizuki")
+    # v_obj.extract_random_frames(10)
+    v_obj.load_images_to_canvases()
+    v_obj.write_title("もう少しだけ", TEST_FILL_COLOR)
+    # v_obj.image_sources = ["test2.jpg"]
+    v_obj.write_subtitle("浠Mizuki", TEST_FILL_COLOR)
+    v_obj.save_canvases()
+
+    print("Time taken: %f s" % (time() - start_time))

@@ -88,8 +88,9 @@ class YouTubeUploader:
 
 
 if __name__ == "__main__":
-    uploader = YouTubeUploader(
-        file_path="test.mp4", title="Test Title", description="Test Description"
-    )
-    uploader.setup_credentials(input("貼上Refresh Token: "))
-    upload_result = uploader.upload()
+    # uploader = YouTubeUploader(
+    #     file_path="test.mp4", title="Test Title", description="Test Description"
+    # )
+    # uploader.setup_credentials(input("貼上Refresh Token: "))
+    # upload_result = uploader.upload()
+    print(YouTubeUploader.refresh_token_is_valid(input("貼上Refresh Token: ")))
