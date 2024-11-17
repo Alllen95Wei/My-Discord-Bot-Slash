@@ -13,8 +13,9 @@ NO_DL_OPTS = {
     "default_search": "auto",
     "usenetrc": False,
     "fixup": "detect_or_warn",
-    "username": "oauth2",
-    "password": "",
+    "cookies_from_browser": "chrome"
+    # "username": "oauth2",
+    # "password": "",
 }
 
 
@@ -55,8 +56,9 @@ class Video:
             "external_downloader_args": {
                 "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
             },
-            "username": "oauth2",
-            "password": "",
+            "cookies_from_browser": "chrome"
+            # "username": "oauth2",
+            # "password": "",
         }
         with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
@@ -78,8 +80,9 @@ class Video:
             "external_downloader_args": {
                 "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
             },
-            "username": "oauth2",
-            "password": "",
+            "cookies_from_browser": "chrome"
+            # "username": "oauth2",
+            # "password": "",
         }
         with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
@@ -130,4 +133,4 @@ class Video:
 if __name__ == "__main__":
     # youtube_download(url=input("請貼上要下載的連結："), file_name=input("請輸入下載後的檔案名稱："))
     v = Video(url=input("請貼上要下載的連結："))
-    v.download_section_in_mp4("test.mp4", 0, 10)
+    v.download_section_in_mp4("test.mp4", 0, 158)

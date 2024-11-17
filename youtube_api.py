@@ -9,6 +9,7 @@ import logging
 
 class YouTubeUploader:
     def __init__(self, file_path: str, title: str, description: str):
+        self.video_id = None
         self.credentials = None
         self.file_path = file_path
         self.body = {
@@ -20,6 +21,7 @@ class YouTubeUploader:
             "status": {"privacyStatus": "unlisted", "selfDeclaredMadeForKids": False},
         }
         self.credentials: Credentials
+        self.video_id: str
 
     @staticmethod
     def refresh_token_is_valid(refresh_token: str) -> bool:
@@ -59,7 +61,7 @@ class YouTubeUploader:
             refresh_token=refresh_token,
         )
 
-    def upload(self) -> dict:
+    def upload_video(self) -> dict:
         if self.credentials is None:
             raise RuntimeError(
                 'Credentials not set. Run "setup_credentials" before uploading.'
@@ -81,10 +83,33 @@ class YouTubeUploader:
                 status, response = insert_request.next_chunk()
                 if response is not None:
                     if "id" in response:
+                        self.video_id = response["id"]
                         logging.info(
                             "Video id '%s' was successfully uploaded." % response["id"]
                         )
                         return response
+
+    def upload_thumbnail(self, file_path: str) -> dict:
+        if self.credentials is None:
+            raise RuntimeError(
+                'Credentials not set. Run "setup_credentials" before uploading.'
+            )
+        else:
+            youtube = build("youtube", "v3", credentials=self.credentials)
+
+            # Docs: https://developers.google.com/youtube/v3/docs/thumbnails/set
+            insert_request = youtube.thumbnails().set(
+                videoId=self.video_id,
+                media_body=MediaFileUpload(
+                    filename=file_path, chunksize=-1, resumable=True
+                ),
+            )
+
+            response = None
+            while response is None:
+                status, response = insert_request.next_chunk()
+                if response is not None:
+                    return response
 
 
 if __name__ == "__main__":
