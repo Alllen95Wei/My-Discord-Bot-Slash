@@ -16,7 +16,7 @@ NO_DL_OPTS = {
     "default_search": "auto",
     "usenetrc": False,
     "fixup": "detect_or_warn",
-    "cookies": COOKIE_TXT_PATH
+    "cookiefile": COOKIE_TXT_PATH
     # "username": "oauth2",
     # "password": "",
 }
@@ -38,7 +38,7 @@ class Video:
             "default_search": "auto",
             "usenetrc": False,
             "fixup": "detect_or_warn",
-            "cookies": COOKIE_TXT_PATH,
+            "cookiefile": COOKIE_TXT_PATH,
         }
         with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
@@ -58,7 +58,7 @@ class Video:
             "external_downloader_args": {
                 "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
             },
-            "cookies": COOKIE_TXT_PATH,
+            "cookiefile": COOKIE_TXT_PATH,
             # "username": "oauth2",
             # "password": "",
         }
@@ -82,7 +82,7 @@ class Video:
             "external_downloader_args": {
                 "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
             },
-            "cookies": COOKIE_TXT_PATH,
+            "cookiefile": COOKIE_TXT_PATH,
             # "username": "oauth2",
             # "password": "",
         }
