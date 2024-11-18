@@ -13,7 +13,7 @@ NO_DL_OPTS = {
     "default_search": "auto",
     "usenetrc": False,
     "fixup": "detect_or_warn",
-    "cookies_from_browser": "chrome"
+    "cookies": "cookies.txt"
     # "username": "oauth2",
     # "password": "",
 }
