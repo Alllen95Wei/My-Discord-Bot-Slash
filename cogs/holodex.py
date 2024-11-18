@@ -350,13 +350,14 @@ Holodex API：https://docs.holodex.net/
         menu.options = choices
 
         async def callback(interaction: Interaction):
+            await interaction.response.defer()
             if interaction.user.id == author.id:
                 selected_file = menu.values[0]
                 try:
                     result = await Basics.run_blocking(
                         self.bot, uploader_obj.upload_thumbnail, selected_file
                     )
-                    hq_thumbnail = result["items"]["maxres"]["url"]
+                    hq_thumbnail = result["items"][0]["maxres"]["url"]
                     embed = Embed(
                         title="縮圖已上傳", description="已更新影片的縮圖。", color=default_color
                     )
@@ -365,7 +366,7 @@ Holodex API：https://docs.holodex.net/
                         value="https://youtu.be/" + uploader_obj.video_id,
                         inline=False,
                     )
-                    embed.set_thumbnail(url=hq_thumbnail)
+                    embed.set_image(url=hq_thumbnail)
                 except Exception as e:
                     if "Refresh token has expired or invalid." in str(e):
                         embed = Embed(
@@ -384,6 +385,9 @@ Holodex API：https://docs.holodex.net/
                             value="```" + selected_file + "```",
                             inline=False,
                         )
+                finally:
+                    for f in files:
+                        os.remove(f)
                 await interaction.edit_original_response(embed=embed, view=None)
             else:
                 embed = Embed(
@@ -449,6 +453,8 @@ Holodex API：https://docs.holodex.net/
             thumb_gen.write_title(title, color)
             thumb_gen.write_subtitle(subtitle, color)
             output_images = thumb_gen.save_canvases()
+            # 移除影片
+            os.remove(self.video_path)
             embed = Embed(
                 title="選擇縮圖", description="請透過下拉式選單選擇縮圖。", color=default_color
             )

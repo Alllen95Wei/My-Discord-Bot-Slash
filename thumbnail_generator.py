@@ -62,7 +62,7 @@ class ThumbnailGenerator:
             video.set(cv2.CAP_PROP_POS_FRAMES, frame_no)
             success, image = video.read()
             if success:
-                file_path = os.path.join(base_dir, f"{self.uuid.split('-')[-1]}_{frame_no}.jpg")
+                file_path = os.path.join(base_dir, "thumbnails", f"{self.uuid.split('-')[-1]}_{frame_no}.jpg")
                 cv2.imwrite(file_path, image)
                 generated_frames.append(file_path)
         self.image_sources += generated_frames
