@@ -65,7 +65,7 @@ class Holodex(commands.Cog):
         add_to_musicbot_queue: bool = False,
         upload_to_youtube: bool = False,
     ) -> ui.View:
-        view = ui.View(disable_on_timeout=True)
+        view = ui.View(timeout=None, disable_on_timeout=True)
         # generate sections
         selections = []
         for sect in sections_list:
@@ -160,7 +160,7 @@ class Holodex(commands.Cog):
 原直播：{video_instance.url}
 
 此剪輯片段由Allen Bot產生，使用Holodex API取得時間軸資料。
-本功能仍在測試中，且可能隨時下線並不另行通知。
+Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash
 Holodex API：https://docs.holodex.net/
 """
                         yt_uploader = youtube_api.YouTubeUploader(
