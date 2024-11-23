@@ -1,16 +1,12 @@
 # coding=utf-8
-import discord
 from discord.ext import commands, tasks
-from discord import Embed, Option
+from discord import Embed
 import os
 import zoneinfo
 from pathlib import Path
-import time
-import datetime
 import pandas as pd
 
 import logger
-import json_assistant
 
 error_color = 0xF1411C
 default_color = 0x5FE1EA
@@ -41,7 +37,7 @@ class SuspensionFetcher(commands.Cog):
                                       f"{new_status}```",
                           color=default_color)
             embed.add_field(name="資料來源", value="https://www.dgpa.gov.tw/typh/daily/nds.html")
-            embed.set_footer(text="此功能只花了5分鐘寫出來，會出包很正常。")
+            embed.set_footer(text="此功能測試中，可能不會正常運作或下線而不另行通知。")
             await self.bot.get_channel(858176848747429938).send(content="<@657519721138094080>", embed=embed)
         else:
             self.real_logger.info("資訊無變動")
