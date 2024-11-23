@@ -3,12 +3,13 @@ import discord
 from discord.ext import commands
 from discord import Option
 import os
+import time
 import zoneinfo
 from pathlib import Path
 
 import logger
 import json_assistant
-
+from cogs.general import EXCLUDE_CHANNELS
 
 error_color = 0xF1411C
 default_color = 0x5FE1EA
@@ -304,6 +305,50 @@ class UserInfo(commands.Cog):
         embed.add_field(name="訊息長度", value=f"`{len(msg_content)}` 字元", inline=False)
         embed.add_field(name="實領文字經驗值", value=f"`{exp}` 點", inline=True)
         await ctx.respond(embed=embed, ephemeral=True)
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.id == self.bot.user.id or message.channel.id in EXCLUDE_CHANNELS:
+            return
+        if "Direct Message" in str(message.channel):
+            embed = discord.Embed(
+                title="是不是傳錯人了...？", description="很抱歉，目前本機器人不接受私人訊息。", color=error_color
+            )
+            await message.channel.send(embed=embed)
+            return
+        msg_in = message.content
+        member_obj = json_assistant.User(message.author.id)
+        time_delta = time.time() - member_obj.get_last_active_time()
+        if time_delta < 300:
+            return
+        if not message.author.bot and isinstance(msg_in, str):
+            if len(msg_in) <= 15:
+                self.real_logger.info(
+                    f"獲得經驗值：{message.author.name} 文字經驗值 +{len(msg_in)} (訊息長度：{len(msg_in)})"
+                )
+                member_obj.add_exp("text", len(msg_in))
+            else:
+                member_obj.add_exp("text", 15)
+                self.real_logger.info(
+                    f"獲得經驗值：{message.author.name} 文字經驗值 +15 (訊息長度：{len(msg_in)})"
+                )
+        member_obj.set_last_active_time(time.time())
+        if member_obj.level_calc("text") and member_obj.notify_threshold_reached(
+                "text"
+        ):
+            self.real_logger.info(
+                f"等級提升：{message.author.name} 文字等級"
+                f"達到 {member_obj.get_level('text')} 等"
+            )
+            embed = discord.Embed(
+                title="等級提升",
+                description=f":tada:恭喜 <@{message.author.id}> *文字*等級升級到 "
+                            f"**{member_obj.get_level('text')}** 等！",
+                color=default_color,
+            )
+            embed.set_thumbnail(url=message.author.display_avatar)
+            embed.set_footer(text="關於經驗值計算系統，請輸入/user_info about")
+            await message.channel.send(embed=embed, delete_after=5)
 
 
 def setup(bot):
