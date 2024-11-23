@@ -1,16 +1,13 @@
 # coding=utf-8
 import discord
 from discord.ext import commands, tasks
-from discord import Embed, Option
+from discord import Embed
 import os
 import zoneinfo
 from pathlib import Path
-import time
-import datetime
 import pandas as pd
 
 import logger
-import json_assistant
 
 error_color = 0xF1411C
 default_color = 0x5FE1EA
