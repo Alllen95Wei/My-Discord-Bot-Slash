@@ -3,7 +3,7 @@ import yt_dlp
 import os
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
-COOKIE_TXT_PATH = os.path.join(base_dir, "cookies.txt")
+DEFAULT_COOKIE_TXT_PATH = os.path.join(base_dir, "cookies.txt")
 NO_DL_OPTS = {
     "skip_download": True,
     "quiet": False,
@@ -16,7 +16,7 @@ NO_DL_OPTS = {
     "default_search": "auto",
     "usenetrc": False,
     "fixup": "detect_or_warn",
-    "cookiefile": COOKIE_TXT_PATH
+    "cookiefile": DEFAULT_COOKIE_TXT_PATH
     # "username": "oauth2",
     # "password": "",
 }
@@ -38,7 +38,7 @@ class Video:
             "default_search": "auto",
             "usenetrc": False,
             "fixup": "detect_or_warn",
-            "cookiefile": COOKIE_TXT_PATH,
+            "cookiefile": DEFAULT_COOKIE_TXT_PATH,
         }
         with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
@@ -58,7 +58,7 @@ class Video:
             "external_downloader_args": {
                 "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
             },
-            "cookiefile": COOKIE_TXT_PATH,
+            "cookiefile": DEFAULT_COOKIE_TXT_PATH,
             # "username": "oauth2",
             # "password": "",
         }
@@ -82,7 +82,7 @@ class Video:
             "external_downloader_args": {
                 "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
             },
-            "cookiefile": COOKIE_TXT_PATH,
+            "cookiefile": DEFAULT_COOKIE_TXT_PATH,
             # "username": "oauth2",
             # "password": "",
         }
@@ -129,6 +129,8 @@ class Video:
     def get_full_info(url) -> dict:
         with yt_dlp.YoutubeDL(NO_DL_OPTS) as ydl:
             info_dict = ydl.extract_info(url, download=False)
+            if info_dict is None:
+                raise RuntimeError("`get_full_info` failed. Are you blocked by YouTube?")
             return info_dict
 
 
