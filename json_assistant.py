@@ -128,6 +128,7 @@ class User:
             last_notify_lvl = user_info.get("last_notify", {"voice": 0, "text": 0})
             last_notify_lvl[level_type] = level
             user_info["last_notify"] = last_notify_lvl
+            self.write_raw_info(user_info)
         else:
             raise ValueError('level_type must be either "voice" or "text"')
 
