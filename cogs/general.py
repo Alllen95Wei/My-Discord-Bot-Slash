@@ -603,8 +603,7 @@ class Basics(commands.Cog):
                 #     reward = 100
                 receiver = 贈與使用者
                 self.real_logger.info(
-                    f"{ctx.author.name}#{ctx.author.discriminator} 贈送 {receiver.name}#{receiver.discriminator}"
-                    f" {reward} 點文字經驗值。"
+                    f"{ctx.author.name} 贈送 {receiver.name} {reward} 點文字經驗值。"
                 )
                 receiver_embed = discord.Embed(
                     title="🎁收到贈禮！",
