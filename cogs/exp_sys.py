@@ -106,62 +106,6 @@ class UserInfo(commands.Cog):
     async def user_info_require_user(self, ctx, user: discord.Member):
         await self.require(ctx, user, 私人訊息=True)
 
-    @user_info.command(name="set_upgrade_notify", description="設定何時要傳送升等通知。")
-    async def exp_upgrade_notify(
-        self,
-        ctx,
-        text_lvl: Option(
-            int,
-            name="文字等級",
-            description="每升級幾次文字等級，才傳送升等通知？",
-            min_value=1,
-            max_value=50,
-            required=True,
-        ),
-        voice_lvl: Option(
-            int,
-            name="語音等級",
-            description="每升級幾次語音等級，才傳送升等通知？",
-            min_value=1,
-            max_value=50,
-            required=True,
-        ),
-        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
-    ):
-        user_obj = json_assistant.User(ctx.author.id)
-        original_threshold = user_obj.get_notify_threshold()
-        user_obj.set_notify_threshold(text_lvl, voice_lvl)
-        embed = discord.Embed(
-            title="設定完成", description="已重新設定升等通知。", color=default_color
-        )
-        embed.add_field(
-            name="文字",
-            value=f"`{original_threshold['text']}`等 ➡️ `{text_lvl}`等",
-            inline=False,
-        )
-        embed.add_field(
-            name="語音",
-            value=f"`{original_threshold['voice']}`等 ➡️ `{voice_lvl}`等",
-            inline=False,
-        )
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
-
-    @user_info.command(name="set_voice_exp_report", description="設定結束語音階段時，是否要傳送經驗值報告。")
-    async def set_voice_exp_report(
-        self,
-        ctx,
-        enabled: Option(bool, name="啟用", description="是否啟用經驗值報告", required=True),
-        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa
-    ):
-        user_obj = json_assistant.User(ctx.author.id)
-        user_obj.set_exp_report_enabled(enabled)
-        embed = discord.Embed(
-            title="設定完成",
-            description=f"已 **{'啟用' if enabled else '停用'}** 語音經驗值報告。",
-            color=default_color,
-        )
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
-
     @user_info.command(name="about", description="顯示關於經驗值及等級的計算。")
     async def exp_about(self, ctx):
         embed = discord.Embed(
@@ -307,7 +251,7 @@ class UserInfo(commands.Cog):
         await ctx.respond(embed=embed, ephemeral=True)
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         if message.author.id == self.bot.user.id or message.channel.id in EXCLUDE_CHANNELS:
             return
         if "Direct Message" in str(message.channel):
