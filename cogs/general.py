@@ -705,7 +705,7 @@ class Basics(commands.Cog):
             ) = 128,
     ):
         await ctx.defer(ephemeral=True)
-        cookie_path = os.path.join(base_dir, "cookies", f"{ctx.author.id}.txt")
+        cookie_path = os.path.join(parent_dir, "cookies", f"{ctx.author.id}.txt")
         if not os.path.exists(cookie_path):
             user_obj = json_assistant.User(ctx.author.id)
             if user_obj.get_dl_using_general_cookie_count() <= 0:
