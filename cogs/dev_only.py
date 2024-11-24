@@ -5,10 +5,11 @@ from discord import Option
 import os
 import zoneinfo
 from pathlib import Path
-from platform import system
+from aiohttp import ClientSession
 from shlex import split
 from subprocess import run
 import git
+from dotenv import load_dotenv
 
 import logger
 import update as upd
@@ -32,8 +33,12 @@ class DevOnly(commands.Cog):
             super().__init__(timeout=None)
             self.bot = outer_instance.bot
 
-        @discord.ui.button(label="現在重新載入更新！", style=discord.ButtonStyle.green, emoji="🔄")
-        async def update_btn(self, button: discord.Button, interaction: discord.Interaction):
+        @discord.ui.button(
+            label="現在重新載入更新！", style=discord.ButtonStyle.green, emoji="🔄"
+        )
+        async def update_btn(
+            self, button: discord.Button, interaction: discord.Interaction
+        ):
             await interaction.response.defer()
             if await self.bot.is_owner(interaction.user):
                 extension_list = list(self.bot.extensions)
@@ -45,13 +50,16 @@ class DevOnly(commands.Cog):
                 embed.description = response_context
                 await interaction.followup.send(embed=embed)
             else:
-                embed = discord.Embed(title="錯誤", description="你沒有權限使用此指令。", color=error_color)
+                embed = discord.Embed(
+                    title="錯誤", description="你沒有權限使用此指令。", color=error_color
+                )
                 await interaction.followup.send(embed=embed, ephemeral=True)
 
     @discord.slash_command(name="cleanytdl", description="清除ytdl的下載資料夾。")
     @commands.is_owner()
-    async def cleanytdl(self, ctx,
-                        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa
+    async def cleanytdl(
+        self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False  # noqa: PEP 3131
+    ):
         await ctx.defer()
         ytdl_folder = os.path.join(parent_dir, "ytdl")
         file_count, folder_size = 0, 0
@@ -59,7 +67,9 @@ class DevOnly(commands.Cog):
             file_count += 1
             folder_size += os.path.getsize(os.path.join(ytdl_folder, f))
             os.remove(os.path.join(ytdl_folder, f))
-        embed = discord.Embed(title="清除ytdl的下載資料夾", description="已清除ytdl的下載資料夾。", color=default_color)
+        embed = discord.Embed(
+            title="清除ytdl的下載資料夾", description="已清除ytdl的下載資料夾。", color=default_color
+        )
         # turn folder_size into human-readable format, MB
         folder_size = round(folder_size / 1024 / 1024, 2)
         embed.add_field(name="清除的檔案數量", value=f"{file_count} 個", inline=False)
@@ -68,16 +78,25 @@ class DevOnly(commands.Cog):
 
     @discord.slash_command(name="cmd", description="在伺服器端執行指令並傳回結果。")
     @commands.is_owner()
-    async def cmd(self, ctx,
-                  指令: Option(str, "要執行的指令", required=True),  # noqa: PEP 3131
-                  執行模組: Option(str, choices=["subprocess", "os"], description="執行指令的模組",  # noqa: PEP 3131
-                                   required=False) = "subprocess",
-                  私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
+    async def cmd(
+        self,
+        ctx,
+        指令: Option(str, "要執行的指令", required=True),  # noqa: PEP 3131
+        執行模組: Option(  # noqa: PEP 3131
+            str,
+            choices=["subprocess", "os"],
+            description="執行指令的模組",  # noqa: PEP 3131
+            required=False,
+        ) = "subprocess",
+        私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False,  # noqa: PEP 3131
+    ):
         try:
             await ctx.defer(ephemeral=私人訊息)
             command = split(指令)
             if command[0] == "cmd":
-                embed = discord.Embed(title="錯誤", description="基於安全原因，你不能執行這個指令。", color=error_color)
+                embed = discord.Embed(
+                    title="錯誤", description="基於安全原因，你不能執行這個指令。", color=error_color
+                )
                 await ctx.respond(embed=embed, ephemeral=私人訊息)
                 return
             if 執行模組 == "subprocess":
@@ -85,13 +104,21 @@ class DevOnly(commands.Cog):
             else:
                 result = str(os.popen(指令).read())
             if result != "":
-                embed = discord.Embed(title="執行結果", description=f"```{result}```", color=default_color)
+                embed = discord.Embed(
+                    title="執行結果", description=f"```{result}```", color=default_color
+                )
             else:
-                embed = discord.Embed(title="執行結果", description="終端未傳回回應。", color=default_color)
+                embed = discord.Embed(
+                    title="執行結果", description="終端未傳回回應。", color=default_color
+                )
         except FileNotFoundError:
-            embed = discord.Embed(title="錯誤", description="找不到指令。請嘗試更換執行模組。", color=error_color)
+            embed = discord.Embed(
+                title="錯誤", description="找不到指令。請嘗試更換執行模組。", color=error_color
+            )
         except Exception as e:
-            embed = discord.Embed(title="錯誤", description=f"發生錯誤：`{e}`", color=error_color)
+            embed = discord.Embed(
+                title="錯誤", description=f"發生錯誤：`{e}`", color=error_color
+            )
         try:
             await ctx.respond(embed=embed, ephemeral=私人訊息)
         except discord.errors.HTTPException as HTTPError:
@@ -99,24 +126,28 @@ class DevOnly(commands.Cog):
                 txt_file_path = os.path.join(parent_dir, "full_msg.txt")
                 with open(txt_file_path, "w") as file:
                     file.write(str(result))  # noqa
-                await ctx.respond("由於訊息長度過長，因此改以文字檔方式呈現。", file=discord.File(txt_file_path),
-                                  ephemeral=私人訊息)
+                await ctx.respond(
+                    "由於訊息長度過長，因此改以文字檔方式呈現。",
+                    file=discord.File(txt_file_path),
+                    ephemeral=私人訊息,
+                )
                 os.remove(txt_file_path)
 
-    @discord.slash_command(name="restart", description="重啟機器人。")
-    @commands.is_owner()
-    async def restart(self, ctx,
-                      私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
-        embed = discord.Embed(title="機器人重啟中", description="機器人正在重啟中。", color=default_color)
-        await ctx.respond(embed=embed, ephemeral=私人訊息)
-        event = discord.Activity(type=discord.ActivityType.playing, name="重啟中...")
-        await self.bot.change_presence(status=discord.Status.idle, activity=event)
-        upd.restart_running_bot(os.getpid(), system())
+    # @discord.slash_command(name="restart", description="重啟機器人。")
+    # @commands.is_owner()
+    # async def restart(self, ctx,
+    #                   私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
+    #     embed = discord.Embed(title="機器人重啟中", description="機器人正在重啟中。", color=default_color)
+    #     await ctx.respond(embed=embed, ephemeral=私人訊息)
+    #     event = discord.Activity(type=discord.ActivityType.playing, name="重啟中...")
+    #     await self.bot.change_presence(status=discord.Status.idle, activity=event)
+    #     upd.restart_running_bot(os.getpid(), system())
 
     @discord.slash_command(name="update", description="更新機器人。")
     @commands.is_owner()
-    async def update(self, ctx,
-                     私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False):  # noqa: PEP 3131
+    async def update(
+        self, ctx, 私人訊息: Option(bool, "是否以私人訊息回應", required=False) = False # noqa: PEP 3131
+    ):
         embed = discord.Embed(title="更新中", description="更新流程啟動。", color=default_color)
         await ctx.respond(embed=embed, view=self.UpdateBtn(self), ephemeral=私人訊息)
         repo = git.Repo(search_parent_directories=True)
@@ -127,8 +158,42 @@ class DevOnly(commands.Cog):
         upd.get_update_files()
         new_commit = repo.head.object.hexsha[:7]
         if old_commit != new_commit:
-            embed = discord.Embed(title="更新資訊", description=f"`{old_commit}` ➡️ `{new_commit}`", color=default_color)
+            embed = discord.Embed(
+                title="更新資訊",
+                description=f"`{old_commit}` ➡️ `{new_commit}`",
+                color=default_color,
+            )
             await ctx.respond(embed=embed)
+
+    @discord.slash_command(name="restart", description="使用Pterodactyl API重啟機器人。")
+    @commands.is_owner()
+    async def restart(
+        self,
+        ctx,
+        action: Option(
+            str, choices=["start", "stop", "restart", "kill"], required=False
+        ) = "restart",
+    ):
+        embed = discord.Embed(title="即將傳送重啟訊號", description="機器人即將中斷連線。", color=default_color)
+        await ctx.respond(embed=embed)
+        load_dotenv(os.path.join(parent_dir, "TOKEN.env"))
+        pterodactyl_token = str(os.getenv("PTERODACTYL_TOKEN"))
+        async with ClientSession() as session:
+            async with session.post(
+                url="https://panel.cheapserver.tw/api/client/servers/3b914575",
+                data={"signal": action},
+                headers={"Authorization": f"Bearer {pterodactyl_token}",
+                         "Content-Type": "application/json",
+                         "Accept": "application/json"},
+            ) as response:
+                if not response.ok:
+                    embed = discord.Embed(
+                        title=f"錯誤：HTTP {response.status}",
+                        description=f"錯誤訊息：\n```{response.text}```",
+                        color=error_color,
+                    )
+                    await ctx.followup.send(embed=embed)
+
 
     @discord.slash_command(name="nothing", description="This command does nothing.")
     @commands.is_owner()
@@ -139,4 +204,4 @@ class DevOnly(commands.Cog):
 
 def setup(bot):
     bot.add_cog(DevOnly(bot, bot.logger))
-    bot.logger.info("\"DevOnly\"已被載入。")
+    bot.logger.info('"DevOnly"已被載入。')
