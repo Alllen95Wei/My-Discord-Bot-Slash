@@ -38,7 +38,8 @@ class User:
                 return self.INIT_DATA
         else:
             with open(file, "r") as f:
-                return f.read()
+                user_info = f.read()
+            return user_info
 
     def write_raw_info(self, data):
         file = os.path.join(base_dir, "user_data", str(self.user_id) + ".json")
