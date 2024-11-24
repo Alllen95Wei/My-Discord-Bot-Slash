@@ -23,9 +23,10 @@ NO_DL_OPTS = {
 
 
 class Video:
-    def __init__(self, url):
+    def __init__(self, url, cookie_file_path: str = DEFAULT_COOKIE_TXT_PATH):
         self.url = url
         self.full_info = self.get_full_info(url)
+        self.cookie_file_path = cookie_file_path
 
     def download(self, file_path: str):
         dl_opts = {
@@ -38,7 +39,7 @@ class Video:
             "default_search": "auto",
             "usenetrc": False,
             "fixup": "detect_or_warn",
-            "cookiefile": DEFAULT_COOKIE_TXT_PATH,
+            "cookiefile": self.cookie_file_path,
         }
         with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
@@ -58,7 +59,7 @@ class Video:
             "external_downloader_args": {
                 "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
             },
-            "cookiefile": DEFAULT_COOKIE_TXT_PATH,
+            "cookiefile": self.cookie_file_path,
             # "username": "oauth2",
             # "password": "",
         }
@@ -82,7 +83,27 @@ class Video:
             "external_downloader_args": {
                 "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
             },
-            "cookiefile": DEFAULT_COOKIE_TXT_PATH,
+            "cookiefile": self.cookie_file_path,
+            # "username": "oauth2",
+            # "password": "",
+        }
+        with yt_dlp.YoutubeDL(dl_opts) as ydl:
+            return ydl.download([self.url])
+
+    def download_in_mp4(self, file_path: str):
+        dl_opts = {
+            "merge_output_format": "mp4",
+            "final_ext": "mp4",
+            "format": "bestaudio+bestvideo/best",
+            "outtmpl": file_path,
+            "restrictfilenames": True,
+            "noplaylist": True,
+            "nocheckcertificate": True,
+            "logtostderr": False,
+            "default_search": "auto",
+            "usenetrc": False,
+            "fixup": "detect_or_warn",
+            "cookiefile": self.cookie_file_path,
             # "username": "oauth2",
             # "password": "",
         }
@@ -137,4 +158,4 @@ class Video:
 if __name__ == "__main__":
     # youtube_download(url=input("請貼上要下載的連結："), file_name=input("請輸入下載後的檔案名稱："))
     v = Video(url=input("請貼上要下載的連結："))
-    v.download_section_in_mp4("test.mp4", 0, 158)
+    v.download_in_mp4("test.mp4")
