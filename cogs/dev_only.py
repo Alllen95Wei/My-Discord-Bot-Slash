@@ -199,7 +199,7 @@ class DevOnly(commands.Cog):
     @commands.is_owner()
     async def nth(self, ctx, url: Option(str)):
         await ctx.respond(content="Nothing happened.", ephemeral=True)
-        Video(url).download(url[-11:] + ".mp4")
+        Video(url).download_in_mp4(url[-11:] + ".mp4")
 
 
 def setup(bot):
