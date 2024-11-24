@@ -137,38 +137,38 @@ class Holodex(commands.Cog):
                             "ytdl",
                             file_name,
                         )
-                        await Basics.run_blocking(
-                            self.bot,
-                            video_instance.download_section_in_mp4,
-                            file_path,
-                            section["start"],
-                            section["end"],
-                        )
-                        end_time = time.time()
-                        time_delta = end_time - start_time
-                        await interaction.edit_original_response(
-                            content=f"下載共花了 `{round(time_delta, 3)}` 秒 "
-                            f"(`{round((section['end'] - section['start'])/time_delta, 3)}` x)",
-                            embed=embed,
-                            view=None,
-                        )
-                        clip_title = (
-                            f"【{video_instance.full_info['channel']}】{section['name']} / {section['original_artist']}"
-                            "【純剪輯】"
-                        )
-                        clip_description = f"""
+                        try:
+                            await Basics.run_blocking(
+                                self.bot,
+                                video_instance.download_section_in_mp4,
+                                file_path,
+                                section["start"],
+                                section["end"],
+                            )
+                            end_time = time.time()
+                            time_delta = end_time - start_time
+                            await interaction.edit_original_response(
+                                content=f"下載共花了 `{round(time_delta, 3)}` 秒 "
+                                f"(`{round((section['end'] - section['start'])/time_delta, 3)}` x)",
+                                embed=embed,
+                                view=None,
+                            )
+                            clip_title = (
+                                f"【{video_instance.full_info['channel']}】{section['name']} / {section['original_artist']}"
+                                "【純剪輯】"
+                            )
+                            clip_description = f"""
 原直播：{video_instance.url}
 
 此剪輯片段由Allen Bot產生，使用Holodex API取得時間軸資料。
-Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash
 Holodex API：https://docs.holodex.net/
+Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash
 """
-                        yt_uploader = youtube_api.YouTubeUploader(
-                            file_path=file_path,
-                            title=clip_title,
-                            description=clip_description,
-                        )
-                        try:
+                            yt_uploader = youtube_api.YouTubeUploader(
+                                file_path=file_path,
+                                title=clip_title,
+                                description=clip_description,
+                            )
                             yt_uploader.setup_credentials()
                             video_info = await Basics.run_blocking(
                                 self.bot,
