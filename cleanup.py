@@ -31,6 +31,14 @@ async def on_ready():
         for file in os.listdir(logs_path):
             os.remove(os.path.join(soundboard_path, file))
             print("刪除檔案：", file)
+        thumbnail_path = os.path.join(os.path.dirname(__file__), "thumbnails")
+        for file in os.listdir(thumbnail_path):
+            os.remove(os.path.join(thumbnail_path, file))
+            print("刪除檔案：", file)
+        cookies_path = os.path.join(os.path.dirname(__file__), "cookies")
+        for file in os.listdir(cookies_path):
+            os.remove(os.path.join(cookies_path, file))
+            print("刪除檔案：", file)
         print("刪除完畢。")
     print("結束工作...")
     exit()
