@@ -255,10 +255,6 @@ class UserInfo(commands.Cog):
         if message.author.id == self.bot.user.id or message.channel.id in EXCLUDE_CHANNELS:
             return
         if "Direct Message" in str(message.channel):
-            embed = discord.Embed(
-                title="是不是傳錯人了...？", description="很抱歉，目前本機器人不接受私人訊息。", color=error_color
-            )
-            await message.channel.send(embed=embed)
             return
         msg_in = message.content
         member_obj = json_assistant.User(message.author.id)
