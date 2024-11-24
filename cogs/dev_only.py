@@ -180,20 +180,20 @@ class DevOnly(commands.Cog):
         pterodactyl_token = str(os.getenv("PTERODACTYL_TOKEN"))
         async with ClientSession() as session:
             async with session.post(
-                url="https://panel.cheapserver.tw/api/client/servers/3b914575",
-                data={"signal": action},
+                url="https://panel.cheapserver.tw/api/client/servers/3b914575/power",
+                data=str({"signal": action}),
                 headers={"Authorization": f"Bearer {pterodactyl_token}",
                          "Content-Type": "application/json",
                          "Accept": "application/json"},
             ) as response:
+                print(await response.text())
                 if not response.ok:
                     embed = discord.Embed(
                         title=f"錯誤：HTTP {response.status}",
-                        description=f"錯誤訊息：\n```{response.text}```",
+                        description=f"錯誤訊息：\n```{await response.text()}```",
                         color=error_color,
                     )
                     await ctx.followup.send(embed=embed)
-
 
     @discord.slash_command(name="nothing", description="This command does nothing.")
     @commands.is_owner()
