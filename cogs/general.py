@@ -2,7 +2,7 @@
 import discord
 from discord.ext import commands
 from discord.ext import tasks
-from discord import Option, Interaction
+from discord import Option, Interaction, Embed
 from discord.ui import Modal
 from discord.ui import InputText
 from discord import InputTextStyle
@@ -112,12 +112,14 @@ class Basics(commands.Cog):
                 video_instance: yt_download.Video,
                 metadata: dict,
                 bit_rate: int = 128,
+                cookie_file_path: str = None,
         ):
             super().__init__()
             self.outer_instance = outer_instance
             self.m_video = video_instance
             self.metadata = metadata
             self.bit_rate = bit_rate
+            self.cookie_file_path = cookie_file_path
 
         @discord.ui.button(style=discord.ButtonStyle.blurple, label="確認下載", emoji="✅")
         async def yes_btn(
@@ -689,7 +691,7 @@ class Basics(commands.Cog):
     )
     async def dl(
             self,
-            ctx,
+            ctx: discord.ApplicationContext,
             連結: Option(str, "欲下載的影片網址", required=True),  # noqa: PEP 3131
             加入後設資料: Option(  # noqa: PEP 3131
                 bool, "是否在檔案中加入影片標題、作者與縮圖，會影響檔案的大小", required=False
@@ -702,8 +704,45 @@ class Basics(commands.Cog):
                 required=False,
             ) = 128,
     ):
-        await ctx.defer()
-        m_video = yt_download.Video(連結)
+        await ctx.defer(ephemeral=True)
+        cookie_path = os.path.join(base_dir, "cookies", f"{ctx.author.id}.txt")
+        if not os.path.exists(cookie_path):
+            user_obj = json_assistant.User(ctx.author.id)
+            if user_obj.get_dl_using_general_cookie_count() <= 0:
+                embed = Embed(
+                    title="錯誤：已達到最大使用上限",
+                    description="你已經使用此指令10次而未上傳自己的cookie檔案。\n"
+                                "為避免惡意濫用，你必須上傳自己的cookie檔案才能繼續使用。",
+                    color=error_color,
+                )
+                embed.add_field(
+                    name="如何上傳cookie檔案？",
+                    value="1. 依照 [此處]"
+                          "(https://github.com/Alllen95Wei/My-Discord-Bot-Slash/wiki/%E5%8C%AF%E5%87%BAcookies.txt) "
+                          "的教學，匯出你的cookies.txt。\n"
+                          "2. 使用`/config musicdl upload_cookie`，並選取剛才匯出的cookies.txt上傳。",
+                    inline=False,
+                )
+                await ctx.respond(embed=embed, ephemeral=True)
+                return
+            user_obj.set_dl_using_general_cookie_count(user_obj.get_dl_using_general_cookie_count() - 1)
+            cookie_path = None
+            warn_embed = Embed(
+                title="提醒你，你尚未上傳cookie檔案！",
+                description="為避免惡意濫用，未上傳cookie檔案的使用者僅可使用此指令**10次**。\n"
+                            f"扣除這次使用後，你還能使用`{user_obj.get_dl_using_general_cookie_count()}`次。",
+                color=default_color,
+            )
+            warn_embed.add_field(
+                name="如何上傳cookie檔案？",
+                value="1. 依照 [此處]"
+                      "(https://github.com/Alllen95Wei/My-Discord-Bot-Slash/wiki/%E5%8C%AF%E5%87%BAcookies.txt) "
+                      "的教學，匯出你的cookies.txt。\n"
+                      "2. 使用`/config musicdl upload_cookie`，並選取剛才匯出的cookies.txt上傳。",
+                inline=False,
+            )
+            await ctx.followup.send(embed=warn_embed, ephemeral=True)
+        m_video = yt_download.Video(連結, cookie_path)
         if m_video.is_live():  # 排除直播影片
             embed = discord.Embed(
                 title="此影片目前直播/串流中",
