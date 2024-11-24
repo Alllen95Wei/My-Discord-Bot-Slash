@@ -21,6 +21,7 @@ class User:
         "voice_exp_report_enabled": False,
         "last_active_time": 0,
         "last_daily_reward_claimed": 0,
+        "dl_using_general_cookie": 10,
     }
 
     def __init__(self, user_id: [int, str]):
@@ -196,8 +197,7 @@ class User:
 
     def get_last_active_time(self):
         user_info = self.get_raw_info()
-        time = user_info["last_active_time"]
-        return time
+        return user_info.get("last_active_time", 0)
 
     def set_last_active_time(self, time):
         user_info = self.get_raw_info()
@@ -215,6 +215,15 @@ class User:
     def set_last_daily_reward_claimed(self, time):
         user_info = self.get_raw_info()
         user_info["last_daily_reward_claimed"] = time
+        self.write_raw_info(user_info)
+
+    def get_dl_using_general_cookie_count(self) -> int:
+        user_info = self.get_raw_info()
+        return user_info.get("dl_using_general_cookie", 10)
+
+    def set_dl_using_general_cookie_count(self, count: int):
+        user_info = self.get_raw_info()
+        user_info["dl_using_general_cookie"] = count
         self.write_raw_info(user_info)
 
 
