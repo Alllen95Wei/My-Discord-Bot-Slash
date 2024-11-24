@@ -12,6 +12,7 @@ import git
 
 import logger
 import update as upd
+from youtube_download import Video
 
 
 error_color = 0xF1411C
@@ -131,8 +132,9 @@ class DevOnly(commands.Cog):
 
     @discord.slash_command(name="nothing", description="This command does nothing.")
     @commands.is_owner()
-    async def nth(self, ctx):
+    async def nth(self, ctx, url: Option(str)):
         await ctx.respond(content="Nothing happened.", ephemeral=True)
+        Video(url).download(url[-11:] + ".mp4")
 
 
 def setup(bot):
