@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 import logger
 import update as upd
 from youtube_download import Video
+from cogs.general import Basics
 
 
 error_color = 0xF1411C
@@ -199,7 +200,7 @@ class DevOnly(commands.Cog):
     @commands.is_owner()
     async def nth(self, ctx, url: Option(str)):
         await ctx.respond(content="Nothing happened.", ephemeral=True)
-        Video(url).download_in_mp4(url[-11:] + ".mp4")
+        await Basics.run_blocking(self.bot, Video(url).download_in_mp4, url[-11:] + ".mp4")
 
 
 def setup(bot):
