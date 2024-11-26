@@ -137,6 +137,17 @@ class Holodex(commands.Cog):
                             "ytdl",
                             file_name,
                         )
+                        # 提前產生標題及說明，避免錯誤在資料產生前即發生
+                        clip_title = (
+                            f"【{video_instance.full_info['channel']}】{section['name']} / {section['original_artist']}"
+                            "【純剪輯】"
+                        )
+                        clip_description = f"""
+原直播：{video_instance.url}
+
+此剪輯片段由Allen Bot產生，使用Holodex API取得時間軸資料。
+Holodex API：https://docs.holodex.net/
+Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
                         try:
                             await Basics.run_blocking(
                                 self.bot,
@@ -153,17 +164,6 @@ class Holodex(commands.Cog):
                                 embed=embed,
                                 view=None,
                             )
-                            clip_title = (
-                                f"【{video_instance.full_info['channel']}】{section['name']} / {section['original_artist']}"
-                                "【純剪輯】"
-                            )
-                            clip_description = f"""
-原直播：{video_instance.url}
-
-此剪輯片段由Allen Bot產生，使用Holodex API取得時間軸資料。
-Holodex API：https://docs.holodex.net/
-Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash
-"""
                             yt_uploader = youtube_api.YouTubeUploader(
                                 file_path=file_path,
                                 title=clip_title,
