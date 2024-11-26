@@ -703,7 +703,7 @@ class Basics(commands.Cog):
                 required=False,
             ) = 128,
     ):
-        await ctx.defer(ephemeral=True)
+        await ctx.defer(invisible=True)
         cookie_path = os.path.join(parent_dir, "cookies", f"{ctx.author.id}.txt")
         if not os.path.exists(cookie_path):
             user_obj = json_assistant.User(ctx.author.id)
