@@ -26,7 +26,7 @@ class Video:
     def __init__(self, url, cookie_file_path: str = DEFAULT_COOKIE_TXT_PATH):
         self.url = url
         self.full_info = self.get_full_info(url)
-        self.cookie_file_path = cookie_file_path
+        self.cookie_file_path = cookie_file_path if cookie_file_path else DEFAULT_COOKIE_TXT_PATH
 
     def download(self, file_path: str):
         dl_opts = {
