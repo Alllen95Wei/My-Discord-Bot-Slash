@@ -1,6 +1,7 @@
 # coding=utf-8
 import yt_dlp
 import os
+from moviepy import VideoFileClip
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_COOKIE_TXT_PATH = os.path.join(base_dir, "cookies.txt")
@@ -66,29 +67,40 @@ class Video:
         with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
 
-    def download_section_in_mp4(self, file_path: str, start_time: int, end_time: int):
-        dl_opts = {
-            "merge_output_format": "mp4",
-            "final_ext": "mp4",
-            "format": "bestaudio+bestvideo/best",
-            "outtmpl": file_path,
-            "restrictfilenames": True,
-            "noplaylist": True,
-            "nocheckcertificate": True,
-            "logtostderr": False,
-            "default_search": "auto",
-            "usenetrc": False,
-            "fixup": "detect_or_warn",
-            "external_downloader": "ffmpeg",
-            "external_downloader_args": {
-                "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
-            },
-            "cookiefile": self.cookie_file_path,
-            # "username": "oauth2",
-            # "password": "",
-        }
-        with yt_dlp.YoutubeDL(dl_opts) as ydl:
-            return ydl.download([self.url])
+    def download_section_in_mp4(self, file_path: str, start_time: int, end_time: int, use_legacy: bool = False):
+        if not use_legacy:
+            dl_opts = {
+                "merge_output_format": "mp4",
+                "final_ext": "mp4",
+                "format": "bestaudio+bestvideo/best",
+                "outtmpl": file_path,
+                "restrictfilenames": True,
+                "noplaylist": True,
+                "nocheckcertificate": True,
+                "logtostderr": False,
+                "default_search": "auto",
+                "usenetrc": False,
+                "fixup": "detect_or_warn",
+                "external_downloader": "ffmpeg",
+                "external_downloader_args": {
+                    "ffmpeg_i": ["-ss", str(start_time), "-to", str(end_time)],
+                },
+                "cookiefile": self.cookie_file_path,
+                # "username": "oauth2",
+                # "password": "",
+            }
+            with yt_dlp.YoutubeDL(dl_opts) as ydl:
+                return ydl.download([self.url])
+        else:
+            cached_file_name = "cache_" + self.get_id() + ".mp4"
+            self.download_in_mp4(cached_file_name)
+            v_obj = VideoFileClip(cached_file_name)
+            print("Prev Duration: ", v_obj.duration)
+            v_obj = v_obj.subclipped(start_time, end_time)
+            print("Curr Duration: ", v_obj.duration)
+            v_obj.write_videofile(file_path)
+            v_obj.close()
+            os.remove(cached_file_name)
 
     def download_in_mp4(self, file_path: str):
         dl_opts = {
@@ -158,4 +170,4 @@ class Video:
 if __name__ == "__main__":
     # youtube_download(url=input("請貼上要下載的連結："), file_name=input("請輸入下載後的檔案名稱："))
     v = Video(url=input("請貼上要下載的連結："))
-    v.download_in_mp4("test.mp4")
+    v.download_section_in_mp4("test.mp4", 5, 10, True)
