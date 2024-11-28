@@ -175,6 +175,9 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
                                 embed=embed,
                                 view=None,
                             )
+                            v_editor = youtube_download.VideoEditor(file_path)
+                            v_editor.fade(0.5)
+                            v_editor.save_video()
                             yt_uploader = youtube_api.YouTubeUploader(
                                 file_path=file_path,
                                 title=clip_title,
