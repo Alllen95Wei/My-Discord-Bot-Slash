@@ -45,7 +45,7 @@ class YouTubeUploader:
                 https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.upload&response_type=token&redirect_uri=https%3A%2F%2Falllen95wei.github.io%2F&client_id=301053688733-0oighbmuqurd094jd9ttlb8ouoa4vjrp.apps.googleusercontent.com&service=lso&o2v=2&ddm=0&flowName=GeneralOAuthFlow
                 """
                 )
-        elif not self.refresh_token_is_valid(refresh_token):
+        if not self.refresh_token_is_valid(refresh_token):
             raise Exception(
                 """
             Refresh token has expired or invalid.
