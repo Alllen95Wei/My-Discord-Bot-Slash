@@ -148,7 +148,7 @@ class Holodex(commands.Cog):
                         )
                         # 提前產生標題及說明，避免錯誤在資料產生前即發生
                         clip_title = (
-                            f"【{video_instance.full_info['channel'].replace[' Channel', '']}】"
+                            f"【{video_instance.full_info['channel'].replace(' Channel', '')}】"
                             f"{section['name']} / {section['original_artist']}"
                             "【純剪輯】"
                         )
