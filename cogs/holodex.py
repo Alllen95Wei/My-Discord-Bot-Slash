@@ -517,12 +517,12 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
 
     class TokenSubmissionWindow(ui.Modal):
         def __init__(self):
-            super().__init__(title="提交Refresh Token")
+            super().__init__(title="提交 Refresh Token")
             self.add_item(
                 ui.InputText(
                     style=InputTextStyle.long,
                     label="Refresh Token",
-                    placeholder="貼上剪貼簿中的Refresh Token",
+                    placeholder="貼上剪貼簿中的 Refresh Token",
                     required=True,
                 )
             )
@@ -545,14 +545,14 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
                 ) as f:
                     json.dump(data, f, ensure_ascii=False, indent=2)
                 embed = Embed(
-                    title="已儲存Refresh Token",
-                    description="此Refresh Token有效。已儲存新的Refresh Token。",
+                    title="已儲存 Refresh Token",
+                    description="此 Refresh Token 有效。已儲存新的 Refresh Token。",
                     color=default_color,
                 )
             else:
                 embed = Embed(
-                    title="錯誤：Refresh Token無效",
-                    description="你所提供的Refresh Token經檢查無效。",
+                    title="錯誤：Refresh Token 無效",
+                    description="你所提供的 Refresh Token 經檢查無效。",
                     color=error_color,
                 )
             embed.add_field(
@@ -567,7 +567,7 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
             self.author = author
             url_btn = ui.Button(
                 style=ButtonStyle.url,
-                label="點此取得新Refresh Token",
+                label="點此取得新 Refresh Token",
                 url="https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?scope=https%3A%2F%2Fwww.googleapis"
                 ".com%2Fauth%2Fyoutube.upload&response_type=token&redirect_uri=https%3A%2F%2Falllen95wei.github.io%2F"
                 "&client_id=301053688733-0oighbmuqurd094jd9ttlb8ouoa4vjrp.apps.googleusercontent.com&service=lso&o2v"
@@ -575,7 +575,7 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
             )
             self.add_item(url_btn)
 
-        @ui.button(style=ButtonStyle.green, label="提交Refresh Token")
+        @ui.button(style=ButtonStyle.green, label="提交 Refresh Token")
         async def submit_callback(self, button, interaction: discord.Interaction):
             if interaction.user.id == self.author.id:
                 await interaction.response.send_modal(Holodex.TokenSubmissionWindow())
@@ -589,7 +589,7 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
 
     HOLODEX_CMDS = discord.SlashCommandGroup(name="holodex")
 
-    @HOLODEX_CMDS.command(name="download", description="從Holodex取得直播時間軸，並下載特定片段")
+    @HOLODEX_CMDS.command(name="download", description="從 Holodex 取得直播時間軸，並下載特定片段")
     async def holodex_download(
         self,
         ctx,
@@ -629,8 +629,8 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
                 section_list = holodex_client.fetch_video_timeline(video.get_id())
                 if "youtube" not in video.get_extractor():
                     embed = Embed(
-                        title="錯誤：連結不是YouTube連結",
-                        description="你所提供的連結不是YouTube的連結。請提供有效的YouTube連結。",
+                        title="錯誤：連結不是 YouTube 連結",
+                        description="你所提供的連結不是 YouTube 的連結。請提供有效的 YouTube 連結。",
                         color=error_color,
                     )
                     embed.add_field(
@@ -695,7 +695,7 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
 
     @commands.is_owner()
     @HOLODEX_CMDS.command(
-        name="clip_and_upload", description="(開發者限定)從Holodex取得直播時間軸、下載特定片段後上傳YouTube"
+        name="clip_and_upload", description="(開發者限定)從 Holodex 取得直播時間軸、下載特定片段後上傳 YouTube"
     )
     async def holodex_clip(
         self,
@@ -729,8 +729,8 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
             section_list = holodex_client.fetch_video_timeline(video.get_id())
             if "youtube" not in video.get_extractor():
                 embed = Embed(
-                    title="錯誤：連結不是YouTube連結",
-                    description="你所提供的連結不是YouTube的連結。請提供有效的YouTube連結。",
+                    title="錯誤：連結不是 YouTube 連結",
+                    description="你所提供的連結不是 YouTube 的連結。請提供有效的 YouTube 連結。",
                     color=error_color,
                 )
                 embed.add_field(
@@ -741,7 +741,7 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
             elif len(section_list) == 0:
                 embed = Embed(
                     title="錯誤：沒有片段",
-                    description="此影片在Holodex中沒有標記任何片段。",
+                    description="此影片在 Holodex 中沒有標記任何片段。",
                     color=error_color,
                 )
                 embed.add_field(
@@ -807,12 +807,12 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
 
     @commands.is_owner()
     @HOLODEX_CMDS.command(
-        name="update_token", description="(開發者限定)更新上傳YouTube所用的Refresh Token"
+        name="update_token", description="(開發者限定)更新上傳 YouTube 所用的 Refresh Token"
     )
     async def holodex_update_token(self, ctx):
         embed = Embed(
-            title="更新Refresh Token",
-            description="請先取得新的Refresh Token後，再點擊「提交Refresh Token」按鈕。",
+            title="更新 Refresh Token",
+            description="請先取得新的 Refresh Token 後，再點擊「提交 Refresh Token」按鈕。",
             color=default_color,
         )
         await ctx.respond(
