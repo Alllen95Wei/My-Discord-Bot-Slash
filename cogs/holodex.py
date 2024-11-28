@@ -64,6 +64,7 @@ class Holodex(commands.Cog):
         sections_list: list,
         add_to_musicbot_queue: bool = False,
         upload_to_youtube: bool = False,
+        use_legacy: bool = False,
     ) -> ui.View:
         view = ui.View(timeout=None, disable_on_timeout=True)
         # generate sections
@@ -164,6 +165,7 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
                                 file_path,
                                 section["start"],
                                 section["end"],
+                                use_legacy
                             )
                             end_time = time.time()
                             time_delta = end_time - start_time
@@ -713,6 +715,12 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
             min_value=1,
             required=False,
         ) = 1,
+        use_legacy: Option(
+            bool,
+            name="使用傳統模式",
+            description="啟用此選項後，機器人會下載完整影片再切片，適用於剛結束的直播",
+            required=False,
+        ) = False,
     ):
         await ctx.defer()
         view = ui.View()
@@ -786,6 +794,7 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
                     selected_page,
                     False,
                     True,
+                    use_legacy,
                 )
         except Exception as e:
             embed = Embed(
