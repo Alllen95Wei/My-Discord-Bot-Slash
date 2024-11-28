@@ -24,7 +24,19 @@ class YouTubeUploader:
         self.video_id: str
 
     @staticmethod
-    def refresh_token_is_valid(refresh_token: str) -> bool:
+    def refresh_token_is_valid(refresh_token: str = None) -> bool:
+        with open("google_client_secret.json", "r", encoding="utf-8") as f:
+            secret_dict = json.load(f)
+        if refresh_token is None:
+            try:
+                refresh_token = secret_dict["refresh_token"]
+            except KeyError:
+                raise Exception(
+                    """
+                \"refresh_token\" not found in \"google_client_secret.json\".
+                https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.upload&response_type=token&redirect_uri=https%3A%2F%2Falllen95wei.github.io%2F&client_id=301053688733-0oighbmuqurd094jd9ttlb8ouoa4vjrp.apps.googleusercontent.com&service=lso&o2v=2&ddm=0&flowName=GeneralOAuthFlow
+                """
+                )
         result = requests.get(
             "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="
             + refresh_token,

@@ -98,7 +98,7 @@ class Holodex(commands.Cog):
                 start_time = time.time()
                 embed = Embed(
                     title="片段已確認",
-                    description=f"已開始下載所選取的片段。",
+                    description="已開始下載所選取的片段。",
                     color=default_color,
                 )
                 embed.add_field(
@@ -129,6 +129,14 @@ class Holodex(commands.Cog):
                     embed.set_thumbnail(url=section["art"])
                 if upload_to_youtube:
                     await interaction.edit_original_response(embed=embed, view=None)
+                    if not youtube_api.YouTubeUploader.refresh_token_is_valid():
+                        warn_embed = Embed(
+                            title="注意：Refresh Token 無效",
+                            description="目前機器人所儲存的 Refresh Token 似乎已過期，因此無法上傳影片至 YouTube。\n"
+                                        "請使用`/holodex update_token`更新 Refresh Token。",
+                            color=default_color,
+                        )
+                        await interaction.followup.send(embed=warn_embed)
                     file_name = f"{video_instance.get_id()}_{section['id'][-12:]}.mp4"
                     existed_id = ClipsRecord().get_youtube_id(file_name)
                     if existed_id is None:
@@ -139,7 +147,8 @@ class Holodex(commands.Cog):
                         )
                         # 提前產生標題及說明，避免錯誤在資料產生前即發生
                         clip_title = (
-                            f"【{video_instance.full_info['channel']}】{section['name']} / {section['original_artist']}"
+                            f"【{video_instance.full_info['channel'].replace[' Channel', '']}】"
+                            f"{section['name']} / {section['original_artist']}"
                             "【純剪輯】"
                         )
                         clip_description = f"""
@@ -235,8 +244,8 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
                                 )
                     else:
                         embed = Embed(
-                            title="此片段已在YouTube上！",
-                            description=f"片段 **{section['name']}** 已可在YouTube上觀看！",
+                            title="此片段已上傳至 YouTube！",
+                            description=f"片段 **{section['name']}** 已可在 YouTube 上觀看！",
                             color=default_color,
                         )
                         embed.add_field(
