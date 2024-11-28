@@ -28,7 +28,9 @@ class Video:
     def __init__(self, url: str, cookie_file_path: str = DEFAULT_COOKIE_TXT_PATH):
         self.url = url
         self.full_info = self.get_full_info(url)
-        self.cookie_file_path = cookie_file_path if cookie_file_path else DEFAULT_COOKIE_TXT_PATH
+        self.cookie_file_path = (
+            cookie_file_path if cookie_file_path else DEFAULT_COOKIE_TXT_PATH
+        )
 
     def download(self, file_path: str):
         dl_opts = {
@@ -68,7 +70,14 @@ class Video:
         with yt_dlp.YoutubeDL(dl_opts) as ydl:
             return ydl.download([self.url])
 
-    def download_section_in_mp4(self, file_path: str, start_time: int, end_time: int, use_legacy: bool = False):
+    def download_section_in_mp4(
+        self,
+        file_path: str,
+        start_time: int,
+        end_time: int,
+        use_legacy: bool = False,
+        keep_cache: bool = False,
+    ):
         if not use_legacy:
             dl_opts = {
                 "merge_output_format": "mp4",
@@ -94,11 +103,13 @@ class Video:
                 return ydl.download([self.url])
         else:
             cached_file_name = "cache_" + self.get_id() + ".mp4"
-            self.download_in_mp4(cached_file_name)
+            if not os.path.exists(cached_file_name):
+                self.download_in_mp4(cached_file_name)
             v_obj = VideoEditor(cached_file_name)
             v_obj.clip(start_time, end_time)
             v_obj.save_video(file_path)
-            os.remove(cached_file_name)
+            if not keep_cache:
+                os.remove(cached_file_name)
 
     def download_in_mp4(self, file_path: str):
         dl_opts = {
@@ -161,7 +172,9 @@ class Video:
         with yt_dlp.YoutubeDL(NO_DL_OPTS) as ydl:
             info_dict = ydl.extract_info(url, download=False)
             if info_dict is None:
-                raise RuntimeError("`get_full_info` failed. Are you blocked by YouTube?")
+                raise RuntimeError(
+                    "`get_full_info` failed. Are you blocked by YouTube?"
+                )
             return info_dict
 
 
