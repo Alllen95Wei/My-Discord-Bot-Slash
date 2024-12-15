@@ -372,7 +372,6 @@ class Soundboard(commands.Cog):
             description=description,
             color=default_color,
         )
-        embed.set_footer(text="本功能目前測試中，可能不會正常運作。")
         await ctx.respond(embed=embed, view=self.soundboard_selection(ctx, is_general))
 
     @SOUNDBOARD_CMDS.command(name="add", description="新增音效。")
