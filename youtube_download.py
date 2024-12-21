@@ -196,7 +196,7 @@ class VideoEditor:
 
     def clip(self, start_time: float, end_time: float):
         if self.use_ffmpeg:
-            self.ffmpeg_cmds.append(f"ffmpeg -i %INPUT -ss {start_time} -c copy -to {end_time} %OUTPUT")
+            self.ffmpeg_cmds.append(f"ffmpeg -y -i %INPUT -ss {start_time} -c copy -to {end_time} %OUTPUT")
         else:
             self.clip_obj = self.clip_obj.subclipped(start_time, end_time)
         self.clip_duration = end_time - start_time
@@ -205,13 +205,13 @@ class VideoEditor:
         if self.use_ffmpeg:
             duration = self.__get_duration()
             self.ffmpeg_cmds.append(
-                "ffmpeg -i %INPUT "
+                "ffmpeg -y -i %INPUT "
                 f"-vf fade=type=out:st={duration - seconds}:d={seconds} "
                 f"-af afade=type=out:st={duration - seconds}:d={seconds} "
                 f"-c:v libsvtav1 -c:a libopus %OUTPUT"
             )
             self.ffmpeg_cmds.append(
-                "ffmpeg -i %INPUT "
+                "ffmpeg -y -i %INPUT "
                 f"-vf fade=type=in:st=1:d={seconds} "
                 f"-af afade=type=in:st=1:d={seconds} "
                 f"-c:v libsvtav1 -c:a libopus %OUTPUT"
