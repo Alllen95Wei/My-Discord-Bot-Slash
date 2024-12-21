@@ -208,13 +208,13 @@ class VideoEditor:
                 "ffmpeg -y -i %INPUT "
                 f"-vf fade=type=out:st={duration - seconds}:d={seconds} "
                 f"-af afade=type=out:st={duration - seconds}:d={seconds} "
-                f"-c:v libsvtav1 -c:a libopus %OUTPUT"
+                f"-c:v libsvtav1 -c:a libopus -vbr:a off -b:a 140k %OUTPUT"
             )
             self.ffmpeg_cmds.append(
                 "ffmpeg -y -i %INPUT "
                 f"-vf fade=type=in:st=1:d={seconds} "
                 f"-af afade=type=in:st=1:d={seconds} "
-                f"-c:v libsvtav1 -c:a libopus %OUTPUT"
+                f"-c:v libsvtav1 -c:a libopus -vbr:a off -b:a 140k %OUTPUT"
             )
         else:
             if fade_in:
