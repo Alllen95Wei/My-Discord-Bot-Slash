@@ -175,9 +175,9 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
                                 embed=embed,
                                 view=None,
                             )
-                            v_editor = youtube_download.VideoEditor(file_path, use_ffmpeg=True)
-                            await Basics.run_blocking(self.bot, v_editor.fade, 0.5)
-                            await Basics.run_blocking(self.bot, v_editor.save_video)
+                            # v_editor = youtube_download.VideoEditor(file_path, use_ffmpeg=True)
+                            # await Basics.run_blocking(self.bot, v_editor.fade, 0.5)
+                            # await Basics.run_blocking(self.bot, v_editor.save_video)
                             yt_uploader = youtube_api.YouTubeUploader(
                                 file_path=file_path,
                                 title=clip_title,
