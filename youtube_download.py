@@ -3,6 +3,7 @@ import yt_dlp
 import os
 from moviepy import VideoFileClip, vfx
 import uuid
+import logging
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_COOKIE_TXT_PATH = os.path.join(base_dir, "cookies.txt")
@@ -179,32 +180,69 @@ class Video:
 
 
 class VideoEditor:
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str, use_ffmpeg: bool = False):
+        self.clip_duration = None
         self.file_path = file_path
-        self.clip_obj = VideoFileClip(file_path)
+        if not use_ffmpeg:
+            self.clip_obj = VideoFileClip(file_path)
+        self.use_ffmpeg = use_ffmpeg
+        self.ffmpeg_cmds: list[str] = []
+        self.clip_duration: float
+
+    def __get_duration(self) -> float:
+        if self.clip_duration:
+            return self.clip_duration
+        return float(os.popen(f"ffprobe -i {self.file_path} -show_entries format=duration -v quiet -of csv=\"p=0\"").read())
 
     def clip(self, start_time: float, end_time: float):
-        self.clip_obj = self.clip_obj.subclipped(start_time, end_time)
+        if self.use_ffmpeg:
+            self.ffmpeg_cmds.append(f"ffmpeg -i %INPUT -ss {start_time} -c copy -to {end_time} %OUTPUT")
+        else:
+            self.clip_obj = self.clip_obj.subclipped(start_time, end_time)
+        self.clip_duration = end_time - start_time
 
     def fade(self, seconds: float, fade_in: bool = True, fade_out: bool = True):
-        if fade_in:
-            self.clip_obj = self.clip_obj.with_effects([vfx.FadeIn(seconds)])
-        if fade_out:
-            self.clip_obj = self.clip_obj.with_effects([vfx.FadeOut(seconds)])
+        if self.use_ffmpeg:
+            duration = self.__get_duration()
+            self.ffmpeg_cmds.append(
+                "ffmpeg -i %INPUT "
+                f"-vf fade=type=out:st={duration - seconds}:d={seconds} "
+                f"-af afade=type=out:st={duration - seconds}:d={seconds} "
+                f"-c:v libx265 -c:a libmp3lame %OUTPUT"
+            )
+            self.ffmpeg_cmds.append(
+                "ffmpeg -i %INPUT "
+                f"-vf fade=type=in:st=1:d={seconds} "
+                f"-af afade=type=in:st=1:d={seconds} "
+                f"-c:v libx265 -c:a libmp3lame %OUTPUT"
+            )
+        else:
+            if fade_in:
+                self.clip_obj = self.clip_obj.with_effects([vfx.FadeIn(seconds)])
+            if fade_out:
+                self.clip_obj = self.clip_obj.with_effects([vfx.FadeOut(seconds)])
 
     def save_video(self, destination_file_path: str = None):
         if destination_file_path is None:
             destination_file_path = self.file_path
         random_file_name = str(uuid.uuid4()).split("-")[-1] + ".mp4"
-        self.clip_obj.write_videofile(random_file_name)
-        self.clip_obj.close()
+        if not self.use_ffmpeg:
+            self.clip_obj.write_videofile(random_file_name)
+            self.clip_obj.close()
+        else:
+            input_file_path = self.file_path
+            for cmd in self.ffmpeg_cmds:
+                logging.debug("Running: " + cmd)
+                os.system(cmd.replace("%INPUT", input_file_path).replace("%OUTPUT", destination_file_path))
+                os.replace(destination_file_path, random_file_name)
+                input_file_path = random_file_name
         os.replace(random_file_name, destination_file_path)
 
 
 if __name__ == "__main__":
-    # youtube_download(url=input("請貼上要下載的連結："), file_name=input("請輸入下載後的檔案名稱："))
-    v = Video(url=input("請貼上要下載的連結："))
-    v.download_section_in_mp4("test.mp4", 5, 10, True)
-    editor = VideoEditor("test.mp4")
+    # v = Video(url=input("請貼上要下載的連結："))
+    # v.download_in_mp4("test.mp4")
+    editor = VideoEditor("test.mp4", use_ffmpeg=True)
+    editor.clip(10, 45)
     editor.fade(0.5)
-    editor.save_video()
+    editor.save_video("test_out.mp4")
