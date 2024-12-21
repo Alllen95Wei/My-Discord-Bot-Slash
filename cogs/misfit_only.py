@@ -101,7 +101,7 @@ class Misfit(commands.Cog):
             if not self.timed_out_member.timed_out:
                 embed = Embed(
                     title="錯誤：使用者未被禁言",
-                    description=f"{self.timed_out_member.mention}似乎已被解除禁言。",
+                    description=f"{self.timed_out_member.mention} 似乎已被解除禁言。",
                     color=error_color,
                 )
             else:
@@ -110,21 +110,22 @@ class Misfit(commands.Cog):
                 )
                 embed = Embed(
                     title="已解除禁言",
-                    description=f"{interaction.user.mention}已解除了{self.timed_out_member.mention}的禁言。",
+                    description=f"{interaction.user.mention} 已解除了 {self.timed_out_member.mention} 的禁言。",
                     color=default_color,
                 )
                 embed.add_field(name="申訴內容", value=self.appeal_content)
                 notify_embed = Embed(
                     title="好消息：申訴通過！",
-                    description=f"你的申訴經過{interaction.user.mention}的許可，因此你的禁言已解除。",
+                    description=f"你的申訴經過 {interaction.user.mention} 的許可，因此你的禁言已解除。",
                     color=default_color,
                 )
                 await self.timed_out_member.send(embed=notify_embed)
-            await interaction.edit_original_response(
-                embed=embed,
+            self.disable_all_items()
+            await interaction.edit_original_response(embed=embed)
+            await interaction.followup.send(
                 view=Misfit.FeedbackView(
                     self.outer_instance, self.timed_out_member, interaction.user
-                ),
+                )
             )
 
         @ui.button(label="未通過，繼續禁言", style=ButtonStyle.red)
@@ -133,22 +134,23 @@ class Misfit(commands.Cog):
             if not self.timed_out_member.timed_out:
                 embed = Embed(
                     title="錯誤：使用者未被禁言",
-                    description=f"{self.timed_out_member.mention}似乎已被解除禁言。",
+                    description=f"{self.timed_out_member.mention} 似乎已被解除禁言。",
                     color=error_color,
                 )
             else:
                 embed = Embed(
                     title="已退回申訴",
-                    description=f"{interaction.user.mention}已退回了{self.timed_out_member.mention}的申訴。禁言將繼續。",
+                    description=f"{interaction.user.mention} 已退回了 {self.timed_out_member.mention} 的申訴。禁言將繼續。",
                     color=default_color,
                 )
                 embed.add_field(name="申訴內容", value=self.appeal_content)
                 notify_embed = Embed(
                     title="申訴未通過",
-                    description=f"你的申訴經過{interaction.user.mention}檢查後遭到拒絕，因此你的禁言將繼續。",
+                    description=f"你的申訴經過 {interaction.user.mention} 檢查後遭到拒絕，因此你的禁言將繼續。",
                     color=default_color,
                 )
                 await self.timed_out_member.send(embed=notify_embed)
+            self.disable_all_items()
             await interaction.edit_original_response(embed=embed)
             await interaction.followup.send(
                 view=Misfit.FeedbackView(
@@ -170,7 +172,6 @@ class Misfit(commands.Cog):
 
         @ui.button(label="提供回應", style=ButtonStyle.blurple, emoji="🗨️")
         async def btn_callback(self, button, interaction: discord.Interaction):
-            await interaction.response.defer()
             await interaction.response.send_modal(
                 Misfit.FeedbackWindow(
                     self.outer_instance,
@@ -216,8 +217,7 @@ class Misfit(commands.Cog):
                     color=default_color,
                 )
                 embed.add_field(name="你的回應", value=provided_reason)
-                await interaction.edit_original_response(view=None)
-                await interaction.followup.send(embed=embed)
+                await interaction.edit_original_response(embed=embed, view=None)
                 response_embed = Embed(
                     title="管理員提供了回應",
                     description=f"{interaction.user.mention}回應了以下內容。",
