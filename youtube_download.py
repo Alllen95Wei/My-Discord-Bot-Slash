@@ -231,11 +231,19 @@ class VideoEditor:
             self.clip_obj.close()
         else:
             input_file_path = self.file_path
+            another_random_file_name = destination_file_path
+            semi_products = []
             for cmd in self.ffmpeg_cmds:
                 logging.debug("Running: " + cmd)
-                os.system(cmd.replace("%INPUT", input_file_path).replace("%OUTPUT", destination_file_path))
-                os.replace(destination_file_path, random_file_name)
-                input_file_path = random_file_name
+                os.system(cmd.replace("%INPUT", input_file_path).replace("%OUTPUT", random_file_name))
+                another_random_file_name = str(uuid.uuid4()).split("-")[-1] + ".mp4"
+                os.replace(random_file_name, another_random_file_name)
+                input_file_path = another_random_file_name
+                semi_products.append(another_random_file_name)
+            random_file_name = another_random_file_name
+            semi_products.remove(random_file_name)
+            for f in semi_products:
+                os.remove(f)
         os.replace(random_file_name, destination_file_path)
 
 
