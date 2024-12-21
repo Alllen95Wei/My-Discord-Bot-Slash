@@ -22,6 +22,7 @@ class User:
         "last_active_time": 0,
         "last_daily_reward_claimed": 0,
         "dl_using_general_cookie": 10,
+        "dl_bit_rate": 128,
     }
 
     def __init__(self, user_id: [int, str]):
