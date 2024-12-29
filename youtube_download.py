@@ -106,7 +106,7 @@ class Video:
             cached_file_name = "cache_" + self.get_id() + ".mp4"
             if not os.path.exists(cached_file_name):
                 self.download_in_mp4(cached_file_name)
-            v_obj = VideoEditor(cached_file_name)
+            v_obj = VideoEditor(cached_file_name, use_ffmpeg=True)
             v_obj.clip(start_time, end_time)
             v_obj.save_video(file_path)
             if not keep_cache:
