@@ -1152,7 +1152,7 @@ class Events(commands.Cog):
     async def set_presence_as_year_process(self):
         year_process = self.get_year_process()
         current_year = datetime.datetime.now(tz=now_tz).year
-        if datetime.datetime.now(tz=now_tz).second == 0:
+        if datetime.datetime.now(tz=now_tz).second % 15 == 0:
             activity = discord.Activity(
                 name=f"{current_year}年進度：{year_process} % 完成！",
                 type=discord.ActivityType.watching,
@@ -1160,13 +1160,13 @@ class Events(commands.Cog):
             await self.bot.change_presence(
                 activity=activity, status=discord.Status.online
             )
-        elif datetime.datetime.now(tz=now_tz).second == 30:
-            activity = discord.Activity(
-                name=get_RPC_context(), type=discord.ActivityType.playing
-            )
-            await self.bot.change_presence(
-                activity=activity, status=discord.Status.online
-            )
+        # elif datetime.datetime.now(tz=now_tz).second == 30:
+        #     activity = discord.Activity(
+        #         name=get_RPC_context(), type=discord.ActivityType.playing
+        #     )
+        #     await self.bot.change_presence(
+        #         activity=activity, status=discord.Status.online
+        #     )
 
     @tasks.loop(seconds=10)
     async def give_voice_exp(self):  # 給予語音經驗
