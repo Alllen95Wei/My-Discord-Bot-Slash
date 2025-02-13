@@ -1150,11 +1150,12 @@ class Events(commands.Cog):
 
     @tasks.loop(seconds=1)
     async def set_presence_as_year_process(self):
-        year_process = self.get_year_process()
-        current_year = datetime.datetime.now(tz=now_tz).year
         if datetime.datetime.now(tz=now_tz).second == 0:
+            year_process = self.get_year_process()
+            current_year = datetime.datetime.now(tz=now_tz).year
+            status_message = f"{current_year}年進度：{year_process} % 完成！"
             activity = discord.Activity(
-                name=f"{current_year}年進度：{year_process} % 完成！",
+                name=status_message,
                 type=discord.ActivityType.watching,
             )
             await self.bot.change_presence(
