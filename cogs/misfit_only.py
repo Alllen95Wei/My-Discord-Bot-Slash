@@ -287,7 +287,7 @@ class Misfit(commands.Cog):
                 after.self_mute or after.self_deaf
             ):
                 msg = member.mention + " ，你目前__**沒有開啟麥克風**__，其他人將無法聽到你的發言。"
-                await after.channel.send(msg, tts=True)
+                await after.channel.send(msg)
 
 
 def setup(bot):
