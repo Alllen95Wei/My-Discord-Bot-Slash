@@ -290,6 +290,11 @@ class Misfit(commands.Cog):
             msg = member.mention + " ，你目前__**沒有開啟麥克風**__，其他人將無法聽到你的發言。"
             await after.channel.send(msg)
 
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.guild.id == 1030069819199991838 and message.author.id in (892737547329998932, 661872566364798997):
+            await message.reply("3800")
+
 
 def setup(bot):
     bot.add_cog(Misfit(bot, bot.logger))
