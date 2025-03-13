@@ -121,12 +121,12 @@ class Misfit(commands.Cog):
                 )
                 await self.timed_out_member.send(embed=notify_embed)
             self.disable_all_items()
-            await interaction.edit_original_response(embed=embed)
-            await interaction.followup.send(
-                view=Misfit.FeedbackView(
-                    self.outer_instance, self.timed_out_member, interaction.user
-                )
-            )
+            await interaction.edit_original_response(view=self, embed=embed)
+            # await interaction.followup.send(
+            #     view=Misfit.FeedbackView(
+            #         self.outer_instance, self.timed_out_member, interaction.user
+            #     )
+            # )
 
         @ui.button(label="未通過，繼續禁言", style=ButtonStyle.red)
         async def disallow_callback(self, button, interaction: discord.Interaction):
@@ -151,12 +151,12 @@ class Misfit(commands.Cog):
                 )
                 await self.timed_out_member.send(embed=notify_embed)
             self.disable_all_items()
-            await interaction.edit_original_response(embed=embed)
-            await interaction.followup.send(
-                view=Misfit.FeedbackView(
-                    self.outer_instance, self.timed_out_member, interaction.user
-                )
-            )
+            await interaction.edit_original_response(view=self, embed=embed)
+            # await interaction.followup.send(
+            #     view=Misfit.FeedbackView(
+            #         self.outer_instance, self.timed_out_member, interaction.user
+            #     )
+            # )
 
     class FeedbackView(ui.View):
         def __init__(
