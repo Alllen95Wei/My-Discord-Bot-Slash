@@ -292,7 +292,11 @@ class Misfit(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.guild.id == 1030069819199991838 and message.author.id in (892737547329998932, 661872566364798997):
+        if (
+            message.guild is not None
+            and message.guild.id == 1030069819199991838
+            and message.author.id in (892737547329998932, 661872566364798997)
+        ):
             await message.reply("3800")
 
 
