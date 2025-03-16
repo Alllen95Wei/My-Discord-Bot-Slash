@@ -279,13 +279,13 @@ class Misfit(commands.Cog):
         after: discord.VoiceState,
     ):
         if (
-            (not member.bot)
+            not member.bot
             and (after.channel is not None)
             and (after.channel.guild.id == 1030069819199991838)  # 損友俱樂部
             and (before.channel != after.channel)
             and after.channel.id != 1096730575475318835  # AFK 頻道
-            and after.self_mute
-            or after.self_deaf
+        ) and (
+            after.self_mute or after.self_deaf
         ):
             msg = member.mention + " ，你目前__**沒有開啟麥克風**__，其他人將無法聽到你的發言。"
             await after.channel.send(msg)
