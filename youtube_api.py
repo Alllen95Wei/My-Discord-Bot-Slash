@@ -86,7 +86,7 @@ class YouTubeUploader:
                 part=",".join(self.body.keys()),
                 body=self.body,
                 media_body=MediaFileUpload(
-                    filename=self.file_path, chunksize=-1, resumable=True
+                    filename=self.file_path, chunksize=10 ^ 7, resumable=True
                 ),
             )
 
@@ -99,6 +99,7 @@ class YouTubeUploader:
                         logging.info(
                             "Video id '%s' was successfully uploaded." % response["id"]
                         )
+                        youtube.close()
                         return response
 
     def upload_thumbnail(self, file_path: str) -> dict:
@@ -121,6 +122,7 @@ class YouTubeUploader:
             while response is None:
                 status, response = insert_request.next_chunk()
                 if response is not None:
+                    youtube.close()
                     return response
 
 
