@@ -82,25 +82,19 @@ class YouTubeUploader:
             youtube = build("youtube", "v3", credentials=self.credentials)
 
             # Docs: https://developers.google.com/youtube/v3/docs/videos/insert
+            media = MediaFileUpload(self.file_path, mimetype="video/mp4", chunksize=1048576, resumable=True)
             insert_request = youtube.videos().insert(
                 part=",".join(self.body.keys()),
                 body=self.body,
-                media_body=MediaFileUpload(
-                    filename=self.file_path, chunksize=10 ^ 7, resumable=True
-                ),
+                media_body=media,
             )
 
             response = None
             while response is None:
                 status, response = insert_request.next_chunk()
-                if response is not None:
-                    if "id" in response:
-                        self.video_id = response["id"]
-                        logging.info(
-                            "Video id '%s' was successfully uploaded." % response["id"]
-                        )
-                        youtube.close()
-                        return response
+                if status:
+                    logging.info("YouTube Uploaded %d%%" % int(status.progress() * 100))
+            return response
 
     def upload_thumbnail(self, file_path: str) -> dict:
         if self.credentials is None:
