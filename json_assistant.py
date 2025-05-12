@@ -25,7 +25,7 @@ class User:
         "dl_bit_rate": 128,
     }
 
-    def __init__(self, user_id: [int, str]):
+    def __init__(self, user_id: int | str):
         self.user_id = user_id
 
     def get_raw_info(self, is_dict=True):
