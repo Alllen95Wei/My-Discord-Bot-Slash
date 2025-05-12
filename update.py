@@ -1,6 +1,9 @@
 # coding=utf-8
 import subprocess
+import git
 from time import sleep
+
+REPO = git.Repo()
 
 
 def update(pid, os):
@@ -10,9 +13,11 @@ def update(pid, os):
 
 
 def get_update_files():
-    subprocess.run(["git", "fetch", "--all"])
+    # subprocess.run(["git", "fetch", "--all"])
+    for remote in REPO.remotes:
+        remote.fetch()
     subprocess.run(['git', 'reset', '--hard', 'origin/main'])
-    subprocess.run(['git', 'pull'])
+    REPO.remotes[0].pull()
 
 
 def restart_running_bot(pid, os):
