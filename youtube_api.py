@@ -93,7 +93,8 @@ class YouTubeUploader:
             while response is None:
                 status, response = insert_request.next_chunk()
                 if status:
-                    logging.info("YouTube Uploaded %d%%" % int(status.progress() * 100))
+                    logging.info("YouTube video uploaded %d%%" % int(status.progress() * 100))
+            youtube.close()
             return response
 
     def upload_thumbnail(self, file_path: str) -> dict:
@@ -108,16 +109,17 @@ class YouTubeUploader:
             insert_request = youtube.thumbnails().set(
                 videoId=self.video_id,
                 media_body=MediaFileUpload(
-                    filename=file_path, chunksize=-1, resumable=True
+                    filename=file_path, chunksize=1048576, resumable=True
                 ),
             )
 
             response = None
             while response is None:
                 status, response = insert_request.next_chunk()
-                if response is not None:
-                    youtube.close()
-                    return response
+                if status:
+                    logging.info("YouTube thumbnail uploaded %d%%" % int(status.progress() * 100))
+            youtube.close()
+            return response
 
 
 if __name__ == "__main__":
