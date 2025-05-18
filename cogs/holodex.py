@@ -188,6 +188,7 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
                                 self.bot,
                                 yt_uploader.upload_video,
                             )
+                            yt_uploader.video_id = video_info["id"]
                             ClipsRecord().add_clip(
                                 file_name=file_name, youtube_id=video_info["id"]
                             )
@@ -399,9 +400,6 @@ Allen Bot：https://github.com/Alllen95Wei/My-Discord-Bot-Slash"""
                             value="```" + selected_file + "```",
                             inline=False,
                         )
-                finally:
-                    for f in files:
-                        os.remove(f)
                 await interaction.edit_original_response(embed=embed, view=None)
             else:
                 embed = Embed(
