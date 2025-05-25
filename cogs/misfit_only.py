@@ -9,7 +9,6 @@ import datetime
 
 import logger
 
-
 error_color = 0xF1411C
 default_color = 0x5FE1EA
 now_tz = zoneinfo.ZoneInfo("Asia/Taipei")
@@ -56,7 +55,9 @@ class Misfit(commands.Cog):
                     self.children[0].value,
                 ),
             )
-            embed = Embed(title="已送出申訴", description="已送出你的申訴。", color=default_color)
+            embed = Embed(
+                title="已送出申訴", description="已送出你的申訴。", color=default_color
+            )
             appeal_embed.add_field(name="申訴內容", value=self.children[0].value)
             await interaction.edit_original_response(embed=embed, view=None)
 
@@ -243,7 +244,9 @@ class Misfit(commands.Cog):
             await ctx.respond(embed=embed, ephemeral=True)
         else:
             embed = Embed(
-                title="錯誤", description="此指令僅允許在「損友俱樂部」使用！", color=error_color
+                title="錯誤",
+                description="此指令僅允許在「損友俱樂部」使用！",
+                color=error_color,
             )
             await ctx.respond(embed=embed, ephemeral=True)
 
@@ -284,10 +287,11 @@ class Misfit(commands.Cog):
             and (after.channel.guild.id == 1030069819199991838)  # 損友俱樂部
             and (before.channel != after.channel)
             and after.channel.id != 1096730575475318835  # AFK 頻道
-        ) and (
-            after.self_mute or after.self_deaf
-        ):
-            msg = member.mention + " ，你目前__**沒有開啟麥克風**__，其他人將無法聽到你的發言。"
+        ) and (after.self_mute or after.self_deaf):
+            msg = (
+                member.mention
+                + " ，你目前__**沒有開啟麥克風**__，其他人將無法聽到你的發言。"
+            )
             await after.channel.send(msg)
 
     @commands.Cog.listener()
@@ -298,6 +302,23 @@ class Misfit(commands.Cog):
             and message.author.id in (616226441687990282, 699576396921438208)
         ):
             await message.reply("3800")
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message: discord.Message):
+        if (
+            message.guild is not None
+            and message.guild.id == 1030069819199991838
+            and message.author.id == self.bot.user.id
+            and message.reference is not None
+        ):
+            replied_msg = await message.channel.fetch_message(
+                message.reference.message_id
+            )
+            if (
+                replied_msg.author.id in (616226441687990282, 699576396921438208)
+                and message.content == "3800"
+            ):
+                await replied_msg.reply("3800")
 
 
 def setup(bot):
