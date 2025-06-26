@@ -1,7 +1,7 @@
 # coding=utf-8
 import json
 import os
-import datetime
+import logging
 from string import hexdigits
 from random import choice
 
@@ -10,7 +10,6 @@ base_dir = os.path.abspath(os.path.dirname(__file__))
 
 class User:
     INIT_DATA = {
-        "join_date": None,
         "exp": {"voice": 0, "text": 0},
         "level": {"voice": 0, "text": 0},
         "notify_threshold": {
@@ -62,51 +61,51 @@ class User:
         else:
             raise ValueError('exp_type must be either "voice" or "text"')
 
-    def set_join_date(self, date):
-        user_info = self.get_raw_info()
-        user_info["join_date"] = date
-        self.write_raw_info(user_info)
+    # def set_join_date(self, date):
+    #     user_info = self.get_raw_info()
+    #     user_info["join_date"] = date
+    #     self.write_raw_info(user_info)
+    #
+    # def get_join_date(self):
+    #     user_info = self.get_raw_info()
+    #     return user_info["join_date"]
 
-    def get_join_date(self):
-        user_info = self.get_raw_info()
-        return user_info["join_date"]
+    # def get_join_date_in_str(self):
+    #     raw_date = self.get_join_date()
+    #     if raw_date is not None:
+    #         if len(str(raw_date[4])) == 1:
+    #             min_reformat = "0" + str(raw_date[4])
+    #         else:
+    #             min_reformat = raw_date[4]
+    #         if len(str(raw_date[5])) == 1:
+    #             sec_reformat = "0" + str(raw_date[5])
+    #         else:
+    #             sec_reformat = raw_date[5]
+    #         str_date = f"{raw_date[0]}/{raw_date[1]}/{raw_date[2]} {raw_date[3]}:{min_reformat}:{sec_reformat}"
+    #         return str_date
+    #     else:
+    #         return None
 
-    def get_join_date_in_str(self):
-        raw_date = self.get_join_date()
-        if raw_date is not None:
-            if len(str(raw_date[4])) == 1:
-                min_reformat = "0" + str(raw_date[4])
-            else:
-                min_reformat = raw_date[4]
-            if len(str(raw_date[5])) == 1:
-                sec_reformat = "0" + str(raw_date[5])
-            else:
-                sec_reformat = raw_date[5]
-            str_date = f"{raw_date[0]}/{raw_date[1]}/{raw_date[2]} {raw_date[3]}:{min_reformat}:{sec_reformat}"
-            return str_date
-        else:
-            return None
-
-    def joined_time(self):
-        raw_date = self.get_join_date()
-        if raw_date is not None:
-            join_date = datetime.datetime(
-                year=raw_date[0],
-                month=raw_date[1],
-                day=raw_date[2],
-                hour=raw_date[3],
-                minute=raw_date[4],
-                second=raw_date[5],
-            )
-            now = datetime.datetime.now()
-            time_diff = now - join_date
-            time_diff = (
-                f"{time_diff.days} 天， {time_diff.seconds // 3600} 小時， "
-                f"{(time_diff.seconds // 60) % 60} 分鐘， {time_diff.seconds % 60} 秒"
-            )
-            return time_diff
-        else:
-            return None
+    # def joined_time(self):
+    #     raw_date = self.get_join_date()
+    #     if raw_date is not None:
+    #         join_date = datetime.datetime(
+    #             year=raw_date[0],
+    #             month=raw_date[1],
+    #             day=raw_date[2],
+    #             hour=raw_date[3],
+    #             minute=raw_date[4],
+    #             second=raw_date[5],
+    #         )
+    #         now = datetime.datetime.now()
+    #         time_diff = now - join_date
+    #         time_diff = (
+    #             f"{time_diff.days} 天， {time_diff.seconds // 3600} 小時， "
+    #             f"{(time_diff.seconds // 60) % 60} 分鐘， {time_diff.seconds % 60} 秒"
+    #         )
+    #         return time_diff
+    #     else:
+    #         return None
 
     def get_level(self, level_type: str):
         if level_type in ("voice", "text"):
