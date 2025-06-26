@@ -46,7 +46,7 @@ class Backup(commands.Cog):
                 if raw_data == "":
                     self.real_logger.info("    原始資料檢查：發現錯誤")
                     self.real_logger.info("    開始還原程序...")
-                    await self.restore_data(user)
+                    self.restore_data(user)
                     continue
                 else:
                     self.real_logger.debug("    原始資料檢查：通過")
@@ -63,21 +63,21 @@ class Backup(commands.Cog):
                 user_obj.get_last_daily_reward_claimed()
                 self.real_logger.debug("    最後每日獎勵領取時間資料檢查：通過")
                 self.real_logger.info("  檢查未發現問題")
+                self.backup_data(user)
             except JSONDecodeError as error:
                 self.real_logger.warning("    單項檢查時偵測到錯誤")
                 self.real_logger.warning(
                     f"    JSON: 於第 {error.lineno} 行的第 {error.colno} 字元"
                 )
                 self.real_logger.info("    開始還原程序")
-                await self.restore_data(user)
+                await self.warn_allen(user, error)
                 continue
             except Exception as e:
                 self.real_logger.warning("    單項檢查時偵測到錯誤")
                 self.real_logger.warning(f"    {type(e).__name__}: {str(e)}")
                 self.real_logger.info("    開始還原程序")
-                await self.restore_data(user)
+                await self.warn_allen(user, e)
                 continue
-            self.backup_data(user)
         self.real_logger.info(f"完成使用者資料檢查，耗時 {round(time.time()-start_time, 3)} 秒")
 
     def backup_data(self, user_id: str):
@@ -88,7 +88,7 @@ class Backup(commands.Cog):
             json.dump(data, f, indent=2)
         self.real_logger.info("  備份完成")
 
-    async def restore_data(self, user_id: str):
+    def restore_data(self, user_id: str):
         self.real_logger.info("  還原使用者資料：" + user_id)
         backup_path = os.path.join(backup_dir, user_id + ".json")
         if os.path.exists(backup_path):
@@ -103,8 +103,18 @@ class Backup(commands.Cog):
         self.real_logger.info("    寫入備份資料中")
         json_assistant.User(user_id).write_raw_info(json_assistant.User.INIT_DATA)
         self.real_logger.info("  還原完成")
-        embed = discord.Embed(title="還原系統通知", description="還原系統檢查資料時，發現了資料問題，並已成功還原。", color=default_color)
-        embed.add_field(name="使用者", value=f"<@{user_id}> ({self.bot.get_user(int(user_id)).name})")
+
+    async def warn_allen(self, user_id: str, exception: Exception):
+        embed = discord.Embed(
+            title="還原系統通知",
+            description="還原系統檢查資料時，發現了資料問題。",
+            color=default_color,
+        )
+        embed.add_field(
+            name="使用者",
+            value=f"<@{user_id}> ({self.bot.get_user(int(user_id)).name})",
+        )
+        embed.add_field(name="錯誤訊息", value=f"```{type(exception).__name__}: {str(exception)}```", inline=False)
         allen = self.bot.get_user(657519721138094080)
         await allen.send(embed=embed)
 
@@ -160,7 +170,7 @@ class Backup(commands.Cog):
     async def force_restore(self, ctx, user: Option(discord.User, required=True)):
         await ctx.defer()
         start_time = time.time()
-        await self.restore_data(str(user.id))
+        self.restore_data(str(user.id))
         embed = discord.Embed(
             title="還原完成",
             description=f"流程耗時 `{round(time.time()-start_time, 3)}` 秒",
