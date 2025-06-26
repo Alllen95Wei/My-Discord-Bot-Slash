@@ -235,12 +235,19 @@ class Misfit(commands.Cog):
         if ctx.guild.id == 1030069819199991838:
             current_time = datetime.datetime.now(tz=now_tz)
             timeout_time = current_time + datetime.timedelta(minutes=10)
-            await user.timeout(until=timeout_time, reason=f"{ctx.user} 600他")
-            embed = Embed(
-                title="他被600了！",
-                description=f"{user.mention}已經被600了w",
-                color=default_color,
-            )
+            try:
+                await user.timeout(until=timeout_time, reason=f"{ctx.user} 600 他")
+                embed = Embed(
+                    title="他被 600 了！",
+                    description=f"{user.mention}已經被 600 了w",
+                    color=default_color,
+                )
+            except discord.Forbidden:
+                embed = Embed(
+                    title="錯誤：沒有權限",
+                    description="機器人無法 600 這個使用者。他是超級損友嗎？",
+                    color=error_color,
+                )
             await ctx.respond(embed=embed, ephemeral=True)
         else:
             embed = Embed(
