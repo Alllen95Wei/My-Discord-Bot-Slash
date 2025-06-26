@@ -711,16 +711,16 @@ class Basics(commands.Cog):
             if user_obj.get_dl_using_general_cookie_count() <= 0:
                 embed = Embed(
                     title="錯誤：已達到最大使用上限",
-                    description="你已經使用此指令10次而未上傳自己的cookie檔案。\n"
-                                "為避免惡意濫用，你必須上傳自己的cookie檔案才能繼續使用。",
+                    description="你已經使用此指令 10 次而未上傳自己的 cookie 檔案。\n"
+                                "為避免惡意濫用，你必須上傳自己的 cookie 檔案才能繼續使用。",
                     color=error_color,
                 )
                 embed.add_field(
-                    name="如何上傳cookie檔案？",
+                    name="如何上傳 cookie 檔案？",
                     value="1. 依照 [此處]"
                           "(https://github.com/Alllen95Wei/My-Discord-Bot-Slash/wiki/%E5%8C%AF%E5%87%BAcookies.txt) "
-                          "的教學，匯出你的cookies.txt。\n"
-                          "2. 使用`/config musicdl upload_cookie`，並選取剛才匯出的cookies.txt上傳。",
+                          "的教學，匯出你的 cookies.txt。\n"
+                          "2. 使用`/config musicdl upload_cookie`，並選取剛才匯出的 cookies.txt 上傳。",
                     inline=False,
                 )
                 await ctx.respond(embed=embed, ephemeral=True)
@@ -728,21 +728,34 @@ class Basics(commands.Cog):
             user_obj.set_dl_using_general_cookie_count(user_obj.get_dl_using_general_cookie_count() - 1)
             cookie_path = None
             warn_embed = Embed(
-                title="提醒你，你尚未上傳cookie檔案！",
-                description="為避免惡意濫用，未上傳cookie檔案的使用者僅可使用此指令**10次**。\n"
+                title="提醒你，你尚未上傳 cookie 檔案！",
+                description="為避免惡意濫用，未上傳 cookie 檔案的使用者僅可使用此指令 **10次**。\n"
                             f"扣除這次使用後，你還能使用`{user_obj.get_dl_using_general_cookie_count()}`次。",
                 color=default_color,
             )
             warn_embed.add_field(
-                name="如何上傳cookie檔案？",
+                name="如何上傳 cookie 檔案？",
                 value="1. 依照 [此處]"
                       "(https://github.com/Alllen95Wei/My-Discord-Bot-Slash/wiki/%E5%8C%AF%E5%87%BAcookies.txt) "
-                      "的教學，匯出你的cookies.txt。\n"
-                      "2. 使用`/config musicdl upload_cookie`，並選取剛才匯出的cookies.txt上傳。",
+                      "的教學，匯出你的 cookies.txt。\n"
+                      "2. 使用`/config musicdl upload_cookie`，並選取剛才匯出的 cookies.txt 上傳。",
                 inline=False,
             )
             await ctx.followup.send(embed=warn_embed, ephemeral=True)
-        m_video = yt_download.Video(連結, cookie_path)
+        try:
+            m_video = yt_download.Video(連結, cookie_path)
+        except Exception as e:
+            embed = Embed(title="錯誤：無法取得影片資訊", description="機器人無法取得此影片的資訊。請檢查影片連結是否正確。", color=error_color)
+            embed.add_field(name="連結正確，錯誤卻持續發生？",
+                            value="有可能是以下原因，導致機器人無法取得影片資訊：\n"
+                                  "- 部分專輯 / 音樂可能由版權方限制了播放地域。由於機器人之伺服器位於美國，因此請嘗試以其他影片測試此功能是否正常。\n"
+                                  "- 若你使用自己的 cookies.txt，則請嘗試重新上傳新的 cookie 檔案。\n"
+                                  "請參閱 [此處](https://github.com/Alllen95Wei/My-Discord-Bot-Slash/wiki/"
+                                  "%E5%8C%AF%E5%87%BA-cookies.txt) 來了解如何上傳 cookie 檔案。\n"
+                                  "- 若你尚未上傳自己的 cookies.txt，則可能是機器人所提供的 cookie 檔案已過期。請聯絡開發者。\n",
+                            inline=False)
+            embed.add_field(name="錯誤訊息", value=f"```{type(e).__name__}: {str(e)}```", inline=False)
+            return
         if m_video.is_live():  # 排除直播影片
             embed = discord.Embed(
                 title="此影片目前直播/串流中",
