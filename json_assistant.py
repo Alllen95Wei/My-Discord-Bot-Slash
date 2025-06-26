@@ -43,8 +43,11 @@ class User:
 
     def write_raw_info(self, data):
         file = os.path.join(base_dir, "user_data", str(self.user_id) + ".json")
-        with open(file, "w") as f:
-            json.dump(data, f, indent=2)
+        try:
+            with open(file, "w") as f:
+                json.dump(data, f, indent=2)
+        except OSError as oe:
+            logging.error("檔案系統發生錯誤。已取消此次操作，以避免資訊損毀。", exc_info=oe)
 
     def get_exp(self, exp_type):
         user_info = self.get_raw_info()
