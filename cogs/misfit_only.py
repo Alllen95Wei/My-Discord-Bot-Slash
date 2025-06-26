@@ -4,8 +4,10 @@ from discord.ext import commands
 from discord import Embed, ui, ButtonStyle, InputTextStyle, Interaction
 import os
 import zoneinfo
+import logging
 from pathlib import Path
 import datetime
+import time
 
 import logger
 
@@ -263,13 +265,14 @@ class Misfit(commands.Cog):
             if not before.timed_out and after.timed_out:  # 遭到禁言
                 embed = Embed(
                     title="申訴",
-                    description="你似乎遭到禁言。如果需要，你可以點擊下方的按鈕開始申訴。\n你的申訴內容僅會被<@&1123952631207968948>看到。",
+                    description="你似乎遭到禁言。如果需要，你可以點擊下方的按鈕開始申訴。\n"
+                                "你的申訴內容僅會被 <@&1123952631207968948> (超級損友) 看到。",
                     color=default_color,
                 )
                 try:
                     await after.send(embed=embed, view=self.AppealView(self))
                 except discord.Forbidden or discord.HTTPException:
-                    self.real_logger.warning(f"私訊給 {after.name} 時發生錯誤。")
+                    logging.warning(f"私訊給 {after.name} 時發生錯誤。")
             elif before.timed_out and not after.timed_out:  # 解除禁言
                 embed = Embed(
                     title="已解除禁言",
@@ -279,7 +282,7 @@ class Misfit(commands.Cog):
                 try:
                     await after.send(embed=embed)
                 except discord.Forbidden or discord.HTTPException:
-                    self.real_logger.warning(f"私訊給 {after.name} 時發生錯誤。")
+                    logging.warning(f"私訊給 {after.name} 時發生錯誤。")
 
     @commands.Cog.listener()
     async def on_voice_state_update(
@@ -308,7 +311,7 @@ class Misfit(commands.Cog):
             and message.guild.id == 1030069819199991838
             and message.author.id in (616226441687990282, 699576396921438208)
         ):
-            await message.reply("3800")
+            await message.reply("3800", delete_after=30)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
@@ -324,8 +327,9 @@ class Misfit(commands.Cog):
             if (
                 replied_msg.author.id in (616226441687990282, 699576396921438208)
                 and message.content == "3800"
+                and (time.time() - message.created_at.timestamp() < 29)
             ):
-                await replied_msg.reply("3800")
+                await replied_msg.reply("3800", delete_after=30)
 
 
 def setup(bot):
