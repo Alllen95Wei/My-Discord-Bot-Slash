@@ -55,7 +55,7 @@ class User:
             raise ValueError('exp_type must be either "voice" or "text"')
 
     def add_exp(self, exp_type, amount):
-        user_info = self.get_raw_info(self.user_id)
+        user_info = self.get_raw_info()
         if exp_type in ("voice", "text"):
             user_info["exp"][exp_type] += amount
             self.write_raw_info(user_info)
