@@ -1395,7 +1395,8 @@ bot.load_extensions(
     "cogs.jail",
     "cogs.holodex",
     "cogs.soundboard",
-    "cogs.config"
+    "cogs.config",
+    "cogs.outline",
     # "cogs.suspension_fetcher",
 )
 
