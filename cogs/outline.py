@@ -19,9 +19,14 @@ parent_dir = str(Path(__file__).parent.parent.absolute())
 
 class Outline(commands.Cog):
     def __init__(self, bot: commands.Bot):
+        self.outline: OutlineAPI
+        self.outline = None
         self.bot = bot
 
         load_dotenv(os.path.join(base_dir, "TOKEN.env"))
+
+    @commands.Cog.listener()
+    async def on_ready(self):
         self.outline = OutlineAPI(os.getenv("OUTLINE_API_URL"))
 
     @staticmethod
