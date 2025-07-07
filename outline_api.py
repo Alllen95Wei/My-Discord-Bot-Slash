@@ -3,7 +3,7 @@ import asyncio
 from aiohttp import ClientSession
 
 
-class OutlineAPI(object):
+class OutlineAPI:
     def __init__(self, api_url: str):
         self.api_url = api_url if api_url.endswith("/") else api_url + "/"
         self.session = ClientSession(self.api_url)
