@@ -309,7 +309,7 @@ class Misfit(commands.Cog):
         if (
             message.guild is not None
             and message.guild.id == 1030069819199991838
-            and message.author.id in (616226441687990282, 699576396921438208)
+            and message.author.id in (847759034345979904, 1289515419941736553)
         ):
             await message.reply("3800", delete_after=30)
 
@@ -325,7 +325,7 @@ class Misfit(commands.Cog):
                 message.reference.message_id
             )
             if (
-                replied_msg.author.id in (616226441687990282, 699576396921438208)
+                replied_msg.author.id in (847759034345979904, 1289515419941736553)
                 and message.content == "3800"
                 and (time.time() - message.created_at.timestamp() < 29)
             ):
