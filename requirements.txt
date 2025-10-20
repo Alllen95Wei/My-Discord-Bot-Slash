@@ -10,7 +10,7 @@ aiohttp>3.10.11
 aiofiles~=25.1.0
 audioread~=3.0.1
 google-api-python-client~=2.184.0
-protobuf~=6.32.1
+protobuf~=6.33.0
 pandas~=2.3.3
 opencv-python~=4.12.0.88
 magika~=0.6.2
