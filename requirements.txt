@@ -1,5 +1,5 @@
 yt-dlp~=2025.10.22
-python-dotenv~=1.1.1
+python-dotenv~=1.2.1
 psutil~=7.1.2
 gitpython>=3.1.41
 colorlog~=6.10.1
