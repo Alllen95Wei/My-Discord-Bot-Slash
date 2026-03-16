@@ -13,5 +13,5 @@ google-api-python-client~=2.192.0
 protobuf~=7.34.0
 pandas~=3.0.1
 opencv-python~=4.13.0.92
-magika~=1.0.1
+magika~=1.0.2
 moviepy~=2.2.1
