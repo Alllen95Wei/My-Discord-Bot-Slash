@@ -1,4 +1,4 @@
-yt-dlp~=2025.10.22
+yt-dlp~=2026.3.17
 python-dotenv~=1.2.2
 psutil~=7.2.2
 gitpython>=3.1.47
